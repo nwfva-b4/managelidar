@@ -1,0 +1,44 @@
+---
+title: "How to use the functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to use the functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# About
+
+This package provides some helper functions to conveniently change or extract metadata from laz files. It makes use of the `lidR` and `lasR` packages. 
+
+
+```{r setup}
+library(managelidar)
+```
+
+
+# Plot extent
+
+Use the function `plot_extent()` to plot the bounding boxes of all laz files in the folder on top of an interactive map (using the `mapview` package). 
+
+```{r plot_extent}
+f <- system.file("extdata", package="managelidar")
+plot_extent(f)
+```
+
+# Get density
+
+Use the function `get_density()` to extract the approximate pulse density (first/last-return only) of laz files. For this function only the header from lasfiles is read and density is calculated from the bounding box of the data file and the number of first-returns. This does not take into account if parts of the bounding box is missing data, and hence this density does not reflect the density as it is calculates by e.g. `lidR`. However, it is much faster because it does not read the entire file and density should be approximately the same if the entire bounding box has point data.
+
+```{r get_density}
+f <- system.file("extdata", package="managelidar")
+get_density(f)
+```

@@ -1,0 +1,43 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# managelidar
+
+<!-- badges: start -->
+
+<!-- badges: end -->
+
+The goal of managelidar is to facilitate the handling and management of lidar data files (`*.laz`).
+
+## Installation
+
+You can install the development version of managelidar from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("wiesehahn/managelidar")
+```
+
+## Example
+
+This is a basic function which queries the spatial extents of all lidar data files (`*.laz`) in a given folder from its data headers (without reading the actual point cloud data). It returns a dataframe which can be used in further data management steps. 
+
+```{r get_extent}
+library(managelidar)
+f <- system.file("extdata", package="managelidar")
+get_extent(f)
+```
+
+
