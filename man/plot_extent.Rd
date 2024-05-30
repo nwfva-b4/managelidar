@@ -7,7 +7,7 @@
 plot_extent(path)
 }
 \arguments{
-\item{path}{Either a path to a directory which contains laz files or
+\item{path}{Either a path to a directory which contains laz files or a single laz file or
 the path to a Virtual Point Cloud (.vpc) created with lasR package.}
 }
 \value{

@@ -3,7 +3,7 @@
 #'
 #' `plot_extent` plots the spatial extent (bounding boxes) of lasfiles on an interactive map. The extent is read from the header of lasfiles.
 #'
-#' @param path Either a path to a directory which contains laz files or
+#' @param path Either a path to a directory which contains laz files or a single laz file or
 #' the path to a Virtual Point Cloud (.vpc) created with lasR package.
 #'
 #' @return An interactive map in the viewer
@@ -23,7 +23,11 @@ plot_extent <- function(path){
     print("Using directory to build temporary Virtual Point Cloud")
     ans = lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc")), on = path)
     t = sf::st_read(ans)
-  } else {
+  } else if (file.exists(path) && !dir.exists(path)) {
+    print("Using file to build temporary Virtual Point Cloud")
+    ans = lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc")), on = path)
+    t = sf::st_read(ans)
+  } else  {
     print("Use either existing Virtual Point Cloud (.vpc) or folder which contains LAZ files.")
   }
 

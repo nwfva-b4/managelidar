@@ -4,11 +4,13 @@
 \alias{get_extent}
 \title{Get the spatial extent of laz files}
 \usage{
-get_extent(path)
+get_extent(path, full.names = FALSE)
 }
 \arguments{
 \item{path}{Either a path to a directory which contains laz files or
 the path to a Virtual Point Cloud (.vpc) created with lasR package.}
+
+\item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
 A dataframe with file, minx, miny, maxx, maxy

@@ -4,11 +4,12 @@
 \alias{get_density}
 \title{Get the approximate pulse density of lasfiles}
 \usage{
-get_density(path)
+get_density(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{Either a path to a directory which contains laz files or
-the path to a Virtual Point Cloud (.vpc) created with lasR package.}
+\item{path}{A path to a laz file or a directory which contains laz files}
+
+\item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
 A dataframe with file, pulses, area, density

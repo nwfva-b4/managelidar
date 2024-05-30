@@ -5,13 +5,15 @@
 #' @param path Either a path to a directory which contains laz files or
 #' the path to a Virtual Point Cloud (.vpc) created with lasR package.
 #'
+#' @param full.names Whether to return the full file path or just the file name (default)
+#'
 #' @return A dataframe with file, minx, miny, maxx, maxy
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package="managelidar")
 #' get_extent(f)
-get_extent <- function(path){
+get_extent <- function(path, full.names = FALSE){
 
   get_file_extent <- function(file){
     fileheader <- lidR::readLASheader(file)
@@ -21,7 +23,11 @@ get_extent <- function(path){
     maxx = fileheader$`Max X`
     maxy = fileheader$`Max Y`
 
-    return(data.frame(path = file, minx, miny, maxx, maxy))
+    if (full.names == FALSE){
+      file <- basename(file)
+    }
+
+    return(data.frame(file = file, minx, miny, maxx, maxy))
 
   }
 
