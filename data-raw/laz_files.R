@@ -8,5 +8,5 @@ f <- c(paste0(path, "3dm_32_547_5724_1_ni_20240327.laz"),
        paste0(path, "3dm_32_548_5725_1_ni_20240327.laz")
        )
 
-laz_files <- lasR::exec(lasR::reader_las(filter = "-thin_with_grid 2.0") + lasR::write_las(here::here("inst/extdata", "*.laz")), on = f)
+laz_files <- lasR::exec(lasR::reader_las(filter = "-thin_with_grid 10.0") + lasR::write_las(here::here("inst/extdata", "*.laz")), on = f)
 

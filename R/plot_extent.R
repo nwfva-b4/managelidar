@@ -14,11 +14,12 @@
 #' plot_extent(f)
 plot_extent <- function(path){
 
+  `proj:bbox` <- `proj.wkt2` <- NULL
   if (endsWith(path, '.vpc')) {
     print("Using information stored in Virtual Point Cloud")
     t = sf::st_read(path)
 
-  } else if (file_test("-d", path)) {
+  } else if (utils::file_test("-d", path)) {
     print("Using directory to build temporary Virtual Point Cloud")
     ans = lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc")), on = path)
     t = sf::st_read(ans)
