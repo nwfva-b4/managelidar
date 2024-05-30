@@ -19,6 +19,16 @@ You can install the development version of managelidar from
 devtools::install_github("wiesehahn/managelidar")
 ```
 
+As some functions depend on the [lasR](https://github.com/r-lidar/lasR)
+package (version \>= 0.5.6) which is hosted on at
+<https://r-lidar.r-universe.dev/lasR> you have to manually install it in
+advance with:
+
+``` r
+# Install lasR in R:
+install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cran.r-project.org"))
+```
+
 ## Example
 
 This is a basic function which queries the spatial extents of all lidar
@@ -30,14 +40,14 @@ be used in further data management steps.
 library(managelidar)
 f <- system.file("extdata", package="managelidar")
 get_extent(f)
-#>                                                                                                                                path
-#> 1 C:/Users/jwiesehahn/AppData/Local/Temp/RtmpuE58vp/temp_libpath1320c2e594a15/managelidar/extdata/3dm_32_547_5724_1_ni_20240327.laz
-#> 2 C:/Users/jwiesehahn/AppData/Local/Temp/RtmpuE58vp/temp_libpath1320c2e594a15/managelidar/extdata/3dm_32_547_5725_1_ni_20240327.laz
-#> 3 C:/Users/jwiesehahn/AppData/Local/Temp/RtmpuE58vp/temp_libpath1320c2e594a15/managelidar/extdata/3dm_32_548_5724_1_ni_20240327.laz
-#> 4 C:/Users/jwiesehahn/AppData/Local/Temp/RtmpuE58vp/temp_libpath1320c2e594a15/managelidar/extdata/3dm_32_548_5725_1_ni_20240327.laz
-#>       minx    miny     maxx    maxy
-#> 1 547690.0 5724000 547999.9 5725000
-#> 2 547647.5 5725000 548000.0 5726000
-#> 3 548000.0 5724000 549000.0 5725000
-#> 4 548000.0 5725000 549000.0 5726000
+#>                                                                                                                               path
+#> 1 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_547_5724_1_ni_20240327.laz
+#> 2 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_547_5725_1_ni_20240327.laz
+#> 3 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_548_5724_1_ni_20240327.laz
+#> 4 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_548_5725_1_ni_20240327.laz
+#>     minx    miny     maxx    maxy
+#> 1 547690 5724000 547999.7 5725000
+#> 2 547648 5725000 547998.1 5725991
+#> 3 548000 5724000 548992.0 5724997
+#> 4 548000 5725000 548995.4 5725992
 ```

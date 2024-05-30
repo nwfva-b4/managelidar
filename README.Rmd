@@ -30,6 +30,13 @@ You can install the development version of managelidar from [GitHub](https://git
 devtools::install_github("wiesehahn/managelidar")
 ```
 
+As some functions depend on the [lasR](https://github.com/r-lidar/lasR) package (version >= 0.5.6) which is hosted on at https://r-lidar.r-universe.dev/lasR you have to manually install it in advance with:
+
+``` r
+# Install lasR in R:
+install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cran.r-project.org"))
+```
+
 ## Example
 
 This is a basic function which queries the spatial extents of all lidar data files (`*.laz`) in a given folder from its data headers (without reading the actual point cloud data). It returns a dataframe which can be used in further data management steps. 
