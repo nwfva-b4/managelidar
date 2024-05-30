@@ -19,7 +19,8 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-The goal of managelidar is to facilitate the handling and management of lidar data files (`*.laz`).
+The goal of managelidar is to facilitate the handling and management of lidar data files (`*.laz`), e.g. to provide some functions to get a quick overview of file attributes. This should facilitate the quality check of incoming ALS data. 
+`managelidar` makes use of functions provided by {lidR} and {lasR}. Functions are not reading the entire LAZ files, as this would require long computations for large collections of data. Instead attriibutes are read from the file header.  
 
 ## Installation
 

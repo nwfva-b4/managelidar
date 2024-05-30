@@ -7,7 +7,12 @@
 <!-- badges: end -->
 
 The goal of managelidar is to facilitate the handling and management of
-lidar data files (`*.laz`).
+lidar data files (`*.laz`), e.g. to provide some functions to get a
+quick overview of file attributes. This should facilitate the quality
+check of incoming ALS data. `managelidar` makes use of functions
+provided by {lidR} and {lasR}. Functions are not reading the entire LAZ
+files, as this would require long computations for large collections of
+data. Instead attriibutes are read from the file header.
 
 ## Installation
 
@@ -40,14 +45,9 @@ be used in further data management steps.
 library(managelidar)
 f <- system.file("extdata", package="managelidar")
 get_extent(f)
-#>                                                                                                                               path
-#> 1 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_547_5724_1_ni_20240327.laz
-#> 2 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_547_5725_1_ni_20240327.laz
-#> 3 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_548_5724_1_ni_20240327.laz
-#> 4 C:/Users/jwiesehahn/AppData/Local/Temp/Rtmp8ECW6P/temp_libpath2cb015f71aa5/managelidar/extdata/3dm_32_548_5725_1_ni_20240327.laz
-#>     minx    miny     maxx    maxy
-#> 1 547690 5724000 547999.7 5725000
-#> 2 547648 5725000 547998.1 5725991
-#> 3 548000 5724000 548992.0 5724997
-#> 4 548000 5725000 548995.4 5725992
+#>                                file   minx    miny     maxx    maxy
+#> 1 3dm_32_547_5724_1_ni_20240327.laz 547690 5724000 547999.7 5725000
+#> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
+#> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
+#> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
 ```
