@@ -29,7 +29,7 @@ library(managelidar)
 
 Use the function `plot_extent()` to plot the bounding boxes of all laz files in the folder on top of an interactive map (using the `mapview` package). 
 
-```{r plot_extent}
+```{r plot_extent, eval =FALSE}
 f <- system.file("extdata", package="managelidar")
 plot_extent(f)
 ```
