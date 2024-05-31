@@ -12,6 +12,7 @@ The goal of managelidar is to facilitate the handling of lidar data files.
 Useful links:
 \itemize{
   \item \url{https://github.com/wiesehahn/managelidar}
+  \item \url{https://wiesehahn.github.io/managelidar/}
   \item Report bugs at \url{https://github.com/wiesehahn/managelidar/issues}
 }
 
