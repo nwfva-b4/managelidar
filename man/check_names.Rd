@@ -4,7 +4,14 @@
 \alias{check_names}
 \title{Check file names}
 \usage{
-check_names(path, prefix = "3dm", zone = 32, region = "ni", date = NULL)
+check_names(
+  path,
+  prefix = "3dm",
+  zone = 32,
+  region = "ni",
+  date = NULL,
+  full.names = FALSE
+)
 }
 \arguments{
 \item{path}{A path to a laz file or a directory which contains laz files}
@@ -16,15 +23,19 @@ check_names(path, prefix = "3dm", zone = 32, region = "ni", date = NULL)
 \item{region}{2 letter character. Region abbreviation (defaults to "ni")}
 
 \item{date}{YYYYMMDD. (optional) acquisition date}
+
+\item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
 A dataframe with name_is, name_should, correct
 }
 \description{
-Checks the file names according to our own standard
+Checks the file names according to our own standard.
 File names should be in the following schema:
 "prefix_UTMzone_minx_miny_tilesize_region_acquisitiondate.laz"
-e.g. "3dm_32_547_5724_1_ni_20240327.laz"
+}
+\details{
+(e.g. "3dm_32_547_5724_1_ni_20240327.laz")
 }
 \examples{
 f <- system.file("extdata", package="managelidar")

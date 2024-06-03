@@ -12,7 +12,7 @@ quick overview of file attributes. This should facilitate the quality
 check of incoming ALS data. `managelidar` makes use of functions
 provided by {lidR} and {lasR}. Functions are not reading the entire LAZ
 files, as this would require long computations for large collections of
-data. Instead attriibutes are read from the file header.
+data. Instead, attributes are read from the file header.
 
 ## Installation
 
@@ -50,4 +50,5 @@ get_extent(f)
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
 #> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
+#> 5                     wrongname.laz 547690 5724000 547999.7 5725000
 ```

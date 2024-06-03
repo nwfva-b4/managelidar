@@ -1,16 +1,18 @@
 
 #' Check file names
 #'
-#' Checks the file names according to our own standard
+#' Checks the file names according to our own standard.
 #' File names should be in the following schema:
 #' "prefix_UTMzone_minx_miny_tilesize_region_acquisitiondate.laz"
-#' e.g. "3dm_32_547_5724_1_ni_20240327.laz"
+#'
+#' (e.g. "3dm_32_547_5724_1_ni_20240327.laz")
 #'
 #' @param path A path to a laz file or a directory which contains laz files
 #' @param prefix 3 letter character. Naming prefix (defaults to "3dm")
 #' @param zone 2 digits integer. UTM zone (defaults to 32)
 #' @param region 2 letter character. Region abbreviation (defaults to "ni")
 #' @param date YYYYMMDD. (optional) acquisition date
+#' @param full.names Whether to return the full file path or just the file name (default)
 #'
 #' @return A dataframe with name_is, name_should, correct
 #' @export
@@ -18,7 +20,7 @@
 #' @examples
 #' f <- system.file("extdata", package="managelidar")
 #' check_names(f)
-check_names <- function(path, prefix = "3dm", zone = 32, region = "ni", date = NULL){
+check_names <- function(path, prefix = "3dm", zone = 32, region = "ni", date = NULL, full.names = FALSE){
 
   check_file_names <- function(file){
 
@@ -48,7 +50,15 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = "ni", date = N
       correct = TRUE
     }
 
-    return(data.frame(name_is = basename(file),
+    if (full.names == FALSE){
+      file <- basename(file)
+    }
+    if (full.names == TRUE){
+      name_should <- file.path(dirname(file), name_should)
+    }
+
+
+    return(data.frame(name_is = file,
                       name_should = name_should,
                       correct_naming = correct))
 
