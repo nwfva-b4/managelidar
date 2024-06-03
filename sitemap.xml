@@ -34,6 +34,9 @@
     <loc>https://wiesehahn.github.io/managelidar/reference/get_extent.html</loc>
   </url>
   <url>
+    <loc>https://wiesehahn.github.io/managelidar/reference/get_header.html</loc>
+  </url>
+  <url>
     <loc>https://wiesehahn.github.io/managelidar/reference/get_lasversion.html</loc>
   </url>
   <url>
@@ -50,5 +53,8 @@
   </url>
   <url>
     <loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc>
+  </url>
+  <url>
+    <loc>https://wiesehahn.github.io/managelidar/reference/set_names.html</loc>
   </url>
 </urlset>
