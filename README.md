@@ -25,7 +25,7 @@ devtools::install_github("wiesehahn/managelidar")
 ```
 
 As some functions depend on the [lasR](https://github.com/r-lidar/lasR)
-package (version \>= 0.5.6) which is hosted on at
+package (version \>= 0.7.2) which is hosted on at
 <https://r-lidar.r-universe.dev/lasR> you have to manually install it in
 advance with:
 
@@ -50,5 +50,4 @@ get_extent(f)
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
 #> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
-#> 5                     wrongname.laz 547690 5724000 547999.7 5725000
 ```
