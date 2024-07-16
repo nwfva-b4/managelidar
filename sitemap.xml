@@ -1,63 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/404.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/articles/how-to-use-the-functions.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/index.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/check_names.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_crs.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_datetime.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_density.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_extent.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_header.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_lasversion.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/get_names.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/laz_files.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/managelidar-package.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc>
-  </url>
-  <url>
-    <loc>https://wiesehahn.github.io/managelidar/reference/set_names.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://wiesehahn.github.io/managelidar/404.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/LICENSE-text.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/LICENSE.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/articles/how-to-use-the-functions.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/articles/index.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/authors.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/index.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/check_names.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_crs.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_datetime.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_density.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_extent.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_header.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_lasversion.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_names.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/index.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/laz_files.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/managelidar-package.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/set_names.html</loc></url>
 </urlset>
+
