@@ -46,11 +46,11 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = "ni", year = N
   }
 
   if (full.names == FALSE) {
-    name_is <- basename(json$features$asset$data$href)
-    name_should <- paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$asset$data$href))
+    name_is <- basename(json$features$assets$data$href)
+    name_should <- paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$assets$data$href))
   } else {
-    name_is <- json$features$asset$data$href
-    name_should <- file.path(dirname(name_is), paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$asset$data$href)))
+    name_is <- json$features$assets$data$href
+    name_should <- file.path(dirname(name_is), paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$assets$data$href)))
   }
 
 
