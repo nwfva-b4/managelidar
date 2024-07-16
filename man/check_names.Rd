@@ -9,12 +9,12 @@ check_names(
   prefix = "3dm",
   zone = 32,
   region = "ni",
-  date = NULL,
+  year = NULL,
   full.names = FALSE
 )
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{A path to a directory which contains las/laz files}
 
 \item{prefix}{3 letter character. Naming prefix (defaults to "3dm")}
 
@@ -22,22 +22,23 @@ check_names(
 
 \item{region}{2 letter character. Region abbreviation (defaults to "ni")}
 
-\item{date}{YYYYMMDD. (optional) acquisition date}
+\item{year}{YYYY. (optional) acquisition year to append to filename.
+If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{full.names}{Whether to return the full file path or just the file names (default)}
 }
 \value{
 A dataframe with name_is, name_should, correct
 }
 \description{
-Checks the file names according to our own standard.
+Checks the file names according to \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard}.
 File names should be in the following schema:
-"prefix_UTMzone_minx_miny_tilesize_region_acquisitiondate.laz"
+\code{prefix}\emph{\code{utmzone}}\code{minx}\emph{\code{miny}}\code{tilesize}\emph{\code{region}}\verb{year``.laz}
 }
 \details{
-(e.g. "3dm_32_547_5724_1_ni_20240327.laz")
+(e.g. \verb{3dm_32_547_5724_1_ni_2024.laz})
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 check_names(f)
 }
