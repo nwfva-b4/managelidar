@@ -78,7 +78,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     extents <- json$features$bbox
 
     find_state_code <- function(bbox_coords, states_sf) {
-      bbox <- sf::st_as_sfc(sf::st_bbox(c(xmin = bbox_coords[1], ymin = bbox_coords[2], xmax = bbox_coords[3], ymax = bbox_coords[4]), crs = 4326))
+      bbox <- sf::st_as_sfc(sf::st_bbox(c(xmin = bbox_coords[1], ymin = bbox_coords[2], xmax = bbox_coords[4], ymax = bbox_coords[5]), crs = 4326))
 
       sf::st_agr(states_sf) <- "constant"
       intersections <- sf::st_intersection(states_sf, bbox)
