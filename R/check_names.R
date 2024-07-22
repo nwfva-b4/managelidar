@@ -38,60 +38,61 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   maxx <- sapply(bbox, function(x) floor(round(x[3] / 1000, 2)))
   maxy <- sapply(bbox, function(x) floor(round(x[4] / 1000, 2)))
 
-# get tilesize from larger extent (x,y) and take into account small inaccuracies
+  # get tilesize from larger extent (x,y)
   tilesize_x <- maxx - minx
   tilesize_y <- maxy - miny
-
-  tilesize <- ceiling(pmax(tilesize_x, tilesize_y) - 0.05)
+  # minimum tilesize 1km
+  tilesize_min <- 1
+  # take into account small inaccuracies (reduce tilesize if less than 50m larger)
+  tilesize <- ceiling(pmax(tilesize_x, tilesize_y, tilesize_min) - 0.05)
 
 
   if (is.null(region)) {
-# get region
-  state_codes <- c(
-    "Baden-Württemberg" = "bw",
-    "Bayern" = "by",
-    "Berlin" = "be",
-    "Brandenburg" = "bb",
-    "Bremen" = "hb",
-    "Hamburg" = "hh",
-    "Hessen" = "he",
-    "Mecklenburg-Vorpommern" = "mv",
-    "Niedersachsen" = "ni",
-    "Nordrhein-Westfalen" = "nw",
-    "Rheinland-Pfalz" = "rp",
-    "Saarland" = "sl",
-    "Sachsen" = "sn",
-    "Sachsen-Anhalt" = "st",
-    "Schleswig-Holstein" = "sh",
-    "Thüringen" = "th"
-  )
+    # get region
+    state_codes <- c(
+      "Baden-Württemberg" = "bw",
+      "Bayern" = "by",
+      "Berlin" = "be",
+      "Brandenburg" = "bb",
+      "Bremen" = "hb",
+      "Hamburg" = "hh",
+      "Hessen" = "he",
+      "Mecklenburg-Vorpommern" = "mv",
+      "Niedersachsen" = "ni",
+      "Nordrhein-Westfalen" = "nw",
+      "Rheinland-Pfalz" = "rp",
+      "Saarland" = "sl",
+      "Sachsen" = "sn",
+      "Sachsen-Anhalt" = "st",
+      "Schleswig-Holstein" = "sh",
+      "Thüringen" = "th"
+    )
 
-  url <- "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-germany-land/exports/parquet?lang=en&timezone=Europe%2FBerlin"
-  states_sf <- arrow::read_parquet(file = url)|>
-    sf::st_as_sf() |>
-    sf::st_set_geometry('geo_shape') |>
-    dplyr::mutate(code = state_codes[lan_name]) |>
-    sf::st_set_crs(4326)
+    url <- "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-germany-land/exports/parquet?lang=en&timezone=Europe%2FBerlin"
+    states_sf <- arrow::read_parquet(file = url) |>
+      sf::st_as_sf() |>
+      sf::st_set_geometry("geo_shape") |>
+      dplyr::mutate(code = state_codes[lan_name]) |>
+      sf::st_set_crs(4326)
 
-  extents <- json$features$bbox
+    extents <- json$features$bbox
 
-  find_state_code <- function(bbox_coords, states_sf) {
-    bbox <- sf::st_as_sfc(sf::st_bbox(c(xmin = bbox_coords[1], ymin = bbox_coords[2], xmax = bbox_coords[3], ymax = bbox_coords[4]), crs = 4326))
+    find_state_code <- function(bbox_coords, states_sf) {
+      bbox <- sf::st_as_sfc(sf::st_bbox(c(xmin = bbox_coords[1], ymin = bbox_coords[2], xmax = bbox_coords[3], ymax = bbox_coords[4]), crs = 4326))
 
-    sf::st_agr(states_sf) = "constant"
-    intersections <- sf::st_intersection(states_sf, bbox)
-    intersections <- intersections |>  dplyr::mutate(intersection_area = sf::st_area(geo_shape))
+      sf::st_agr(states_sf) <- "constant"
+      intersections <- sf::st_intersection(states_sf, bbox)
+      intersections <- intersections |> dplyr::mutate(intersection_area = sf::st_area(geo_shape))
 
-    state_code <- intersections |>
-      dplyr::filter(intersection_area == max(intersection_area)) |>
-      dplyr::pull(code)  # Assuming your state code column is named `state_code`
+      state_code <- intersections |>
+        dplyr::filter(intersection_area == max(intersection_area)) |>
+        dplyr::pull(code) # Assuming your state code column is named `state_code`
 
-    return(state_code)
-  }
+      return(state_code)
+    }
 
-  # Apply the function to each bbox
-  region <- sapply(extents, find_state_code, states_sf = states_sf)
-
+    # Apply the function to each bbox
+    region <- sapply(extents, find_state_code, states_sf = states_sf)
   }
 
 
