@@ -52,7 +52,7 @@ File names should be in the following schema:
 <span>  <span class="va">path</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"3dm"</span>,</span>
 <span>  zone <span class="op">=</span> <span class="fl">32</span>,</span>
-<span>  region <span class="op">=</span> <span class="st">"ni"</span>,</span>
+<span>  region <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  full.names <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -75,7 +75,7 @@ File names should be in the following schema:
 
 
 <dt id="arg-region">region<a class="anchor" aria-label="anchor" href="#arg-region"></a></dt>
-<dd><p>2 letter character. Region abbreviation (defaults to "ni")</p></dd>
+<dd><p>2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.</p></dd>
 
 
 <dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
