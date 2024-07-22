@@ -5,9 +5,9 @@
 #' @param path A path to a directory which contains las/laz files
 #' @param prefix 3 letter character. Naming prefix (defaults to "3dm")
 #' @param zone 2 digits integer. UTM zone (defaults to 32)
-#' @param region 2 letter character. Region abbreviation (defaults to "ni")
-#' @param year YYYY. (optional) acquisition year to append to filename. 
-#' If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.  
+#' @param region 2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.
+#' @param year YYYY. (optional) acquisition year to append to filename.
+#' If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.
 #'
 #' @return Renamed files
 #' @export
@@ -17,7 +17,7 @@
 #' copy <- tempfile(fileext = ".laz")
 #' file.copy(f, copy)
 #' set_names(copy)
-set_names <- function(path, prefix = "3dm", zone = 32, region = "ni", year = NULL) {
+set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL) {
   t <- managelidar::check_names(path, prefix, zone, region, year, full.names = T)
   t <- subset(t, correct == FALSE)
 

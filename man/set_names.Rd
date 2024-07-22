@@ -4,7 +4,7 @@
 \alias{set_names}
 \title{Set file names}
 \usage{
-set_names(path, prefix = "3dm", zone = 32, region = "ni", year = NULL)
+set_names(path, prefix = "3dm", zone = 32, region = NULL, year = NULL)
 }
 \arguments{
 \item{path}{A path to a directory which contains las/laz files}
@@ -13,7 +13,7 @@ set_names(path, prefix = "3dm", zone = 32, region = "ni", year = NULL)
 
 \item{zone}{2 digits integer. UTM zone (defaults to 32)}
 
-\item{region}{2 letter character. Region abbreviation (defaults to "ni")}
+\item{region}{2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.}
 
 \item{year}{YYYY. (optional) acquisition year to append to filename.
 If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
