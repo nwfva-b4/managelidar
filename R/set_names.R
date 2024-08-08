@@ -17,15 +17,17 @@
 #' copy <- tempfile(fileext = ".laz")
 #' file.copy(f, copy)
 #' set_names(copy)
-set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL) {
-  t <- managelidar::check_names(path, prefix, zone, region, year, full.names = T)
+set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, verbose = FALSE) {
+  t <- managelidar::check_names(path, prefix, zone, region, year, full.names = T, verbose = verbose)
   t <- subset(t, correct == FALSE)
 
   if (ncol(t) == 0L) {
     stop("all names already as expected")
   }
+  if (verbose) {
+    print(paste0("Renaming ", nrow(t), " files"))
+  }
 
-  print(paste0("Renaming ", nrow(t), " files"))
 
   file.rename(from = t$name_is, to = t$name_should)
 }

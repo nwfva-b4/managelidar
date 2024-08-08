@@ -20,17 +20,23 @@
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' check_names(f)
-check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, full.names = FALSE) {
-  print("create VPC with GPStime")
+check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, full.names = FALSE, verbose = FALSE) {
+  if (verbose) {
+    print("creating VPC with GPStime")
+  }
   ans <- lasR::exec(
     lasR::set_crs(25832) + lasR::write_vpc(ofile = tempfile(fileext = ".vpc"), use_gpstime = TRUE, absolute_path = TRUE),
     with = list(ncores = lasR::concurrent_files(lasR::half_cores())),
     on = path
   )
-
+  if (verbose) {
+    print("reading VPC")
+  }
   json <- jsonlite::fromJSON(ans)
 
-
+  if (verbose) {
+    print("extracting bboxes and tilesizes")
+  }
   bbox <- json$features$properties$`proj:bbox`
 
   minx <- sapply(bbox, function(x) floor(round(x[1] / 1000, 2)))
@@ -47,6 +53,9 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
 
 
   if (is.null(region)) {
+    if (verbose) {
+      print("extracting state codes by intersecting with geometries")
+    }
     # get region
     state_codes <- c(
       "Baden-Württemberg" = "bw",
@@ -115,7 +124,9 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     name_should <- file.path(dirname(name_is), paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$assets$data$href)))
   }
 
-
+  if (verbose) {
+    print("creating dataframe")
+  }
   dat <- data.frame(
     name_is = name_is,
     name_should = name_should,
