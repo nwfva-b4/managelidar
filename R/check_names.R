@@ -38,7 +38,6 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   maxx <- sapply(bbox, function(x) floor(round(x[3] / 1000, 2)))
   maxy <- sapply(bbox, function(x) floor(round(x[4] / 1000, 2)))
 
-  # get tilesize from larger extent (x,y)
   tilesize_x <- maxx - minx
   tilesize_y <- maxy - miny
   # minimum tilesize 1km
@@ -86,7 +85,13 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
 
       state_code <- intersections |>
         dplyr::filter(intersection_area == max(intersection_area)) |>
-        dplyr::pull(code) # Assuming your state code column is named `state_code`
+        dplyr::pull(code)
+
+      # set state code to "de" if no overlap with federal boundaries (e.g. at sea)
+      if (rlang::is_empty(state_code)) {
+        state_code <- "de"
+      }
+
 
       return(state_code)
     }
