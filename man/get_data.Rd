@@ -4,7 +4,7 @@
 \alias{get_data}
 \title{Get data in a standardized format}
 \usage{
-get_data(origin, destination, campaign)
+get_data(origin, destination, campaign, origin_recurse = FALSE)
 }
 \arguments{
 \item{origin}{The path to a directory which contains (unprocessed) las/laz files}
@@ -12,6 +12,8 @@ get_data(origin, destination, campaign)
 \item{destination}{The directory under which the processed files are copied and subfolders (year/campaign) are created}
 
 \item{campaign}{(character) Name of the project or campaign of data acquisition.}
+
+\item{origin_recurse}{boolean. Should files in subfolder be included?}
 }
 \value{
 A structured copy of input lidar data

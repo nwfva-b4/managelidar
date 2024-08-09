@@ -10,7 +10,8 @@ check_names(
   zone = 32,
   region = NULL,
   year = NULL,
-  full.names = FALSE
+  full.names = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{

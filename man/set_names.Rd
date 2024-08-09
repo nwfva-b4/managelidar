@@ -4,7 +4,14 @@
 \alias{set_names}
 \title{Set file names}
 \usage{
-set_names(path, prefix = "3dm", zone = 32, region = NULL, year = NULL)
+set_names(
+  path,
+  prefix = "3dm",
+  zone = 32,
+  region = NULL,
+  year = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{path}{A path to a directory which contains las/laz files}

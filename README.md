@@ -25,7 +25,7 @@ devtools::install_github("wiesehahn/managelidar")
 ```
 
 As some functions depend on the [lasR](https://github.com/r-lidar/lasR)
-package (version \>= 0.9.1) which is hosted on at
+package (version \>= 0.9.2) which is hosted on at
 <https://r-lidar.r-universe.dev/lasR> you have to manually install it in
 advance with:
 
