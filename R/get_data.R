@@ -56,14 +56,19 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE) {
       destination_files <- file.path(destination_dir, basename(files_to_move))
       file.rename(files_to_move, destination_files)
 
-      vpc <- file.path(docufolder, paste0(campaign, "_", year, ".vpc"))
+        # create spatial index for new files
       lasR::exec(
-        # create spatial index for faster processing
-        lasR::write_lax(embedded = TRUE) +
-          # create virtual point cloud
-          lasR::write_vpc(ofile = vpc, use_gpstime = TRUE, absolute_path = TRUE),
+        lasR::write_lax(embedded = TRUE),
         with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
         on = destination_files
+      )
+
+          # create virtual point cloud for all files in folder
+      vpc <- file.path(docufolder, paste0(campaign, "_", year, ".vpc"))
+      lasR::exec(
+          lasR::write_vpc(ofile = vpc, use_gpstime = TRUE, absolute_path = TRUE),
+        with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
+        on = destination_dir
       )
     }
   }
