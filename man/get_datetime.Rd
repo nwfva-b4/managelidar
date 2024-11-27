@@ -15,12 +15,12 @@ get_datetime(path, full.names = FALSE)
 A dataframe with file, min datetime, max datetime
 }
 \description{
-\code{get_datetime()} calculates the earliest and latest datetime from point cloud files.
+\code{get_datetime()} calculates the earliest and latest acquisition datetime from point cloud files.
 }
 \details{
-This function requires the entire point cloud to be read and thus takes long processing time, especially if applied on entire folders. Acquisition date is encoded as adjusted standard GPS time with newer (>= LAS 1.3) point cloud data, this can be converted to datetime.
+Unfortunately this is only possible for newer (>= LAS 1.3) point cloud data, where acquisition date is encoded as adjusted standard GPS time. This can be converted to datetime. This function requires the entire point cloud to be read and thus takes long processing time, especially if applied on entire folders or large files.
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_datetime(f)
 }
