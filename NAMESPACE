@@ -3,6 +3,7 @@
 export(check_names)
 export(get_crs)
 export(get_data)
+export(get_datetime)
 export(get_density)
 export(get_extent)
 export(get_header)

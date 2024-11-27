@@ -9,7 +9,8 @@
 #' @param full.names Whether to return the full file path or just the file name (default)
 #'
 #' @return A dataframe with file, min datetime, max datetime
-#'
+#' @export
+#' 
 #' @examples
 #' f <- system.file("extdata", package="managelidar")
 #' get_datetime(f)
