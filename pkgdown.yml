@@ -3,7 +3,7 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   how-to-use-the-functions: how-to-use-the-functions.html
-last_built: 2025-02-26T16:42Z
+last_built: 2025-02-26T17:06Z
 urls:
   reference: https://wiesehahn.github.io/managelidar/reference
   article: https://wiesehahn.github.io/managelidar/articles
