@@ -13,7 +13,7 @@ the path to a Virtual Point Cloud (.vpc) created with lasR package.}
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file, minx, miny, maxx, maxy
+A dataframe with file, minx, miny, minz, maxx, maxy, maxz
 }
 \description{
 \code{get_extent} uses min and max values of spatial extent defined in the header of lasfiles.

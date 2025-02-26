@@ -7,7 +7,7 @@
 #'
 #' @param full.names Whether to return the full file path or just the file name (default)
 #'
-#' @return A dataframe with file, minx, miny, maxx, maxy
+#' @return A dataframe with file, minx, miny, minz, maxx, maxy, maxz
 #' @export
 #'
 #' @examples
@@ -20,14 +20,16 @@ get_extent <- function(path, full.names = FALSE){
 
     minx = fileheader$`Min X`
     miny = fileheader$`Min Y`
+    minz = fileheader$`Min Z`
     maxx = fileheader$`Max X`
     maxy = fileheader$`Max Y`
+    maxz = fileheader$`Max Z`
 
     if (full.names == FALSE){
       file <- basename(file)
     }
 
-    return(data.frame(file = file, minx, miny, maxx, maxy))
+    return(data.frame(file = file, minx, miny, minz, maxx, maxy, maxz))
 
   }
 
