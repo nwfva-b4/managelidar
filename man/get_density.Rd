@@ -12,13 +12,13 @@ get_density(path, full.names = FALSE)
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file, pulses, area, density
+A dataframe with file, points, pulses, area, pointdensity, pulsedensity
 }
 \description{
-\code{get_density()} calculates the approximate average pulse density (first/last-return only) of lasfiles.
+\code{get_density()} calculates the approximate average point and pulse (first/last-return only) density of lasfiles.
 }
 \details{
-For this function only the header from lasfiles is read and density is calculated from the bounding box of the data file and the number of first-returns. This does not take into account if parts of the bounding box is missing data, and hence this density does not reflect the density as it is calculates by e.g. \code{lidR}. However, it is much faster because it does not read the entire file and density should be approximately the same if the entire bounding box has point data.
+For this function only the header from lasfiles is read and density is calculated from the bounding box of the data file and the number of points or first-returns. This does not take into account if parts of the bounding box is missing data, and hence this density does not reflect the density as it is calculates by e.g. \code{lidR}. However, it is much faster because it does not read the entire file and density should be approximately the same if the entire bounding box has point data.
 }
 \examples{
 f <- system.file("extdata", package="managelidar")
