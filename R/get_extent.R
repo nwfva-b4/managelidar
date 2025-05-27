@@ -33,6 +33,10 @@ get_extent <- function(path, full.names = FALSE){
 
   }
 
-  f <- list.files(path, pattern = "*.laz$", full.names = TRUE)
-  return(as.data.frame(do.call(rbind, lapply(f, get_file_extent))))
+  if (file.exists(path) && !dir.exists(path)) {
+    return(as.data.frame(get_file_extent(path)))
+  } else {
+    f <- list.files(path, pattern = "*.laz$", full.names = TRUE)
+    return(as.data.frame(do.call(rbind, lapply(f, get_file_extent))))
+  }
 }
