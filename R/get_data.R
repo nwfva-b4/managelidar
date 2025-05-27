@@ -15,7 +15,8 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' get_data(f, tempdir(), "landesbefliegung")
 #' }
-get_data <- function(origin, destination, campaign, origin_recurse = FALSE) {
+get_data <- function(origin, destination, campaign, origin_recurse = FALSE, prefix = "3dm", zone = 32, region = NULL, year = NULL, verbose = FALSE) {
+
   # create temporary folder
   tmpfolder <- fs::dir_create(fs::path(destination, "in_process"), recurse = TRUE)
   # create documentary folder
@@ -25,54 +26,76 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE) {
   # just in case process stopped
   processed_files <- list.files(tmpfolder, pattern = "/*.laz$")
   all_files <- list.files(origin, pattern = "/*.las|z$", full.names = TRUE, recursive = origin_recurse)
-  unprocessed_files <- setdiff(tools::file_path_sans_ext(basename(all_files)), tools::file_path_sans_ext(basename(processed_files)))
-  unprocessed_files <- all_files[tools::file_path_sans_ext(basename(all_files)) %in% unprocessed_files]
+  unprocessed_files <- setdiff(
+    fs::path_ext_remove(fs::path_ext_remove(fs::path_file(all_files))),
+    fs::path_ext_remove(fs::path_ext_remove(fs::path_file(processed_files))))
+  unprocessed_files <- all_files[fs::path_ext_remove(fs::path_ext_remove(fs::path_file(all_files))) %in% unprocessed_files]
 
-  print(paste0("Writing ", length(unprocessed_files), " files to tempfolder (", tmpfolder, "). As LAZ, define CRS as 25832, sort points spatially"))
+  if (verbose) {
+    print(paste0("Writing ", length(unprocessed_files), " files to tempfolder (", tmpfolder, "). (save as COPC, define CRS as EPSG:25832, sort points spatially)"))
+
+  }
+
   lasR::exec(
     # set CRS (for the case it is not correctly set)
     lasR::set_crs(25832) +
       # sort points for better compression and efficient reading
-      lasR::sort_points(spatial = TRUE) +
+      lasR::sort_points() +
       # write compressed
-      lasR::write_las(ofile = paste0(tmpfolder, "/*.laz")),
+      lasR::write_las(ofile = paste0(tmpfolder, "/*.copc.laz")),
     with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
     on = unprocessed_files
   )
 
   # rename files according to ADV standard
-  print("Rename files according to ADv standard")
-  managelidar::set_names(path = tmpfolder)
+  if (verbose) {
+    print("Rename files according to ADV standard")
+  }
 
-  print(paste0("Move files to destination (", destination, ") and create Virtual Point Cloud per Year"))
+  managelidar::set_names(path = tmpfolder, prefix, zone, region, year, copc=TRUE, verbose)
+
+  if (verbose) {
+    print(paste0("Move files to destination (", destination, ") and create Virtual Point Cloud per Year"))
+  }
+
+
   now <- as.integer(format(Sys.time(), "%Y"))
   for (year in c(2000:now)) {
-    files_to_move <- list.files(path = tmpfolder, pattern = paste0("*", year, ".laz$"), full.names = TRUE)
+    files_to_move <- list.files(path = tmpfolder, pattern = paste0("*", year, ".copc.laz$"), full.names = TRUE)
+
+    print(paste0("files_to_move: ", files_to_move))
 
     if (length(files_to_move) > 0) {
       # sort files in folders by year
       destination_dir <- fs::path(destination, year, campaign)
+      print(paste0("destination_dir: ", destination_dir))
       fs::dir_create(destination_dir, recurse = TRUE)
       destination_files <- file.path(destination_dir, basename(files_to_move))
+
+      print(paste0("destination_files: ", destination_files))
       file.rename(files_to_move, destination_files)
 
-        # create spatial index for new files
-      lasR::exec(
-        lasR::write_lax(embedded = TRUE),
-        with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
-        on = destination_files
-      )
+      # # create spatial index for new files
+      # lasR::exec(
+      #   lasR::write_lax(embedded = TRUE),
+      #   with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
+      #   on = destination_files
+      # )
 
-          # create virtual point cloud for all files in folder
+      # create virtual point cloud for all files in folder
       vpc <- file.path(docufolder, paste0(campaign, "_", year, ".vpc"))
       lasR::exec(
-          lasR::write_vpc(ofile = vpc, use_gpstime = TRUE, absolute_path = TRUE),
+        lasR::write_vpc(ofile = vpc, use_gpstime = TRUE, absolute_path = TRUE),
         with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
         on = destination_dir
       )
     }
   }
 
-  print("deleting tempfolder")
   unlink(tmpfolder, recursive = TRUE)
+
+  if (verbose) {
+    print("Tempfolder deleted")
+  }
+
 }

@@ -17,8 +17,8 @@
 #' copy <- tempfile(fileext = ".laz")
 #' file.copy(f, copy)
 #' set_names(copy)
-set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, verbose = FALSE) {
-  t <- managelidar::check_names(path, prefix, zone, region, year, full.names = T, verbose = verbose)
+set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, verbose = FALSE) {
+  t <- managelidar::check_names(path, prefix, zone, region, year, copc, full.names = T, verbose)
   t <- subset(t, correct == FALSE)
 
   if (ncol(t) == 0L) {

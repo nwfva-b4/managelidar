@@ -12,6 +12,7 @@
 #' @param region 2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.
 #' @param year YYYY. (optional) acquisition year to append to filename.
 #' If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.
+#' @param copc Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)
 #' @param full.names Whether to return the full file path or just the file names (default)
 #'
 #' @return A dataframe with name_is, name_should, correct
@@ -20,7 +21,7 @@
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' check_names(f)
-check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, full.names = FALSE, verbose = FALSE) {
+check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, full.names = FALSE, verbose = FALSE) {
   if (verbose) {
     print("creating VPC with GPStime")
   }
@@ -116,12 +117,18 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     year <- format(as.Date(json$features$properties$datetime), "%Y")
   }
 
+  optional_copc <- ""
+  if (copc) {
+    optional_copc <- ".copc"
+  }
+
+
   if (full.names == FALSE) {
     name_is <- basename(json$features$assets$data$href)
-    name_should <- paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$assets$data$href))
+    name_should <- paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, optional_copc, ".", tools::file_ext(json$features$assets$data$href))
   } else {
     name_is <- json$features$assets$data$href
-    name_should <- file.path(dirname(name_is), paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, ".", tools::file_ext(json$features$assets$data$href)))
+    name_should <- file.path(dirname(name_is), paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, optional_copc, ".", tools::file_ext(json$features$assets$data$href)))
   }
 
   if (verbose) {
