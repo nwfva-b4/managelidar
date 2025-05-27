@@ -14,18 +14,27 @@
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_datetime(f)
-get_datetime <- function(path, full.names = FALSE) {
+get_datetime <- function(path, full.names = FALSE, verbose = FALSE) {
   get_file_datetime <- function(file) {
     fileheader <- lidR::readLASheader(file)
 
     if (fileheader$`Global Encoding`$`GPS Time Type`) {
+
+      if (verbose) {
+        print("Reading GPStime from Point Cloud")
+      }
+
       f <- lidR::readLAS(file, select = "gpstime", filter = "-keep_first")
 
       gps_epoch <- as.POSIXct("1980-01-06 00:00:00", tz = "UTC")
       datetime_min <- gps_epoch + min(f@data$gpstime[f@data$gpstime > 0]) + 1e9
       datetime_max <- gps_epoch + max(f@data$gpstime) + 1e9
     } else {
-      print("Not possible to get acqusition datetime correctly from file.")
+
+      if (verbose) {
+        print("Not possible to get acqusition datetime correctly from file, setting to NA")
+      }
+
       datetime_min <- NA
       datetime_max <- NA
     }
