@@ -16,7 +16,6 @@
 #' get_data(f, tempdir(), "landesbefliegung")
 #' }
 get_data <- function(origin, destination, campaign, origin_recurse = FALSE, prefix = "3dm", zone = 32, region = NULL, year = NULL, verbose = FALSE) {
-
   # create temporary folder
   tmpfolder <- fs::dir_create(fs::path(destination, "in_process"), recurse = TRUE)
   # create documentary folder
@@ -28,12 +27,12 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE, pref
   all_files <- list.files(origin, pattern = "/*.las|z$", full.names = TRUE, recursive = origin_recurse)
   unprocessed_files <- setdiff(
     fs::path_ext_remove(fs::path_ext_remove(fs::path_file(all_files))),
-    fs::path_ext_remove(fs::path_ext_remove(fs::path_file(processed_files))))
+    fs::path_ext_remove(fs::path_ext_remove(fs::path_file(processed_files)))
+  )
   unprocessed_files <- all_files[fs::path_ext_remove(fs::path_ext_remove(fs::path_file(all_files))) %in% unprocessed_files]
 
   if (verbose) {
     print(paste0("Writing ", length(unprocessed_files), " files to tempfolder (", tmpfolder, "). (save as COPC, define CRS as EPSG:25832, sort points spatially)"))
-
   }
 
   lasR::exec(
@@ -42,7 +41,10 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE, pref
       # sort points for better compression and efficient reading
       lasR::sort_points() +
       # write compressed
-      lasR::write_las(ofile = paste0(tmpfolder, "/*.copc.laz")),
+      lasR::write_copc(
+        ofile = paste0(tmpfolder, "/*.copc.laz"),
+        density = "normal"
+      ),
     with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
     on = unprocessed_files
   )
@@ -52,7 +54,7 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE, pref
     print("Rename files according to ADV standard")
   }
 
-  managelidar::set_names(path = tmpfolder, prefix, zone, region, year, copc=TRUE, verbose)
+  managelidar::set_names(path = tmpfolder, prefix, zone, region, year, copc = TRUE, verbose)
 
   if (verbose) {
     print(paste0("Move files to destination (", destination, ") and create Virtual Point Cloud per Year"))
@@ -75,7 +77,7 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE, pref
       print(paste0("destination_files: ", destination_files))
       file.rename(files_to_move, destination_files)
 
-      # # create spatial index for new files
+      # # create spatial index for new files (not nessessary for copc)
       # lasR::exec(
       #   lasR::write_lax(embedded = TRUE),
       #   with = list(ncores = lasR::concurrent_files(lasR::half_cores()), progress = TRUE),
@@ -97,5 +99,4 @@ get_data <- function(origin, destination, campaign, origin_recurse = FALSE, pref
   if (verbose) {
     print("Tempfolder deleted")
   }
-
 }
