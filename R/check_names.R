@@ -9,9 +9,9 @@
 #' @param path A path to a directory which contains las/laz files
 #' @param prefix 3 letter character. Naming prefix (defaults to "3dm")
 #' @param zone 2 digits integer. UTM zone (defaults to 32)
-#' @param region 2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.
+#' @param region 2 letter character. (optional) federal state abbreviation. It will be fetched automatically if not defined (default).
 #' @param year YYYY. (optional) acquisition year to append to filename.
-#' If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.
+#' If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.
 #' @param copc Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)
 #' @param full.names Whether to return the full file path or just the file names (default)
 #'
