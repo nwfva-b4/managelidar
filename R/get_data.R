@@ -1,10 +1,10 @@
-#' Get data in a standardized format
+#' Get data in a standardized format and structure
 #'
 #' This function copies data from one folder to another folder, while ensuring certain data formatting and folder structure. CRS is set, points are sorted, files are compressed, files are renamed according to [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111), files are ordered in folders by acquisition date and campaign, a VPC is created and files are spatially indexed.
 #'
-#' @param origin The path to a directory which contains (unprocessed) las/laz files
-#' @param destination The directory under which the processed files are copied and subfolders (year/campaign) are created
-#' @param campaign (character) Name of the project or campaign of data acquisition.
+#' @param origin path. The path to a directory which contains las/laz files
+#' @param destination path. The directory under which the processed files are copied and subfolders (year/campaign) are created
+#' @param campaign character. Name of the project or campaign of data acquisition.
 #' @param origin_recurse boolean. Should files in subfolder be included?
 #'
 #' @return A structured copy of input lidar data
