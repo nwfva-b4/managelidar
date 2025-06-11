@@ -54,6 +54,7 @@ File names should be in the following schema:
 <span>  zone <span class="op">=</span> <span class="fl">32</span>,</span>
 <span>  region <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  copc <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  full.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -76,12 +77,16 @@ File names should be in the following schema:
 
 
 <dt id="arg-region">region<a class="anchor" aria-label="anchor" href="#arg-region"></a></dt>
-<dd><p>2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.</p></dd>
+<dd><p>2 letter character. (optional) federal state abbreviation. It will be fetched automatically if not defined (default).</p></dd>
 
 
 <dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
 <dd><p>YYYY. (optional) acquisition year to append to filename.
-If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.</p></dd>
+If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.</p></dd>
+
+
+<dt id="arg-copc">copc<a class="anchor" aria-label="anchor" href="#arg-copc"></a></dt>
+<dd><p>Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)</p></dd>
 
 
 <dt id="arg-full-names">full.names<a class="anchor" aria-label="anchor" href="#arg-full-names"></a></dt>
