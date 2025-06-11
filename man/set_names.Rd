@@ -10,6 +10,7 @@ set_names(
   zone = 32,
   region = NULL,
   year = NULL,
+  copc = FALSE,
   verbose = FALSE
 )
 }

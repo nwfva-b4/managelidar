@@ -4,7 +4,7 @@
 \alias{get_datetime}
 \title{Get acquisition datetime from point cloud}
 \usage{
-get_datetime(path, full.names = FALSE)
+get_datetime(path, full.names = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{path}{A path to a laz file or a directory which contains laz files}

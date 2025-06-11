@@ -10,6 +10,7 @@ check_names(
   zone = 32,
   region = NULL,
   year = NULL,
+  copc = FALSE,
   full.names = FALSE,
   verbose = FALSE
 )
@@ -21,10 +22,12 @@ check_names(
 
 \item{zone}{2 digits integer. UTM zone (defaults to 32)}
 
-\item{region}{2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.}
+\item{region}{2 letter character. (optional) federal state abbreviation. It will be fetched automatically if not defined (default).}
 
 \item{year}{YYYY. (optional) acquisition year to append to filename.
-If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
+If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
+
+\item{copc}{Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)}
 
 \item{full.names}{Whether to return the full file path or just the file names (default)}
 }

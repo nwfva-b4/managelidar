@@ -7,7 +7,7 @@
 get_density(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{The path to a file (las/laz/copc), to a directory which contains these files, or to a VPC file referencing these files.}
 
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }

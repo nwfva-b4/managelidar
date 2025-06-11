@@ -7,7 +7,7 @@
 get_names(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{A path to a LAS file, VPC file, or a directory which contains LAS files}
 
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
@@ -15,9 +15,9 @@ get_names(path, full.names = FALSE)
 A vector of filenames
 }
 \description{
-Simply get a vector of names of all lasfiles (*.laz) in the folder.
+Simply get a vector of names of all LAS files (*.las, *.laz, *.laz.copc) in the folder.
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_names(f)
 }
