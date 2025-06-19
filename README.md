@@ -7,12 +7,14 @@
 <!-- badges: end -->
 
 The goal of managelidar is to facilitate the handling and management of
-lidar data files (`*.laz`), e.g. to provide some functions to get a
-quick overview of file attributes. This should facilitate the quality
-check of incoming ALS data. `managelidar` makes use of functions
-provided by {lidR} and {lasR}. Functions are not reading the entire LAZ
-files, as this would require long computations for large collections of
-data. Instead, attributes are read from the file header.
+lidar data files (`*.las/laz`). Its’s main purpose is to convert new
+incoming data to data with certain quality standards. Further, it
+provides functions to facilitate the quality check of incoming ALS data.
+`managelidar` makes use of functions provided by {lidR} and {lasR}. Most
+functions which provide information about 3D point cloud files are
+working without reading the entire files, as this would require long
+computations for large collections of data. Instead, attributes are read
+from the file header where possible.
 
 ## Installation
 
@@ -26,8 +28,8 @@ pak::pkg_install("wiesehahn/managelidar")
 
 As some functions depend on the [lasR](https://github.com/r-lidar/lasR)
 package (version \>= 0.14.1) which is hosted on at
-<https://r-lidar.r-universe.dev/lasR> you have to manually install it in
-advance with:
+<https://r-lidar.r-universe.dev/lasR>, you have to manually install it
+in advance with:
 
 ``` r
 # Install lasR in R:
@@ -37,9 +39,9 @@ install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cr
 ## Example
 
 This is a basic function which queries the spatial extents of all lidar
-data files (`*.laz`) in a given folder from its data headers (without
-reading the actual point cloud data). It returns a dataframe which can
-be used in further data management steps.
+data files in a given folder from its data headers (without reading the
+actual point cloud data). It returns a dataframe which can be used in
+further data management steps.
 
 ``` r
 library(managelidar)
