@@ -7,18 +7,19 @@
 get_datetime(path, full.names = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
 
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file, min datetime, max datetime
+A dataframe returning \code{filename}, \code{datetime_min} \code{datetime_max}
 }
 \description{
 \code{get_datetime()} calculates the earliest and latest acquisition datetime from point cloud files.
 }
 \details{
-Unfortunately this is only possible for newer (>= LAS 1.3) point cloud data, where acquisition date is encoded as adjusted standard GPS time. This can be converted to datetime. This function requires the entire point cloud to be read and thus takes long processing time, especially if applied on entire folders or large files.
+This function requires the entire point cloud to be read! Thus it takes potentially a long processing time, especially if applied on entire folders or large files.
+Unfortunately it is only possible to derive exact acquisition date from newer (>= LAS 1.3) point cloud data, where acquisition date is encoded as adjusted standard GPS time. Otherwise, additional information on GPSweek is necessary.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

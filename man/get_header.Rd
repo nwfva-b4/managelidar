@@ -2,20 +2,22 @@
 % Please edit documentation in R/get_header.R
 \name{get_header}
 \alias{get_header}
-\title{Get Fileheader from las file}
+\title{Get the Fileheader (Metadata) from LAS files}
 \usage{
-get_header(file)
+get_header(path, full.names = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{file}{A path to a laz file}
+\item{path}{The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
+
+\item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-LASheader
+A named list of LASheaders
 }
 \description{
-Provides a simple wrapper to read the fileheader from LAS/LAZ files via lidR::readLASheader.
+Provides a simple wrapper to read the metadata included in the fileheader from LAS files.
 }
 \examples{
-f <- system.file("extdata/3dm_32_547_5724_1_ni_20240327.laz", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_header(f)
 }

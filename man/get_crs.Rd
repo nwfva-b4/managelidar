@@ -2,22 +2,23 @@
 % Please edit documentation in R/get_crs.R
 \name{get_crs}
 \alias{get_crs}
-\title{Get the Coordinate Reference system of laz files}
+\title{Get the Coordinate Reference System of LAS files}
 \usage{
 get_crs(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
 
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file and crs (EPSG)
+A dataframe returning \code{filename} and \code{crs} (EPSG)
 }
 \description{
-Get the Coordinate Reference system of laz files
+Get the Coordinate Reference System of LAS files
 }
 \examples{
 f <- system.file("extdata", package="managelidar")
 get_crs(f)
+
 }

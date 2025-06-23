@@ -1,14 +1,15 @@
-#' Get the point cloud summary of laz files
+#' Get the point cloud summary of LAS files
 #'
-#' `get_summary` derives information for laz files, such as Number of points per class and histogram distribution of z or intensity values.
+#' `get_summary` derives information for LAS files, such as number of points per class and histogram distribution of z or intensity values.
 #'
-#' The function needs to read the actual point cloud data. To speed up the processing the function reads just a sample of points, which is slower than just readinsg teh header information but much faster than reading the entire file.
-#' But the results are thus only valid for the subsample of points and do not nessesarily reflect the entire file.
+#' The function needs to read the actual point cloud data!
+#' To speed up the processing the function reads just a sample of points, which is slower than just reading the header information but much faster than reading the entire file.
+#' But the results are thus only valid for the subsample of points and do not necessarily reflect the entire file.
 #'
-#' @param path The path to a file (las/laz/copc), to a directory which contains these files, or to a VPC file referencing these files.
+#' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
 #' @param full.names Whether to return the full file path or just the file name (default)
 #'
-#' @returns A named list of summary information (npoints, nsingle, nwithheld, nsynthetic, npoints_per_return, npoints_per_class, z_histogram, i_histogram, crs, epsg)
+#' @returns A named list of summary information (`npoints`, `nsingle`, `nwithheld`, `nsynthetic`, `npoints_per_return`, `npoints_per_class`, `z_histogram`, `i_histogram`, `crs`, `epsg`)
 #' @export
 #'
 #' @examples
@@ -36,7 +37,7 @@ get_summary <- function(path, full.names = FALSE){
       file <- basename(file)
     }
 
-    return(list(file = file, summary = ans))
+    return(list(filename = file, summary = ans))
 
   }
 

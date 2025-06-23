@@ -2,24 +2,25 @@
 % Please edit documentation in R/get_summary.R
 \name{get_summary}
 \alias{get_summary}
-\title{Get the point cloud summary of laz files}
+\title{Get the point cloud summary of LAS files}
 \usage{
 get_summary(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{The path to a file (las/laz/copc), to a directory which contains these files, or to a VPC file referencing these files.}
+\item{path}{The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
 
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-A named list of summary information (npoints, nsingle, nwithheld, nsynthetic, npoints_per_return, npoints_per_class, z_histogram, i_histogram, crs, epsg)
+A named list of summary information (\code{npoints}, \code{nsingle}, \code{nwithheld}, \code{nsynthetic}, \code{npoints_per_return}, \code{npoints_per_class}, \code{z_histogram}, \code{i_histogram}, \code{crs}, \code{epsg})
 }
 \description{
-\code{get_summary} derives information for laz files, such as Number of points per class and histogram distribution of z or intensity values.
+\code{get_summary} derives information for LAS files, such as number of points per class and histogram distribution of z or intensity values.
 }
 \details{
-The function needs to read the actual point cloud data. To speed up the processing the function reads just a sample of points, which is slower than just readinsg teh header information but much faster than reading the entire file.
-But the results are thus only valid for the subsample of points and do not nessesarily reflect the entire file.
+The function needs to read the actual point cloud data!
+To speed up the processing the function reads just a sample of points, which is slower than just reading the header information but much faster than reading the entire file.
+But the results are thus only valid for the subsample of points and do not necessarily reflect the entire file.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

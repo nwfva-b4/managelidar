@@ -2,20 +2,22 @@
 #'
 #' `get_datetime()` calculates the earliest and latest acquisition datetime from point cloud files.
 #'
-#' Unfortunately this is only possible for newer (>= LAS 1.3) point cloud data, where acquisition date is encoded as adjusted standard GPS time. This can be converted to datetime. This function requires the entire point cloud to be read and thus takes long processing time, especially if applied on entire folders or large files.
+#' This function requires the entire point cloud to be read! Thus it takes potentially a long processing time, especially if applied on entire folders or large files.
+#' Unfortunately it is only possible to derive exact acquisition date from newer (>= LAS 1.3) point cloud data, where acquisition date is encoded as adjusted standard GPS time. Otherwise, additional information on GPSweek is necessary.
 #'
-#' @param path A path to a laz file or a directory which contains laz files
-#'
+#' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
 #' @param full.names Whether to return the full file path or just the file name (default)
-#'
-#' @return A dataframe with file, min datetime, max datetime
+##'
+#' @return A dataframe returning `filename`, `datetime_min` `datetime_max`
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_datetime(f)
-get_datetime <- function(path, full.names = FALSE, verbose = FALSE) {
-  get_file_datetime <- function(file) {
+
+get_datetime <- function(path, full.names = FALSE, verbose = FALSE){
+
+  get_datetime_file <- function(file){
     fileheader <- lidR::readLASheader(file)
 
     if (fileheader$`Global Encoding`$`GPS Time Type`) {
@@ -43,13 +45,42 @@ get_datetime <- function(path, full.names = FALSE, verbose = FALSE) {
       file <- basename(file)
     }
 
-    return(data.frame(file = file, datetime_min, datetime_max))
+    return(data.frame(filename = file, datetime_min, datetime_max))
+
+
   }
 
   if (file.exists(path) && !dir.exists(path)) {
-    return(as.data.frame(get_file_datetime(path)))
-  } else {
-    f <- list.files(path, pattern = "*.laz$", full.names = TRUE)
-    return(as.data.frame(do.call(rbind, lapply(f, get_file_datetime))))
+
+    # Virtual Point Cloud
+    if (tools::file_ext(path) == "vpc") {
+      vpc <- yyjsonr::read_json_file(path)
+      f <- sapply(vpc$features$assets, function(x) x$data$href)
+      return(as.data.frame(do.call(rbind, lapply(f, get_datetime_file))))
+    }
+    # LAZ file
+    else if (tools::file_ext(path) %in% c("las", "laz")) {
+      return(as.data.frame(get_datetime_file(path)))
+    } else {
+      stop("Unsupported file format. Supported formats: .las, .laz, .vpc")
+    }
   }
+
+  # Folder Path
+  else if (dir.exists(path)) {
+
+    f <- list.files(path, pattern = "\\.(las|laz)$", full.names = TRUE)
+    return(as.data.frame(do.call(rbind, lapply(f, get_datetime_file))))
+  } else {
+    stop("Path does not exist: ", path)
+  }
+
+
 }
+
+
+
+
+
+
+
