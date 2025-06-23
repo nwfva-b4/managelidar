@@ -59,7 +59,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A dataframe returning <code>filename</code>, <code>points</code>, <code>pulses</code>, <code>area</code>, <code>pointdensity</code>, <code>pulsedensity</code></p>
+    <p>A dataframe returning <code>filename</code>, <code>npoints</code>, <code>npulses</code>, <code>area</code>, <code>pointdensity</code>, <code>pulsedensity</code></p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -70,186 +70,17 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">get_density</span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_547_5724_1_ni_20240327.laz`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_547_5724_1_ni_20240327.laz`$filename</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "3dm_32_547_5724_1_ni_20240327.laz"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_547_5724_1_ni_20240327.laz`$header</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File signature:           LASF </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File source ID:           0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Global encoding:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - GPS Time Type: Standard GPS Time </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Synthetic Return Numbers: no </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Well Know Text: CRS is WKT </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Aggregate Model: false </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Project ID - GUID:        00000000-0000-0000-0000-000000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Version:                  1.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> System identifier:         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Generating software:      TerraScan </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File creation d/y:        123/2024</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> header size:              375 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset to point data:     2822 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. var. length record:  3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data format:        7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data record length: 42 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of point records:    2936 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of points by return: 2606 127 127 63 12 1 0 0 0 0 0 0 0 0 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Scale factor X Y Z:       0.001 0.001 0.001 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset X Y Z:             2e+06 6500000 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> min X Y Z:                547690 5724000 222.866 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> max X Y Z:                547999.7 5725000 316.283 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Variable Length Records (VLR):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 1 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Tags:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Key 3072 value 25832 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 2 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 3 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description: RIEGL Extra Bytes </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Extra Bytes Description:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Amplitude: Echo signal amplitude [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Reflectance: Echo signal reflectance [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Deviation: Pulse shape deviation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Extended Variable Length Records (EVLR):  void</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_547_5725_1_ni_20240327.laz`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_547_5725_1_ni_20240327.laz`$filename</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "3dm_32_547_5725_1_ni_20240327.laz"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_547_5725_1_ni_20240327.laz`$header</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File signature:           LASF </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File source ID:           0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Global encoding:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - GPS Time Type: Standard GPS Time </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Synthetic Return Numbers: no </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Well Know Text: CRS is WKT </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Aggregate Model: false </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Project ID - GUID:        00000000-0000-0000-0000-000000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Version:                  1.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> System identifier:         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Generating software:      TerraScan </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File creation d/y:        123/2024</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> header size:              375 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset to point data:     2822 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. var. length record:  3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data format:        7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data record length: 42 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of point records:    3369 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of points by return: 1340 534 748 584 162 1 0 0 0 0 0 0 0 0 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Scale factor X Y Z:       0.001 0.001 0.001 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset X Y Z:             2e+06 6500000 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> min X Y Z:                547648 5725000 223.448 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> max X Y Z:                547998.1 5725991 316.526 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Variable Length Records (VLR):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 1 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Tags:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Key 3072 value 25832 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 2 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 3 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description: RIEGL Extra Bytes </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Extra Bytes Description:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Amplitude: Echo signal amplitude [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Reflectance: Echo signal reflectance [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Deviation: Pulse shape deviation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Extended Variable Length Records (EVLR):  void</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_548_5724_1_ni_20240327.laz`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_548_5724_1_ni_20240327.laz`$filename</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "3dm_32_548_5724_1_ni_20240327.laz"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_548_5724_1_ni_20240327.laz`$header</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File signature:           LASF </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File source ID:           0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Global encoding:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - GPS Time Type: Standard GPS Time </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Synthetic Return Numbers: no </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Well Know Text: CRS is WKT </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Aggregate Model: false </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Project ID - GUID:        00000000-0000-0000-0000-000000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Version:                  1.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> System identifier:         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Generating software:      TerraScan </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File creation d/y:        123/2024</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> header size:              375 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset to point data:     2822 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. var. length record:  3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data format:        7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data record length: 42 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of point records:    10000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of points by return: 3426 1998 2228 1755 558 33 2 0 0 0 0 0 0 0 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Scale factor X Y Z:       0.001 0.001 0.001 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset X Y Z:             2e+06 6500000 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> min X Y Z:                548000 5724000 224.578 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> max X Y Z:                548992 5724997 372.281 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Variable Length Records (VLR):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 1 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Tags:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Key 3072 value 25832 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 2 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 3 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description: RIEGL Extra Bytes </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Extra Bytes Description:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Amplitude: Echo signal amplitude [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Reflectance: Echo signal reflectance [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Deviation: Pulse shape deviation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Extended Variable Length Records (EVLR):  void</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_548_5725_1_ni_20240327.laz`</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_548_5725_1_ni_20240327.laz`$filename</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "3dm_32_548_5725_1_ni_20240327.laz"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $`3dm_32_548_5725_1_ni_20240327.laz`$header</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File signature:           LASF </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File source ID:           0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Global encoding:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - GPS Time Type: Standard GPS Time </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Synthetic Return Numbers: no </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Well Know Text: CRS is WKT </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - Aggregate Model: false </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Project ID - GUID:        00000000-0000-0000-0000-000000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Version:                  1.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> System identifier:         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Generating software:      TerraScan </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> File creation d/y:        123/2024</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> header size:              375 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset to point data:     2822 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. var. length record:  3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data format:        7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Point data record length: 42 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of point records:    10000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Num. of points by return: 4247 1657 2105 1482 489 17 2 1 0 0 0 0 0 0 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Scale factor X Y Z:       0.001 0.001 0.001 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Offset X Y Z:             2e+06 6500000 0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> min X Y Z:                548000 5725000 232.946 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> max X Y Z:                548995.4 5725992 385.486 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Variable Length Records (VLR):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 1 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Tags:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Key 3072 value 25832 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 2 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description:  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Variable Length Record 3 of 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Description: RIEGL Extra Bytes </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        Extra Bytes Description:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Amplitude: Echo signal amplitude [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Reflectance: Echo signal reflectance [dB]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Deviation: Pulse shape deviation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Extended Variable Length Records (EVLR):  void</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            filename npoints npulses           area</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 3dm_32_547_5724_1_ni_20240327.laz    2936    2606 309656.1 [m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3dm_32_547_5725_1_ni_20240327.laz    3369    1340 347095.0 [m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 3dm_32_548_5724_1_ni_20240327.laz   10000    3426 988760.1 [m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 3dm_32_548_5725_1_ni_20240327.laz   10000    4247 987443.7 [m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          pointdensity        pulsedensity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.009481486 [1/m^2] 0.008415787 [1/m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.009706277 [1/m^2] 0.003860615 [1/m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.010113677 [1/m^2] 0.003464946 [1/m^2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.010127160 [1/m^2] 0.004301005 [1/m^2]</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
