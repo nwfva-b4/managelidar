@@ -12,7 +12,7 @@ get_density(path, full.names = FALSE)
 \item{full.names}{Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe returning \code{filename}, \code{points}, \code{pulses}, \code{area}, \code{pointdensity}, \code{pulsedensity}
+A dataframe returning \code{filename}, \code{npoints}, \code{npulses}, \code{area}, \code{pointdensity}, \code{pulsedensity}
 }
 \description{
 \code{get_density()} calculates the approximate average point and pulse (first/last-return only) density of LAS files.
@@ -23,4 +23,5 @@ For this function only the header from LAS files is read and density is calculat
 \examples{
 f <- system.file("extdata", package = "managelidar")
 get_density(f)
+
 }

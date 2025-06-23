@@ -8,40 +8,38 @@
 #' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
 #' @param full.names Whether to return the full file path or just the file name (default)
 #'
-#' @return A dataframe returning `filename`, `points`, `pulses`, `area`, `pointdensity`, `pulsedensity`
+#' @return A dataframe returning `filename`, `npoints`, `npulses`, `area`, `pointdensity`, `pulsedensity`
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_density(f)
-
+#'
 get_density <- function(path, full.names = FALSE){
 
   get_file_density <- function(file){
 
-    if (endsWith(file, ".las") | endsWith(file, ".laz")) {
+    fileheader <- lidR::readLASheader(file)
 
-      fileheader <- lidR::readLASheader(file)
+    minx <- fileheader$`Min X`
+    miny <- fileheader$`Min Y`
+    maxx <- fileheader$`Max X`
+    maxy <- fileheader$`Max Y`
 
-      minx <- fileheader$`Min X`
-      miny <- fileheader$`Min Y`
-      maxx <- fileheader$`Max X`
-      maxy <- fileheader$`Max Y`
+    points <- fileheader$`Number of point records`
+    pulses <- fileheader$`Number of points by return`[1]
+    bbox <- sf::st_bbox(c(xmin = minx, xmax = maxx, ymax = maxy, ymin = miny), crs = sf::st_crs(fileheader))
+    area <- sf::st_area(sf::st_as_sfc(bbox))
+    pointdensity <- points / area
+    pulsedensity <- pulses / area
 
-      points <- fileheader$`Number of point records`
-      pulses <- fileheader$`Number of points by return`[1]
-      bbox <- sf::st_bbox(c(xmin = minx, xmax = maxx, ymax = maxy, ymin = miny), crs = sf::st_crs(fileheader))
-      area <- sf::st_area(sf::st_as_sfc(bbox))
-      pointdensity <- points / area
-      pulsedensity <- pulses / area
 
-    }
 
     if (full.names == FALSE){
       file <- basename(file)
     }
 
-    return(list(filename = file, header = fileheader))
+    return(data.frame(filename = file, npoints = points, npulses = pulses, area, pointdensity, pulsedensity))
 
   }
 
@@ -51,15 +49,11 @@ get_density <- function(path, full.names = FALSE){
     if (tools::file_ext(path) == "vpc") {
       vpc <- yyjsonr::read_json_file(path)
       f <- sapply(vpc$features$assets, function(x) x$data$href)
-      result <- lapply(f, get_file_density)
-      names(result) <- sapply(result, function(x) basename(x$file))
-      return(result)
+      return(as.data.frame(do.call(rbind, lapply(f, get_file_density))))
     }
     # LAZ file
     else if (tools::file_ext(path) %in% c("las", "laz")) {
-      result <- list(get_file_density(path))
-      names(result) <- basename(result[[1]]$file)
-      return(result)
+      return(as.data.frame(get_file_density(path)))
     } else {
       stop("Unsupported file format. Supported formats: .las, .laz, .vpc")
     }
@@ -69,9 +63,7 @@ get_density <- function(path, full.names = FALSE){
   else if (dir.exists(path)) {
 
     f <- list.files(path, pattern = "\\.(las|laz)$", full.names = TRUE)
-    result <- lapply(f, get_file_density)
-    names(result) <- sapply(result, function(x) basename(x$file))
-    return(result)
+    return(as.data.frame(do.call(rbind, lapply(f, get_file_density))))
   } else {
     stop("Path does not exist: ", path)
   }
