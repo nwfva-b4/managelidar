@@ -14,7 +14,7 @@ is_classified(path, full.names = FALSE, add_classes = FALSE)
 \item{add_classes}{Whether to add a list of present classes or not (default)}
 }
 \value{
-A dataframe returning \code{filename}, \code{classified}
+A data.frame returning \code{filename}, \code{classified} and optionally \code{classes}
 }
 \description{
 \code{is_classified} derives information about point classification

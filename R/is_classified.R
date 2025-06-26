@@ -10,7 +10,7 @@
 #' @param full.names Whether to return the full file path or just the file name (default)
 #' @param add_classes Whether to add a list of present classes or not (default)
 #'
-#' @returns A dataframe returning `filename`, `classified`
+#' @returns A data.frame returning `filename`, `classified` and optionally `classes`
 #' @export
 #'
 #' @examples
