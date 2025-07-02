@@ -2,7 +2,7 @@
 #'
 #' Checks the file names according to [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111).
 #' File names should be in the following schema:
-#' `prefix`_`utmzone`_`minx`_`miny`_`tilesize`_`region`_`year``.laz`
+#' `prefix_utmzone_minx_miny_tilesize_region_year.laz`
 #'
 #' (e.g. `3dm_32_547_5724_1_ni_2024.laz`)
 #'
@@ -13,9 +13,9 @@
 #' @param year YYYY. (optional) acquisition year to append to filename.
 #' If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.
 #' @param copc Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)
-#' @param full.names Whether to return the full file path or just the file names (default)
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file names (default)
 #'
-#' @return A dataframe with name_is, name_should, correct
+#' @return A data.frame with attributes `name_is`, `name_should`, `correct`
 #' @export
 #'
 #' @examples

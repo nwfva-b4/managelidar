@@ -9,10 +9,10 @@ get_datetime(path, full.names = FALSE, verbose = FALSE)
 \arguments{
 \item{path}{The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe returning \code{filename}, \code{datetime_min} \code{datetime_max}
+A data.frame with attributes \code{filename}, \code{datetime_min} and \code{datetime_max}
 }
 \description{
 \code{get_datetime()} calculates the earliest and latest acquisition datetime from point cloud files.

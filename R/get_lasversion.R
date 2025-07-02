@@ -1,10 +1,10 @@
 
-#' Get the Version of laz files
+#' Get the Version of LAS files
 #'
-#' @param path A path to a laz file or a directory which contains laz files
-#' @param full.names Whether to return the full file path or just the file name (default)
+#' @param path A path to a LAS file or a directory which contains LAS files
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
 #'
-#' @return A dataframe with file and lasversion (Major.Minor)
+#' @return A data.frame with attributes `filename` and `lasversion` (Major.Minor)
 #' @export
 #'
 #' @examples
@@ -22,7 +22,7 @@ get_lasversion <- function(path, full.names = FALSE){
       file <- basename(file)
     }
 
-    return(data.frame(file = file, lasversion = paste0(major, ".", minor)))
+    return(data.frame(filename = file, lasversion = paste0(major, ".", minor)))
 
   }
 

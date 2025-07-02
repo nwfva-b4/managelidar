@@ -4,7 +4,7 @@
 #'
 #' @param path A path to a LAS file, VPC file, or a directory which contains LAS files
 #'
-#' @param full.names Whether to return the full file path or just the file name (default)
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
 #'
 #' @return A vector of filenames
 #' @export

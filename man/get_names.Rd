@@ -9,7 +9,7 @@ get_names(path, full.names = FALSE)
 \arguments{
 \item{path}{A path to a LAS file, VPC file, or a directory which contains LAS files}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
 }
 \value{
 A vector of filenames

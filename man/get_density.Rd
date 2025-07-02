@@ -7,12 +7,12 @@
 get_density(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
+\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe returning \code{filename}, \code{npoints}, \code{npulses}, \code{area}, \code{pointdensity}, \code{pulsedensity}
+A data.frame with attributes \code{filename}, \code{npoints}, \code{npulses}, \code{area}, \code{pointdensity} and \code{pulsedensity}
 }
 \description{
 \code{get_density()} calculates the approximate average point and pulse (first/last-return only) density of LAS files.

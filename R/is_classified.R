@@ -6,8 +6,8 @@
 #' To speed up the processing the function reads just a sample of points, which is slower than just reading the header information but much faster than reading the entire file.
 #' The results are thus only valid for the subsample of points and do not necessarily reflect the entire file.
 #'
-#' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
-#' @param full.names Whether to return the full file path or just the file name (default)
+#' @param path The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file paths or just the filenames (default)
 #' @param add_classes Whether to add a list of present classes or not (default)
 #'
 #' @returns A data.frame returning `filename`, `classified` and optionally `classes`

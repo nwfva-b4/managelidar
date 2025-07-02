@@ -6,9 +6,9 @@
 #' Unfortunately it is only possible to derive exact acquisition date from newer (>= LAS 1.3) point cloud data, where acquisition date is encoded as adjusted standard GPS time. Otherwise, additional information on GPSweek is necessary.
 #'
 #' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
-#' @param full.names Whether to return the full file path or just the file name (default)
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
 ##'
-#' @return A dataframe returning `filename`, `datetime_min` `datetime_max`
+#' @return A data.frame with attributes `filename`, `datetime_min` and `datetime_max`
 #' @export
 #'
 #' @examples

@@ -5,10 +5,10 @@
 #' For this function only the header from LAS files is read and density is calculated based on the bounding box of the data file and the number of points of first-returns. This does not take into account if parts of the bounding box are missing data, and hence this density does not reflect the density as it is calculates by e.g. `lidR`. However, it is much faster because it does not read the entire file and density should be approximately the same if the entire bounding box has point data.
 #'
 #'
-#' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
-#' @param full.names Whether to return the full file path or just the file name (default)
+#' @param path The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
 #'
-#' @return A dataframe returning `filename`, `npoints`, `npulses`, `area`, `pointdensity`, `pulsedensity`
+#' @return A data.frame with attributes `filename`, `npoints`, `npulses`, `area`, `pointdensity` and `pulsedensity`
 #' @export
 #'
 #' @examples

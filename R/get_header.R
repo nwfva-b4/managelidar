@@ -3,8 +3,8 @@
 #'
 #' Provides a simple wrapper to read the metadata included in the fileheader from LAS files.
 #'
-#' @param path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
-#' @param full.names Whether to return the full file path or just the file name (default)
+#' @param path The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
 #'
 #' @return A named list of LASheaders
 #' @export
@@ -17,7 +17,7 @@ get_header <- function(path, full.names = FALSE, verbose = FALSE){
 
   get_header_file <- function(file){
 
-if (endsWith(file, ".las") | endsWith(file, ".laz")) {
+if (endsWith(file, ".las") || endsWith(file, ".laz")) {
 
   fileheader <- lidR::readLASheader(file)
 

@@ -29,15 +29,15 @@ If not provided (default) the year will be extracted from the files. It will be 
 
 \item{copc}{Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)}
 
-\item{full.names}{Whether to return the full file path or just the file names (default)}
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file names (default)}
 }
 \value{
-A dataframe with name_is, name_should, correct
+A data.frame with attributes \code{name_is}, \code{name_should}, \code{correct}
 }
 \description{
 Checks the file names according to \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard}.
 File names should be in the following schema:
-\code{prefix}\emph{\code{utmzone}}\code{minx}\emph{\code{miny}}\code{tilesize}\emph{\code{region}}\verb{year``.laz}
+\code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
 }
 \details{
 (e.g. \verb{3dm_32_547_5724_1_ni_2024.laz})

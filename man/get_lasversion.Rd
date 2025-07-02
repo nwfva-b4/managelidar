@@ -2,20 +2,20 @@
 % Please edit documentation in R/get_lasversion.R
 \name{get_lasversion}
 \alias{get_lasversion}
-\title{Get the Version of laz files}
+\title{Get the Version of LAS files}
 \usage{
 get_lasversion(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{A path to a LAS file or a directory which contains LAS files}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file and lasversion (Major.Minor)
+A data.frame with attributes \code{filename} and \code{lasversion} (Major.Minor)
 }
 \description{
-Get the Version of laz files
+Get the Version of LAS files
 }
 \examples{
 f <- system.file("extdata", package="managelidar")
