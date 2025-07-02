@@ -2,23 +2,24 @@
 % Please edit documentation in R/get_extent.R
 \name{get_extent}
 \alias{get_extent}
-\title{Get the spatial extent of laz files}
+\title{Get the spatial extent of LAS files}
 \usage{
-get_extent(path, full.names = FALSE)
+get_extent(path, as_sf = FALSE, full.names = FALSE)
 }
 \arguments{
-\item{path}{Either a path to a directory which contains laz files or
-the path to a Virtual Point Cloud (.vpc) created with lasR package.}
+\item{path}{path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{as_sf}{Whether to return the dataframe as spatial features}
+
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file, minx, miny, minz, maxx, maxy, maxz
+A data.frame with attributes \code{filename}, \code{xmin}, \code{xmax}, \code{ymin} and \code{ymax}
 }
 \description{
 \code{get_extent} uses min and max values of spatial extent defined in the header of lasfiles.
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_extent(f)
 }
