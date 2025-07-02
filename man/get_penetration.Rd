@@ -2,20 +2,20 @@
 % Please edit documentation in R/get_penetration.R
 \name{get_penetration}
 \alias{get_penetration}
-\title{Get the pulse penetration ratio of lasfiles}
+\title{Get the pulse penetration ratio of LAS files}
 \usage{
 get_penetration(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a laz file or a directory which contains laz files}
+\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
 
-\item{full.names}{Whether to return the full file path or just the file name (default)}
+\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
 }
 \value{
-A dataframe with file, single, two, three, four, five, six, multiple
+A data.frame with attributes \code{filename}, \code{single}, \code{two}, \code{three}, \code{four}, \code{five}, \code{six} and \code{multiple}
 }
 \description{
-\code{get_penetration()} calculates the approximate pulse penetration ratio of lasfiles.
+\code{get_penetration()} calculates the approximate pulse penetration ratio of LAS files.
 }
 \details{
 For this function only the header from lasfiles is read. It calculates the ratio of pulses which have a single return only, which have two returns, three returns, four returns, five returns, six returns and for convenience multiple returns (two or more). Beware that this does not have to be exact especially for small files since pulses can be split at borders.
