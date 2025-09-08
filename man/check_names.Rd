@@ -24,7 +24,7 @@ check_names(
 
 \item{region}{2 letter character. (optional) federal state abbreviation. It will be fetched automatically if not defined (default).}
 
-\item{year}{YYYY. (optional) acquisition year to append to filename.
+\item{year}{(optional) either an acquisition year (YYYY) or a proper csv file where to read the year.
 If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
 
 \item{copc}{Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)}

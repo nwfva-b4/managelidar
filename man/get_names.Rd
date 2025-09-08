@@ -15,7 +15,7 @@ get_names(path, full.names = FALSE)
 A vector of filenames
 }
 \description{
-Simply get a vector of names of all LAS files (*.las, *.laz, *.laz.copc) in the folder.
+Simply get a vector of names of all LAS files (*.las, *.laz, *.laz.copc) in a folder or VPC.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
