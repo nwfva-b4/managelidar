@@ -27,32 +27,32 @@ get_datetime <- function(path, full.names = FALSE, verbose = FALSE, from_csv = N
       # get last date before processing date from csv
       if(return_referenceyear) {
         date <- acquisitions |>
-        mutate(Flugdatum = as.Date(Flugdatum, format = "%Y-%m-%d")) |>
-        filter(
+        dplyr::mutate(Flugdatum = as.Date(Flugdatum, format = "%Y-%m-%d")) |>
+          dplyr::filter(
           # get data by minx miny
           floor(minx / 1000) == floor(fileheader@PHB$`Min X` / 1000),
           floor(miny / 1000) == floor(fileheader@PHB$`Min Y` / 1000),
           # get data where acquisition date is earlier than processing date
           Flugdatum <= processing_date
         ) |>
-        arrange(desc(Flugdatum)) |>
-        slice(1) |>
-        pull(referenzjahr)
+          dplyr::arrange(desc(Flugdatum)) |>
+          dplyr::slice(1) |>
+          dplyr::pull(referenzjahr)
       } else {
         date <- acquisitions |>
-        mutate(Flugdatum = as.Date(Flugdatum, format = "%Y-%m-%d")) |>
-        filter(
+          dplyr::mutate(Flugdatum = as.Date(Flugdatum, format = "%Y-%m-%d")) |>
+          dplyr::filter(
           # get data by minx miny
           floor(minx / 1000) == floor(fileheader@PHB$`Min X` / 1000),
           floor(miny / 1000) == floor(fileheader@PHB$`Min Y` / 1000),
           # get data where acquisition date is earlier than processing date
           Flugdatum <= processing_date
         ) |>
-        arrange(desc(Flugdatum)) |>
-        slice(1) |>
-        pull(Flugdatum)
+        dplyr::arrange(desc(Flugdatum)) |>
+          dplyr::slice(1) |>
+          dplyr::pull(Flugdatum)
       }
-      
+
 
       # Check if any matches were found
       if (length(date) == 0) {
