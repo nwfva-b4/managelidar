@@ -116,7 +116,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   if (is.null(year)) {
     # set year to acqusition /processing year
     year <- format(as.Date(json$features$properties$datetime), "%Y")
-  } else if (file.exists(year)) {
+  } else if (is.character(year) && file.exists(year)) {
 
     files <- managelidar::get_names(vpc, full.names = TRUE)
     year <- sapply(files, function(x) {
@@ -126,7 +126,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
       )[["datetime_min"]]
     })
 
-  } else if (is.integer(year)) {
+  } else if (is.numeric(year)) {
     year <- year
   } else {
     year <- 1900
