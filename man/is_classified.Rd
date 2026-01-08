@@ -2,30 +2,48 @@
 % Please edit documentation in R/is_classified.R
 \name{is_classified}
 \alias{is_classified}
-\title{Check if LAS files are classified}
+\title{Check whether LAS files are classified}
 \usage{
 is_classified(path, full.names = FALSE, add_classes = FALSE)
 }
 \arguments{
-\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing
+such files, or a Virtual Point Cloud (\code{.vpc}).}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file paths or just the filenames (default)}
+\item{full.names}{Logical. If \code{TRUE}, return full file paths; otherwise
+return base filenames only (default).}
 
-\item{add_classes}{Whether to add a list of present classes or not (default)}
+\item{add_classes}{Logical. If \code{TRUE}, include a list-column with the
+detected classification codes present in the sampled points.}
 }
 \value{
-A data.frame returning \code{filename}, \code{classified} and optionally \code{classes}
+A \code{data.frame} with columns:
+\describe{
+\item{file}{Filename of the LAS file.}
+\item{classified}{Logical indicating whether classified points
+(class > 0) are present.}
+\item{classes}{(Optional) List column of detected class codes.}
+}
 }
 \description{
-\code{is_classified} derives information about point classification
+\code{is_classified()} determines whether LAS point cloud files contain
+point classifications other than class \code{0} (unclassified).
 }
 \details{
-The function needs to read the actual point cloud data!
-To speed up the processing the function reads just a sample of points, which is slower than just reading the header information but much faster than reading the entire file.
-The results are thus only valid for the subsample of points and do not necessarily reflect the entire file.
+Unlike header-based functions, this function reads actual point data.
+To reduce I/O overhead, only a \emph{subset} of points is sampled:
+\itemize{
+\item For LAS/LAZ files, points are sampled from a small circular region
+around the spatial center of the file.
+\item For COPC files, only the first hierarchy level is read.
+}
+
+As a result, classification status is inferred from the sampled points
+and may not reflect the full contents of the file.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
 is_classified(f)
+is_classified(f, add_classes = TRUE)
 
 }

@@ -1,65 +1,45 @@
-
-#' Get the Fileheader (Metadata) from LAS files
+#' Retrieve LAS file headers (metadata)
 #'
-#' Provides a simple wrapper to read the metadata included in the fileheader from LAS files.
+#' `get_header()` reads the metadata included in the headers of LAS/LAZ/COPC files
+#' without loading the full point cloud. It works on single files, directories,
+#' or Virtual Point Cloud (.vpc) files referencing LAS files.
 #'
-#' @param path The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
-#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
+#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+#'   or a Virtual Point Cloud (.vpc) file.
+#' @param full.names Logical. If `TRUE`, the returned list is named with full file paths;
+#'   if `FALSE` (default), the list is named with base filenames only.
 #'
-#' @return A named list of LASheaders
+#' @return A named list of `LASheader` S4 objects, one per file.
+#'   Use `names()` to see the file names or paths.
+#'
+#' @details
+#' The function wraps `lidR::readLASheader()` and allows quick access to metadata such as
+#' number of points, number of returns, point format, and coordinate system,
+#' without loading the point cloud into memory.
+#'
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_header(f)
 
-get_header <- function(path, full.names = FALSE, verbose = FALSE){
+get_header <- function(path, full.names = FALSE){
 
-  get_header_file <- function(file){
 
-if (endsWith(file, ".las") || endsWith(file, ".laz")) {
+  files <- resolve_las_paths(path)
 
-  fileheader <- lidR::readLASheader(file)
-
-    }
-
-    if (full.names == FALSE){
-      file <- basename(file)
-    }
-
-    return(list(filename = file, header = fileheader))
-
+  if (length(files) == 0) {
+    stop("No LAS/LAZ/COPC files found.")
   }
 
-  if (file.exists(path) && !dir.exists(path)) {
+  headers <- lapply(files, lidR::readLASheader)
 
-    # Virtual Point Cloud
-    if (tools::file_ext(path) == "vpc") {
-      vpc <- yyjsonr::read_json_file(path)
-      f <- sapply(vpc$features$assets, function(x) x$data$href)
-      result <- lapply(f, get_header_file)
-      names(result) <- sapply(result, function(x) basename(x$file))
-      return(result)
-    }
-    # LAZ file
-    else if (tools::file_ext(path) %in% c("las", "laz")) {
-      result <- list(get_header_file(path))
-      names(result) <- basename(result[[1]]$file)
-      return(result)
-    } else {
-      stop("Unsupported file format. Supported formats: .las, .laz, .vpc")
-    }
-  }
-
-  # Folder Path
-  else if (dir.exists(path)) {
-
-    f <- list.files(path, pattern = "\\.(las|laz)$", full.names = TRUE)
-    result <- lapply(f, get_header_file)
-    names(result) <- sapply(result, function(x) basename(x$file))
-    return(result)
+  if (!full.names) {
+    names(headers) <- basename(files)
   } else {
-    stop("Path does not exist: ", path)
+    names(headers) <- files
   }
+
+  headers
 
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_names.R
 \name{check_names}
 \alias{check_names}
-\title{Check file names}
+\title{Validate LAS file names according to the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard}}
 \usage{
 check_names(
   path,
@@ -11,36 +11,46 @@ check_names(
   region = NULL,
   year = NULL,
   copc = FALSE,
-  full.names = FALSE,
-  verbose = FALSE
+  full.names = FALSE
 )
 }
 \arguments{
-\item{path}{A path to a directory which contains las/laz files}
+\item{path}{Character vector. Paths to LAS/LAZ/COPC files or directories
+containing such files.}
 
-\item{prefix}{3 letter character. Naming prefix (defaults to "3dm")}
+\item{prefix}{Character scalar. Naming prefix (default: \code{"3dm"}).}
 
-\item{zone}{2 digits integer. UTM zone (defaults to 32)}
+\item{zone}{Integer scalar. UTM zone (default: \code{32}).}
 
-\item{region}{2 letter character. (optional) federal state abbreviation. It will be fetched automatically if not defined (default).}
+\item{region}{Optional character vector of two-letter region codes. If
+\code{NULL}, the region is automatically inferred from file bounding boxes.}
 
-\item{year}{(optional) either an acquisition year (YYYY) or a proper csv file where to read the year.
-If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
+\item{year}{Optional acquisition year (\code{YYYY}) or path to CSV file.
+If \code{NULL}, the year is derived from the LAS header or GPStime metadata.}
 
-\item{copc}{Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)}
+\item{copc}{Logical. Whether the files are expected to be COPC (\code{.copc.laz}).}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file names (default)}
+\item{full.names}{Logical. If \code{TRUE}, returns full file paths in \code{name_is}
+and \code{name_should}; otherwise, only the base file names.}
 }
 \value{
-A data.frame with attributes \code{name_is}, \code{name_should}, \code{correct}
+A \code{data.frame} with one row per file and columns:
+\describe{
+\item{name_is}{Existing file name or path}
+\item{name_should}{Expected file name according to AdV standard}
+\item{correct}{Logical indicating whether the existing name matches the standard}
+}
 }
 \description{
-Checks the file names according to \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard}.
-File names should be in the following schema:
-\code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
+\code{check_names()} verifies whether LAS/LAZ/COPC file names conform to the
+German AdV standard for tiled LiDAR data. File names are expected to
+follow the schema:
 }
 \details{
-(e.g. \verb{3dm_32_547_5724_1_ni_2024.laz})
+\code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
+
+Example:
+\code{3dm_32_547_5724_1_ni_2024.laz}
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

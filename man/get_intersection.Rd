@@ -13,24 +13,32 @@ get_intersection(
 )
 }
 \arguments{
-\item{path1}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path1}{Character. Path(s) to LAS/LAZ/COPC files, a directory, or a
+Virtual Point Cloud (.vpc).}
 
-\item{path2}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path2}{Character. Path(s) to LAS/LAZ/COPC files, a directory, or a
+Virtual Point Cloud (.vpc).}
 
-\item{mode}{Either 'intersects' (default) or 'equals'.}
+\item{mode}{Character. Spatial predicate to use: \code{"intersects"} (default)
+or \code{"equals"}.}
 
-\item{as_sf}{(boolean) Whether to return the dataframe as spatials features data.frame or not (default).}
+\item{as_sf}{Logical. If \code{TRUE}, return results as \code{sf} objects;
+otherwise drop geometries (default).}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default)}
+\item{full.names}{Logical. If \code{TRUE}, filenames are returned as full paths;
+otherwise base filenames (default).}
 }
 \value{
-A list of 2 data.frames with attribute \code{filename} of all intersecting or equal file extents between \code{path1} and \code{path2}, optionally as spatial features data.frame.
+A named list with two elements (\code{path1}, \code{path2}), each containing
+a \code{data.frame} or \code{sf} object with column \code{filename} for intersecting
+or equal file extents.
 }
 \description{
-Get intersecting LAS files
+\code{get_intersection()} identifies LAS/LAZ/COPC files whose spatial extents
+intersect or are spatially equal between two inputs.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-file <- list.files(folder, full.names = T)[1]
+file <- list.files(folder, full.names = TRUE)[1]
 get_intersection(folder, file)
 }

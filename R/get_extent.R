@@ -1,12 +1,20 @@
 #' Get the spatial extent of LAS files
 #'
-#' `get_extent` uses min and max values of spatial extent defined in the header of lasfiles.
+#' `get_extent()` extracts the spatial extent (xmin, xmax, ymin, ymax) from LASfiles.
 #'
-#' @param path path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.
-#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
-#' @param as_sf Whether to return the dataframe as spatial features
+#' @param path Character. Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) referencing these files.
+#' @param full.names Logical. If `TRUE`, filenames in the output are full paths; otherwise base filenames (default).
+#' @param as_sf Logical. If `TRUE`, returns an `sf` object with geometry.
 #'
-#' @return A data.frame with attributes `filename`, `xmin`, `xmax`, `ymin` and `ymax`
+#' @return A `data.frame` or `sf` object with columns:
+#' \describe{
+#'   \item{filename}{Filename of the LAS file.}
+#'   \item{xmin}{Minimum X coordinate.}
+#'   \item{xmax}{Maximum X coordinate.}
+#'   \item{ymin}{Minimum Y coordinate.}
+#'   \item{ymax}{Maximum Y coordinate.}
+#'   \item{geometry}{(optional) Polygon geometry if `as_sf = TRUE`.}
+#' }
 #' @export
 #'
 #' @examples
@@ -14,48 +22,47 @@
 #' get_extent(f)
 get_extent <- function(path, as_sf = FALSE, full.names = FALSE) {
 
-  # Virtual Point Cloud
-  if (tools::file_ext(path) == "vpc") {
-    print("Using information stored in Virtual Point Cloud")
-    ans <- path
-  } else if (
-  # LAZ file
-  tools::file_ext(path) %in% c("las", "laz")) {
-    print("Using file to build temporary Virtual Point Cloud")
-    ans <- lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc"), absolute_path =TRUE), on = path)
-  } else if (
-
-  # Folder Path
-  dir.exists(path)) {
-    print("Using directory to build temporary Virtual Point Cloud")
-    ans <- lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc"), absolute_path =TRUE), on = path)
+  # ------------------------------------------------------------------
+  # Resolve LAS files and build VPC if not provided
+  # ------------------------------------------------------------------
+  if (all(tools::file_ext(path) == "vpc") && length(path) == 1 && file.exists(path)) {
+    vpc_file <- path
   } else {
-    stop("Path does not exist: ", path, "Use either existing Virtual Point Cloud (.vpc), LAS file, or folder which contains LAS files.")
+    # resolve LAS/LAZ/COPC files
+    files <- resolve_las_paths(path)
+    if (length(files) == 0) stop("No LAS/LAZ/COPC files found.")
+
+    # build temporary VPC for all files
+    vpc_file <- lasR::exec(
+      lasR::write_vpc(tempfile(fileext = ".vpc"), absolute_path = TRUE),
+      on = files
+    )
   }
 
-  # read info from vpc
-  vpc <- yyjsonr::read_json_file(ans)
-  t <- data.frame(filename = sapply(vpc$features$assets, function(x) x$data$href),
-                  xmin = sapply(vpc$features$properties, function(x) x$`proj:bbox`[[1]]),
-                  xmax = sapply(vpc$features$properties, function(x) x$`proj:bbox`[[3]]),
-                  ymin = sapply(vpc$features$properties, function(x) x$`proj:bbox`[[2]]),
-                  ymax = sapply(vpc$features$properties, function(x) x$`proj:bbox`[[4]])
+  # ------------------------------------------------------------------
+  # Read bbox info from VPC
+  # ------------------------------------------------------------------
+  vpc <- yyjsonr::read_json_file(vpc_file)
+
+  ext <- data.frame(
+    filename = sapply(vpc$features$assets, function(x) x$data$href),
+    xmin = sapply(vpc$features$properties, function(x) x$`proj:bbox`[1]),
+    ymin = sapply(vpc$features$properties, function(x) x$`proj:bbox`[2]),
+    xmax = sapply(vpc$features$properties, function(x) x$`proj:bbox`[3]),
+    ymax = sapply(vpc$features$properties, function(x) x$`proj:bbox`[4]),
+    stringsAsFactors = FALSE,
+    row.names = NULL
   )
 
-
-
-  # optionally as spatial features
+  # optionally return as sf
   if (as_sf) {
-    t <- sf::st_sf(t, geometry = sf::st_read(ans)$geometry)
-    t <- sf::st_zm(t)
+    ext <- sf::st_sf(ext, geometry = sf::st_read(vpc_file)$geometry) |>
+      sf::st_zm()
   }
 
-  # return basename or full name
-  if (full.names == FALSE){
-    t$filename <- basename(t$filename)
-  }
+  # adjust filenames
+  if (!full.names) ext$filename <- basename(ext$filename)
 
-  return(t)
+  ext
 }
-
 

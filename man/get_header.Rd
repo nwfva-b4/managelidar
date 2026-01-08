@@ -2,20 +2,30 @@
 % Please edit documentation in R/get_header.R
 \name{get_header}
 \alias{get_header}
-\title{Get the Fileheader (Metadata) from LAS files}
+\title{Retrieve LAS file headers (metadata)}
 \usage{
-get_header(path, full.names = FALSE, verbose = FALSE)
+get_header(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+or a Virtual Point Cloud (.vpc) file.}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, the returned list is named with full file paths;
+if \code{FALSE} (default), the list is named with base filenames only.}
 }
 \value{
-A named list of LASheaders
+A named list of \code{LASheader} S4 objects, one per file.
+Use \code{names()} to see the file names or paths.
 }
 \description{
-Provides a simple wrapper to read the metadata included in the fileheader from LAS files.
+\code{get_header()} reads the metadata included in the headers of LAS/LAZ/COPC files
+without loading the full point cloud. It works on single files, directories,
+or Virtual Point Cloud (.vpc) files referencing LAS files.
+}
+\details{
+The function wraps \code{lidR::readLASheader()} and allows quick access to metadata such as
+number of points, number of returns, point format, and coordinate system,
+without loading the point cloud into memory.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

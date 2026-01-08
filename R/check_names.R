@@ -1,63 +1,84 @@
-#' Check file names
+#' Validate LAS file names according to the [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
 #'
-#' Checks the file names according to [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111).
-#' File names should be in the following schema:
-#' `prefix_utmzone_minx_miny_tilesize_region_year.laz`
+#' `check_names()` verifies whether LAS/LAZ/COPC file names conform to the
+#' German AdV standard for tiled LiDAR data. File names are expected to
+#' follow the schema:
 #'
-#' (e.g. `3dm_32_547_5724_1_ni_2024.laz`)
+#' \code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
 #'
-#' @param path A path to a directory which contains las/laz files
-#' @param prefix 3 letter character. Naming prefix (defaults to "3dm")
-#' @param zone 2 digits integer. UTM zone (defaults to 32)
-#' @param region 2 letter character. (optional) federal state abbreviation. It will be fetched automatically if not defined (default).
-#' @param year (optional) either an acquisition year (YYYY) or a proper csv file where to read the year.
-#' If not provided (default) the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.
-#' @param copc Whether the file is expected to be a Cloud Optimized Point Cloud (.copc.laz)
-#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file names (default)
+#' Example:
+#' \code{3dm_32_547_5724_1_ni_2024.laz}
 #'
-#' @return A data.frame with attributes `name_is`, `name_should`, `correct`
+#' @param path Character vector. Paths to LAS/LAZ/COPC files or directories
+#'   containing such files.
+#' @param prefix Character scalar. Naming prefix (default: `"3dm"`).
+#' @param zone Integer scalar. UTM zone (default: `32`).
+#' @param region Optional character vector of two-letter region codes. If
+#'   `NULL`, the region is automatically inferred from file bounding boxes.
+#' @param year Optional acquisition year (`YYYY`) or path to CSV file.
+#'   If `NULL`, the year is derived from the LAS header or GPStime metadata.
+#' @param copc Logical. Whether the files are expected to be COPC (`.copc.laz`).
+#' @param full.names Logical. If `TRUE`, returns full file paths in `name_is`
+#'   and `name_should`; otherwise, only the base file names.
+#'
+#' @return A `data.frame` with one row per file and columns:
+#' \describe{
+#'   \item{name_is}{Existing file name or path}
+#'   \item{name_should}{Expected file name according to AdV standard}
+#'   \item{correct}{Logical indicating whether the existing name matches the standard}
+#' }
+#'
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' check_names(f)
 
-check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, full.names = FALSE, verbose = FALSE) {
-  if (verbose) {
-    print("creating VPC with GPStime")
-  }
-  vpc <- lasR::exec(
-    lasR::set_crs(25832) + lasR::write_vpc(ofile = tempfile(fileext = ".vpc"), use_gpstime = TRUE, absolute_path = TRUE),
+check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, full.names = FALSE) {
+
+
+  # ------------------------------------------------------------------
+  # Resolve all LAS/LAZ/COPC files
+  # ------------------------------------------------------------------
+  files <- resolve_las_paths(path)
+  if (length(files) == 0) stop("No LAS/LAZ/COPC files found.")
+
+
+  # ------------------------------------------------------------------
+  # Build a temporary VPC to extract metadata (bbox + datetime)
+  # ------------------------------------------------------------------
+  vpc_file <- lasR::exec(
+    lasR::set_crs(25832) +
+      lasR::write_vpc(
+        ofile = tempfile(fileext = ".vpc"),
+        use_gpstime = TRUE,
+        absolute_path = TRUE
+      ),
     with = list(ncores = lasR::concurrent_files(lasR::half_cores())),
-    on = path
+    on = files
   )
-  if (verbose) {
-    print("reading VPC")
-  }
-  json <- jsonlite::fromJSON(vpc)
 
-  if (verbose) {
-    print("extracting bboxes and tilesizes")
-  }
+  json <- jsonlite::fromJSON(vpc_file)
+
+
+  # ------------------------------------------------------------------
+  # Compute tile bounding boxes
+  # ------------------------------------------------------------------
   bbox <- json$features$properties$`proj:bbox`
+  minx <- vapply(bbox, function(x) floor(round(x[1] / 1000, 2)), numeric(1))
+  miny <- vapply(bbox, function(x) floor(round(x[2] / 1000, 2)), numeric(1))
+  maxx <- vapply(bbox, function(x) floor(round(x[3] / 1000, 2)), numeric(1))
+  maxy <- vapply(bbox, function(x) floor(round(x[4] / 1000, 2)), numeric(1))
 
-  minx <- sapply(bbox, function(x) floor(round(x[1] / 1000, 2)))
-  miny <- sapply(bbox, function(x) floor(round(x[2] / 1000, 2)))
-  maxx <- sapply(bbox, function(x) floor(round(x[3] / 1000, 2)))
-  maxy <- sapply(bbox, function(x) floor(round(x[4] / 1000, 2)))
-
-  tilesize_x <- maxx - minx
-  tilesize_y <- maxy - miny
-  # minimum tilesize 1km
-  tilesize_min <- 1
   # take into account small inaccuracies (reduce tilesize if less than 50m larger)
-  tilesize <- ceiling(pmax(tilesize_x, tilesize_y, tilesize_min) - 0.05)
+  tilesize <- ceiling(pmax(maxx - minx, maxy - miny, 1) - 0.05)
 
 
+  # ------------------------------------------------------------------
+  # Determine region
+  # ------------------------------------------------------------------
+  # get region via extent if not provided
   if (is.null(region)) {
-    if (verbose) {
-      print("extracting state codes by intersecting with geometries")
-    }
     # get region
     state_codes <- c(
       "Baden-Württemberg" = "bw",
@@ -111,49 +132,50 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     region <- sapply(extents, find_state_code, states_sf = states_sf)
   }
 
-
-
+  # ------------------------------------------------------------------
+  # Determine year
+  # ------------------------------------------------------------------
+  # get year via VPC if not provided
+  # in VPC it is extracted from first point if possible and from header (likely wrong) otherwise
   if (is.null(year)) {
-    # set year to acqusition /processing year
     year <- format(as.Date(json$features$properties$datetime), "%Y")
-  } else if (is.character(year) && file.exists(year)) {
-
-    files <- managelidar::get_names(vpc, full.names = TRUE)
-    year <- sapply(files, function(x) {
-      managelidar::get_datetime(x,
-                                from_csv = year,
-                                return_referenceyear = TRUE
-      )[["datetime_min"]]
-    })
-
   } else if (is.numeric(year)) {
-    year <- year
+    year <- as.character(year)
+  } else if (is.character(year) && length(year) == 1 && file.exists(year)) {
+    files_names <- managelidar::get_names(vpc_file, full.names = TRUE)
+    year <- vapply(files_names, function(f) {
+      managelidar::get_date(f, from_csv = year, return_referenceyear = TRUE)[["date"]]
+    }, character(1))
   } else {
-    year <- 1900
+    year <- rep("1900", length(files))
   }
 
-  optional_copc <- ""
-  if (copc) {
-    optional_copc <- ".copc"
-  }
+  # ------------------------------------------------------------------
+  # Optional COPC suffix
+  # ------------------------------------------------------------------
+  optional_copc <- if (copc) ".copc" else ""
 
-
-  if (full.names == FALSE) {
-    name_is <- basename(json$features$assets$data$href)
-    name_should <- paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, optional_copc, ".", tools::file_ext(json$features$assets$data$href))
-  } else {
-    name_is <- json$features$assets$data$href
-    name_should <- file.path(dirname(name_is), paste0(prefix, "_", zone, "_", minx, "_", miny, "_", tilesize, "_", region, "_", year, optional_copc, ".", tools::file_ext(json$features$assets$data$href)))
-  }
-
-  if (verbose) {
-    print("creating dataframe")
-  }
-  dat <- data.frame(
-    name_is = name_is,
-    name_should = name_should,
-    correct = name_is == name_should
+  # ------------------------------------------------------------------
+  # Construct expected file names
+  # ------------------------------------------------------------------
+  ext <- tools::file_ext(files)
+  name_should <- paste0(
+    prefix, "_", zone, "_",
+    minx, "_", miny, "_",
+    tilesize, "_", region, "_",
+    year, optional_copc, ".", ext
   )
 
-  return(dat)
+  name_is <- if (full.names) files else basename(files)
+  if (full.names) name_should <- file.path(dirname(files), name_should)
+
+  # ------------------------------------------------------------------
+  # Build result
+  # ------------------------------------------------------------------
+  data.frame(
+    name_is = name_is,
+    name_should = name_should,
+    correct = name_is == name_should,
+    stringsAsFactors = FALSE
+  )
 }

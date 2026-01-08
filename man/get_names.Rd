@@ -2,20 +2,28 @@
 % Please edit documentation in R/get_names.R
 \name{get_names}
 \alias{get_names}
-\title{Get file names}
+\title{Get LAS file names}
 \usage{
 get_names(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a LAS file, VPC file, or a directory which contains LAS files}
+\item{path}{Character. Path(s) to a LAS/LAZ/COPC file, a directory containing
+such files, or a Virtual Point Cloud (\code{.vpc}).}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, return full file paths; otherwise
+return base filenames only (default).}
 }
 \value{
-A vector of filenames
+A character vector of filenames or file paths.
 }
 \description{
-Simply get a vector of names of all LAS files (*.las, *.laz, *.laz.copc) in a folder or VPC.
+\code{get_names()} returns the filenames of all LAS-related point cloud files
+(\code{.las}, \code{.laz}, \code{.copc}) found in a given input.
+}
+\details{
+The input may be a single file, a directory containing LAS files, or a
+Virtual Point Cloud (\code{.vpc}) referencing LAS/LAZ/COPC files. Internally,
+file paths are resolved using \code{resolve_las_paths()}.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

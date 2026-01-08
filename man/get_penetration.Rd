@@ -2,25 +2,55 @@
 % Please edit documentation in R/get_penetration.R
 \name{get_penetration}
 \alias{get_penetration}
-\title{Get the pulse penetration ratio of LAS files}
+\title{Compute pulse penetration ratios from LAS headers}
 \usage{
 get_penetration(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character vector specifying one or more paths to:
+\itemize{
+\item LAS/LAZ/COPC files
+\item Directories containing LAS/LAZ/COPC files (non-recursive)
+\item Virtual Point Cloud files (\code{.vpc}) referencing LAS files
+}}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, return full file paths in the
+\code{filename} column. If \code{FALSE} (default), only the base file names
+are returned.}
 }
 \value{
-A data.frame with attributes \code{filename}, \code{single}, \code{two}, \code{three}, \code{four}, \code{five}, \code{six} and \code{multiple}
+A \code{data.frame} with one row per input file and the following columns:
+\describe{
+\item{filename}{File name or full path of the LAS file}
+\item{single}{Proportion of pulses with exactly one return}
+\item{two}{Proportion of pulses with exactly two returns}
+\item{three}{Proportion of pulses with exactly three returns}
+\item{four}{Proportion of pulses with exactly four returns}
+\item{five}{Proportion of pulses with exactly five returns}
+\item{six}{Proportion of pulses with exactly six returns}
+\item{multiple}{Proportion of pulses with two or more returns}
+}
 }
 \description{
-\code{get_penetration()} calculates the approximate pulse penetration ratio of LAS files.
+\code{get_penetration()} computes approximate pulse penetration ratios for
+LAS/LAZ/COPC files using information stored in the LAS file header.
+Only header data are read; point data are not loaded.
 }
 \details{
-For this function only the header from lasfiles is read. It calculates the ratio of pulses which have a single return only, which have two returns, three returns, four returns, five returns, six returns and for convenience multiple returns (two or more). Beware that this does not have to be exact especially for small files since pulses can be split at borders.
+The function estimates the proportion of pulses that resulted in
+exactly one return, two returns, three returns, up to six returns,
+as well as the proportion of pulses with multiple returns (two or more).
+
+Pulse penetration ratios are derived from the
+\dQuote{Number of points by return} field in the LAS header.
+Because only header information is used, results are approximate.
+
+For small files or spatially clipped tiles, pulses may be split at
+tile boundaries, which can lead to biased penetration ratios.
+Consequently, values should be interpreted as indicative rather than
+exact.
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_penetration(f)
 }

@@ -2,26 +2,37 @@
 % Please edit documentation in R/get_density.R
 \name{get_density}
 \alias{get_density}
-\title{Get the approximate point and pulse density of LAS files}
+\title{Get approximate point and pulse density of LAS files}
 \usage{
 get_density(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+or a Virtual Point Cloud (.vpc) referencing these files.}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, filenames in the output are full paths; otherwise base filenames (default).}
 }
 \value{
-A data.frame with attributes \code{filename}, \code{npoints}, \code{npulses}, \code{area}, \code{pointdensity} and \code{pulsedensity}
+A \code{data.frame} with columns:
+\describe{
+\item{filename}{File name or path.}
+\item{npoints}{Total number of points in the file.}
+\item{npulses}{Number of first-return pulses.}
+\item{area}{Area of bounding box (units of CRS^2).}
+\item{pointdensity}{Approximate points per unit area.}
+\item{pulsedensity}{Approximate first-return pulses per unit area.}
+}
 }
 \description{
-\code{get_density()} calculates the approximate average point and pulse (first/last-return only) density of LAS files.
+\code{get_density()} calculates the approximate average point and pulse density of LAS files.
 }
 \details{
-For this function only the header from LAS files is read and density is calculated based on the bounding box of the data file and the number of points of first-returns. This does not take into account if parts of the bounding box are missing data, and hence this density does not reflect the density as it is calculates by e.g. \code{lidR}. However, it is much faster because it does not read the entire file and density should be approximately the same if the entire bounding box has point data.
+Only the LAS file headers are read. Densities are calculated based on the bounding box
+and number of points / first-return pulses. This does not account for missing data
+within the bounding box, so the density is approximate and faster to compute than reading
+the full point cloud.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
 get_density(f)
-
 }

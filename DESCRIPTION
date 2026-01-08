@@ -12,10 +12,17 @@ Depends:
     R (>= 2.10)
 Imports: 
     arrow,
+    data.table,
+    dplyr,
+    fs,
+    glue,
     jsonlite,
     lidR,
+    lubridate,
     mapview,
-    sf
+    purrr,
+    sf,
+    yyjsonr
 Suggests: 
     knitr,
     rmarkdown

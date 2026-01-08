@@ -7,17 +7,25 @@
 get_extent(path, as_sf = FALSE, full.names = FALSE)
 }
 \arguments{
-\item{path}{path The path to a file (.las/.laz/.copc), to a directory which contains these files, or to a virtual point cloud (.vpc) referencing these files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) referencing these files.}
 
-\item{as_sf}{Whether to return the dataframe as spatial features}
+\item{as_sf}{Logical. If \code{TRUE}, returns an \code{sf} object with geometry.}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, filenames in the output are full paths; otherwise base filenames (default).}
 }
 \value{
-A data.frame with attributes \code{filename}, \code{xmin}, \code{xmax}, \code{ymin} and \code{ymax}
+A \code{data.frame} or \code{sf} object with columns:
+\describe{
+\item{filename}{Filename of the LAS file.}
+\item{xmin}{Minimum X coordinate.}
+\item{xmax}{Maximum X coordinate.}
+\item{ymin}{Minimum Y coordinate.}
+\item{ymax}{Maximum Y coordinate.}
+\item{geometry}{(optional) Polygon geometry if \code{as_sf = TRUE}.}
+}
 }
 \description{
-\code{get_extent} uses min and max values of spatial extent defined in the header of lasfiles.
+\code{get_extent()} extracts the spatial extent (xmin, xmax, ymin, ymax) from LASfiles.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

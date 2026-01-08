@@ -1,44 +1,34 @@
-#' Get file names
+#' Get LAS file names
 #'
-#' Simply get a vector of names of all LAS files (*.las, *.laz, *.laz.copc) in a folder or VPC.
+#' `get_names()` returns the filenames of all LAS-related point cloud files
+#' (`.las`, `.laz`, `.copc`) found in a given input.
 #'
-#' @param path A path to a LAS file, VPC file, or a directory which contains LAS files
+#' The input may be a single file, a directory containing LAS files, or a
+#' Virtual Point Cloud (`.vpc`) referencing LAS/LAZ/COPC files. Internally,
+#' file paths are resolved using `resolve_las_paths()`.
 #'
-#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
+#' @param path Character. Path(s) to a LAS/LAZ/COPC file, a directory containing
+#'   such files, or a Virtual Point Cloud (`.vpc`).
+#' @param full.names Logical. If `TRUE`, return full file paths; otherwise
+#'   return base filenames only (default).
 #'
-#' @return A vector of filenames
+#' @return A character vector of filenames or file paths.
+#'
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_names(f)
 get_names <- function(path, full.names = FALSE) {
-  
-  # Single file input
-  if (file.exists(path) && !dir.exists(path)) {
-    # Virtual Point Cloud
-    if (tools::file_ext(path) == "vpc") {
-      t <- yyjsonr::read_json_file(path)
-      files <- sapply(t$features$assets, function(x) x$data$href)
-      if (full.names == FALSE) {
-        file <- basename(files)
-      } else {
-        file <- files
-      }
-    # LAS/LAZ/COPC file
-    } else if (tools::file_ext(path) %in% c("las", "laz", "copc")) {
-      if (full.names == FALSE) {
-        file <- basename(path)
-      } else {
-        file <- path
-      }
-    } else {
-      stop("Unsupported file format. Supported formats: .las, .laz, .laz.copc, .vpc")
-    }
-  } else {
-    # Folder path
-    file <- list.files(path, pattern = "\\.(las|laz(\\.copc)?)$", full.names = full.names)
+
+  files <- resolve_las_paths(path)
+
+  if (length(files) == 0) {
+    stop("No LAS/LAZ/COPC files found.")
   }
 
-  return(file)
+  # adjust filenames
+  if (!full.names) files <- basename(files)
+
+  files
 }

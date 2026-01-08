@@ -2,20 +2,33 @@
 % Please edit documentation in R/get_crs.R
 \name{get_crs}
 \alias{get_crs}
-\title{Get the Coordinate Reference System of LAS files}
+\title{Get the Coordinate Reference System (CRS) of LAS files}
 \usage{
 get_crs(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+or a Virtual Point Cloud (.vpc) referencing LAS files.}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, the returned filenames will be full paths;
+if \code{FALSE} (default), only base filenames are used.}
 }
 \value{
-A data.frame with attributes \code{filename} and \code{crs} (EPSG)
+A \code{data.frame} with two columns:
+\describe{
+\item{filename}{The filename or full path of each LAS file.}
+\item{crs}{The EPSG code of the file's coordinate reference system.}
+}
 }
 \description{
-Get the Coordinate Reference System of LAS files
+\code{get_crs()} extracts the coordinate reference system (EPSG code) from the
+headers of LAS/LAZ/COPC files. It works on individual files, directories
+containing LAS files, or Virtual Point Cloud (.vpc) files referencing LAS files.
+}
+\details{
+This function reads only the LAS file headers using \code{get_header()},
+which avoids loading the full point cloud into memory. It is suitable
+for quickly inspecting the CRS of multiple LAS/LAZ/COPC files.
 }
 \examples{
 f <- system.file("extdata", package="managelidar")

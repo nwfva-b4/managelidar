@@ -1,39 +1,51 @@
-
-#' Get the Version of LAS files
+#' Get the LAS version of point cloud files
 #'
-#' @param path A path to a LAS file or a directory which contains LAS files
-#' @param full.names Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)
+#' `get_lasversion()` extracts the LAS specification version (Major.Minor)
+#' from the file headers of LAS/LAZ/COPC files.
 #'
-#' @return A data.frame with attributes `filename` and `lasversion` (Major.Minor)
+#' @param path Character. Path(s) to LAS/LAZ/COPC files, a directory containing
+#'   such files, or a Virtual Point Cloud (.vpc) referencing these files.
+#' @param full.names Logical. If `TRUE`, filenames in the output are full paths;
+#'   otherwise base filenames (default).
+#'
+#' @return A `data.frame` with columns:
+#' \describe{
+#'   \item{filename}{Filename of the LAS file.}
+#'   \item{lasversion}{LAS version in `Major.Minor` format.}
+#' }
+#'
 #' @export
 #'
 #' @examples
-#' f <- system.file("extdata", package="managelidar")
+#' f <- system.file("extdata", package = "managelidar")
 #' get_lasversion(f)
-get_lasversion <- function(path, full.names = FALSE){
+get_lasversion <- function(path, full.names = FALSE) {
 
-  get_file_lasversion <- function(file){
-    fileheader <- lidR::readLASheader(file)
+  # ------------------------------------------------------------------
+  # Read headers (single I/O layer)
+  # ------------------------------------------------------------------
+  headers <- get_header(path, full.names = full.names)
 
-    major = fileheader@PHB$`Version Major`
-    minor = fileheader@PHB$`Version Minor`
-
-    if (full.names == FALSE){
-      file <- basename(file)
-    }
-
-    return(data.frame(filename = file, lasversion = paste0(major, ".", minor)))
-
+  if (length(headers) == 0) {
+    stop("No LAS/LAZ/COPC files found.")
   }
 
+  # ------------------------------------------------------------------
+  # Extract LAS version
+  # ------------------------------------------------------------------
+  df <- do.call(rbind, lapply(seq_along(headers), function(i) {
+    hdr <- headers[[i]]
 
-  if (file.exists(path) && !dir.exists(path)) {
-    return(as.data.frame(get_file_lasversion(path)))
-  }
-  else {
-    f <- list.files(path, pattern = "*.laz$", full.names = TRUE)
-    return(as.data.frame(do.call(rbind, lapply(f, get_file_lasversion))))
-  }
+    data.frame(
+      filename   = names(headers)[i],
+      lasversion = paste0(
+        hdr@PHB$`Version Major`,
+        ".",
+        hdr@PHB$`Version Minor`
+      ),
+      stringsAsFactors = FALSE
+    )
+  }))
 
-
+  df
 }

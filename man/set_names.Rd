@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_names.R
 \name{set_names}
 \alias{set_names}
-\title{Set file names}
+\title{Set LAS file names according to ADV standard}
 \usage{
 set_names(
   path,
@@ -11,30 +11,38 @@ set_names(
   region = NULL,
   year = NULL,
   copc = FALSE,
-  verbose = FALSE
+  dry_run = FALSE
 )
 }
 \arguments{
-\item{path}{A path to a directory which contains las/laz files}
+\item{path}{Character. Path to a LAS/LAZ/COPC file or a directory containing LAS files.}
 
-\item{prefix}{3 letter character. Naming prefix (defaults to "3dm")}
+\item{prefix}{Character. Naming prefix (default \code{"3dm"}).}
 
-\item{zone}{2 digits integer. UTM zone (defaults to 32)}
+\item{zone}{Integer. UTM zone (default \code{32}).}
 
-\item{region}{2 letter character. (optional) federal state abbreviation. It will be fetched automatically if Null.}
+\item{region}{Character. Federal state abbreviation (optional). Automatically determined if \code{NULL}.}
 
-\item{year}{YYYY. (optional) acquisition year to append to filename.
-If not provided the year will be extracted from the files. It will be the acquisition date if points contain datetime in GPStime format, otherwise it will get the year from the file header, which is the processing date by definition.}
+\item{year}{Integer or character. Acquisition year to append to filenames (optional). If \code{NULL}, the year is derived from the file.}
+
+\item{copc}{Logical. Whether files are COPC (\code{.copc.laz}, default \code{FALSE}).}
+
+\item{dry_run}{Logical. If \code{TRUE}, only preview renaming without modifying files (default \code{FALSE}).}
+
+\item{verbose}{Logical. Print messages and a preview of renaming (default \code{FALSE}).}
 }
 \value{
-Renamed files
+Invisibly returns a \code{data.frame} with columns \code{from} and \code{to} showing original and new filenames.
 }
 \description{
-Renames files according to schema validated by \code{check_files()}. This is according to \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard}.
+\code{set_names()} renames LAS/LAZ/COPC files to match the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV naming standard}.
+}
+\details{
+Files are expected to follow the schema:
+\code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
 }
 \examples{
-f <- system.file("extdata/3dm_32_547_5724_1_ni_20240327.laz", package = "managelidar")
-copy <- tempfile(fileext = ".laz")
-file.copy(f, copy)
-set_names(copy)
+f <- system.file("extdata", package = "managelidar")
+set_names(copy, verbose = TRUE, dry_run = TRUE)
+
 }

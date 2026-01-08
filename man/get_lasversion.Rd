@@ -2,22 +2,29 @@
 % Please edit documentation in R/get_lasversion.R
 \name{get_lasversion}
 \alias{get_lasversion}
-\title{Get the Version of LAS files}
+\title{Get the LAS version of point cloud files}
 \usage{
 get_lasversion(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{A path to a LAS file or a directory which contains LAS files}
+\item{path}{Character. Path(s) to LAS/LAZ/COPC files, a directory containing
+such files, or a Virtual Point Cloud (.vpc) referencing these files.}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default)}
+\item{full.names}{Logical. If \code{TRUE}, filenames in the output are full paths;
+otherwise base filenames (default).}
 }
 \value{
-A data.frame with attributes \code{filename} and \code{lasversion} (Major.Minor)
+A \code{data.frame} with columns:
+\describe{
+\item{filename}{Filename of the LAS file.}
+\item{lasversion}{LAS version in \code{Major.Minor} format.}
+}
 }
 \description{
-Get the Version of LAS files
+\code{get_lasversion()} extracts the LAS specification version (Major.Minor)
+from the file headers of LAS/LAZ/COPC files.
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_lasversion(f)
 }

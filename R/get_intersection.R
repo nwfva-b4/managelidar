@@ -1,45 +1,76 @@
 #' Get intersecting LAS files
 #'
-#' @param path1 The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
+#' `get_intersection()` identifies LAS/LAZ/COPC files whose spatial extents
+#' intersect or are spatially equal between two inputs.
 #'
-#' @param path2 The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param path1 Character. Path(s) to LAS/LAZ/COPC files, a directory, or a
+#'   Virtual Point Cloud (.vpc).
+#' @param path2 Character. Path(s) to LAS/LAZ/COPC files, a directory, or a
+#'   Virtual Point Cloud (.vpc).
+#' @param mode Character. Spatial predicate to use: `"intersects"` (default)
+#'   or `"equals"`.
+#' @param as_sf Logical. If `TRUE`, return results as `sf` objects;
+#'   otherwise drop geometries (default).
+#' @param full.names Logical. If `TRUE`, filenames are returned as full paths;
+#'   otherwise base filenames (default).
 #'
-#' @param mode Either 'intersects' (default) or 'equals'.
-#' @param as_sf (boolean) Whether to return the dataframe as spatials features data.frame or not (default).
-#' @param full.names Whether to return the full file paths or just the filenames (default)
+#' @return A named list with two elements (`path1`, `path2`), each containing
+#'   a `data.frame` or `sf` object with column `filename` for intersecting
+#'   or equal file extents.
 #'
-#' @returns A list of 2 data.frames with attribute `filename` of all intersecting or equal file extents between `path1` and `path2`, optionally as spatial features data.frame.
 #' @export
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' file <- list.files(folder, full.names = T)[1]
+#' file <- list.files(folder, full.names = TRUE)[1]
 #' get_intersection(folder, file)
-get_intersection <- function(path1, path2, mode = "intersects", as_sf = FALSE, full.names = FALSE) {
-  # get extents
-  ext1 <- managelidar::get_extent(path1, as_sf = TRUE, full.names = full.names)
-  ext2 <- managelidar::get_extent(path2, as_sf = TRUE, full.names = full.names)
+get_intersection <- function(path1,
+                             path2,
+                             mode = "intersects",
+                             as_sf = FALSE,
+                             full.names = FALSE) {
 
-  if (mode == "intersects") {
-    # get intersection
-    intersection1 <- ext1[lengths(sf::st_intersects(ext1, ext2)) > 0, "filename"]
-    intersection2 <- ext2[lengths(sf::st_intersects(ext2, ext1)) > 0, "filename"]
-  } else if (mode == "equals") {
-    # get equal
-    intersection1 <- ext1[lengths(sf::st_equals(ext1, ext2)) > 0, "filename"]
-    intersection2 <- ext2[lengths(sf::st_equals(ext2, ext1)) > 0, "filename"]
-  } else {
-    stop("mode must be either 'intersects' or 'equals'")
+  # ------------------------------------------------------------------
+  # Validate mode
+  # ------------------------------------------------------------------
+  mode <- match.arg(mode, choices = c("intersects", "equals"))
+
+  # ------------------------------------------------------------------
+  # Get extents as sf
+  # ------------------------------------------------------------------
+  ext1 <- get_extent(path1, as_sf = TRUE, full.names = full.names)
+  ext2 <- get_extent(path2, as_sf = TRUE, full.names = full.names)
+
+  if (nrow(ext1) == 0 || nrow(ext2) == 0) {
+    stop("No LAS/LAZ/COPC files found in one or both inputs.")
   }
 
-  if (as_sf == FALSE) {
-    # drop geometries
-    intersection1 <- sf::st_drop_geometry(intersection1)
-    intersection2 <- sf::st_drop_geometry(intersection2)
+  # ------------------------------------------------------------------
+  # Spatial predicate
+  # ------------------------------------------------------------------
+  pred_fun <- switch(
+    mode,
+    intersects = sf::st_intersects,
+    equals     = sf::st_equals
+  )
+
+  idx1 <- lengths(pred_fun(ext1, ext2)) > 0
+  idx2 <- lengths(pred_fun(ext2, ext1)) > 0
+
+  res1 <- ext1[idx1, "filename", drop = FALSE]
+  res2 <- ext2[idx2, "filename", drop = FALSE]
+
+  # ------------------------------------------------------------------
+  # Drop geometry if requested
+  # ------------------------------------------------------------------
+  if (!as_sf) {
+    res1 <- sf::st_drop_geometry(res1)
+    res2 <- sf::st_drop_geometry(res2)
   }
 
-  # return named list
-  intersection <- list(intersection1, intersection2)
-  names(intersection) <- c("path1", "path2")
-  return(intersection)
+  # ------------------------------------------------------------------
+  # Return named list
+  # ------------------------------------------------------------------
+  out <- list(path1 = res1, path2 = res2)
+  out
 }

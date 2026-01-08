@@ -1,42 +1,71 @@
-#' Plot the extent of LAS files
+#' Plot the spatial extent of LAS files
 #'
-#' `plot_extent` plots the spatial extent of LAS files on an interactive map.
+#' `plot_extent()` visualizes the spatial extent of LAS/LAZ/COPC files on an
+#' interactive map using bounding boxes derived from file headers or an
+#' existing Virtual Point Cloud (VPC).
 #'
-#' @param path The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param path Character. Path(s) to LAS/LAZ/COPC files, a directory containing
+#'   such files, or a Virtual Point Cloud (.vpc).
 #'
-#' @return An interactive map in the viewer
+#' @return An interactive `mapview` map displayed in the viewer.
 #' @export
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' plot_extent(f)
 plot_extent <- function(path) {
-  `proj:bbox` <- `proj.wkt2` <- NULL
-  if (endsWith(path, ".vpc")) {
-    print("Using information stored in Virtual Point Cloud")
-    t <- sf::st_read(path)
-  } else if (utils::file_test("-d", path)) {
-    print("Using directory to build temporary Virtual Point Cloud")
-    ans <- lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc")), on = path)
-    t <- sf::st_read(ans)
-  } else if (file.exists(path) && !dir.exists(path)) {
-    print("Using file to build temporary Virtual Point Cloud")
-    ans <- lasR::exec(lasR::write_vpc(tempfile(fileext = ".vpc")), on = path)
-    t <- sf::st_read(ans)
+
+  # ------------------------------------------------------------------
+  # Resolve LAS files and build VPC if not provided
+  # ------------------------------------------------------------------
+  if (all(tools::file_ext(path) == "vpc") && length(path) == 1 && file.exists(path)) {
+    vpc_file <- path
   } else {
-    print("Use either existing Virtual Point Cloud (.vpc) or folder which contains LAZ files.")
+    # resolve LAS/LAZ/COPC files
+    files <- resolve_las_paths(path)
+    if (length(files) == 0) stop("No LAS/LAZ/COPC files found.")
+
+    # build temporary VPC for all files
+    vpc_file <- lasR::exec(
+      lasR::write_vpc(tempfile(fileext = ".vpc"), absolute_path = TRUE, use_gpstime = TRUE),
+      on = files
+    )
   }
 
-  # remove list colum
-  t <- subset(t, select = -`proj:bbox`)
-  # remove long character column for plotting
-  t <- subset(t, select = -`proj.wkt2`)
-  # drop M and Z value for plotting
-  t <- sf::st_zm(t)
+  # ------------------------------------------------------------------
+  # Read bbox info from VPC
+  # ------------------------------------------------------------------
+  vpc <- yyjsonr::read_json_file(vpc_file)
 
-  t$date <- as.character(as.Date(t$datetime, format = "%Y-%m-%d"))
+  ext <- data.frame(
+    filename = sapply(vpc$features$assets, function(x) x$data$href),
+    xmin = sapply(vpc$features$properties, function(x) x$`proj:bbox`[1]),
+    ymin = sapply(vpc$features$properties, function(x) x$`proj:bbox`[2]),
+    xmax = sapply(vpc$features$properties, function(x) x$`proj:bbox`[3]),
+    ymax = sapply(vpc$features$properties, function(x) x$`proj:bbox`[4]),
+    date = sapply(vpc$features$properties, function(x) x$`datetime`),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
 
+  ext <- sf::st_sf(ext, geometry = sf::st_read(vpc_file)$geometry) |>
+    sf::st_zm()
 
+  # adjust filenames
+  if (!full.names) ext$filename <- basename(ext$filename)
+
+  if (nrow(ext) == 0) {
+    stop("No LAS/LAZ/COPC files found.")
+  }
+
+  # ------------------------------------------------------------------
+  # Plot
+  # ------------------------------------------------------------------
   mapview::mapviewOptions(basemaps = "OpenTopoMap")
-  mapview::mapview(t, alpha.regions = 0, label = "date")
+
+  mapview::mapview(
+    ext,
+    alpha.regions = 0,
+    label = "filename"
+  )
 }
