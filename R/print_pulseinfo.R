@@ -26,7 +26,6 @@
 #' print_pulseinfo(f)
 #'
 print_pulseinfo <- function(path) {
-
   # ------------------------------------------------------------------
   # Density statistics
   # ------------------------------------------------------------------
@@ -44,13 +43,13 @@ print_pulseinfo <- function(path) {
     round(mean(x, na.rm = TRUE) * 100, 1)
   }
 
-  avg_single   <- to_pct(penetration$single)
+  avg_single <- to_pct(penetration$single)
   avg_multiple <- to_pct(penetration$multiple)
-  avg_two      <- to_pct(penetration$two)
-  avg_three    <- to_pct(penetration$three)
-  avg_four     <- to_pct(penetration$four)
-  avg_five     <- to_pct(penetration$five)
-  avg_six      <- to_pct(penetration$six)
+  avg_two <- to_pct(penetration$two)
+  avg_three <- to_pct(penetration$three)
+  avg_four <- to_pct(penetration$four)
+  avg_five <- to_pct(penetration$five)
+  avg_six <- to_pct(penetration$six)
 
   # ------------------------------------------------------------------
   # Print
@@ -74,4 +73,3 @@ Multiple Returns : {avg_multiple} %
 
   invisible(NULL)
 }
-

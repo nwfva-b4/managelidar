@@ -23,11 +23,10 @@
 #' @export
 #'
 #' @examples
-#' f <- system.file("extdata", package="managelidar")
+#' f <- system.file("extdata", package = "managelidar")
 #' get_crs(f)
 #'
-get_crs <- function(path, full.names = FALSE){
-
+get_crs <- function(path, full.names = FALSE) {
   header <- get_header(path, full.names = full.names)
 
   do.call(rbind, lapply(seq_along(header), function(i) {
@@ -38,5 +37,4 @@ get_crs <- function(path, full.names = FALSE){
       stringsAsFactors = FALSE
     )
   }))
-
 }

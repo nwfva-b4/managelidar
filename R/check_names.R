@@ -1,13 +1,11 @@
-#' Validate LAS file names according to the [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
+#' Validate LAS file names according to the ADV standard
 #'
 #' `check_names()` verifies whether LAS/LAZ/COPC file names conform to the
 #' German AdV standard for tiled LiDAR data. File names are expected to
-#' follow the schema:
+#' follow the schema: \code{prefix_utmzone_minx_miny_tilesize_region_year.laz}.
+#' Example: \code{3dm_32_547_5724_1_ni_2024.laz}.
+#' See the [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111) for details.
 #'
-#' \code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
-#'
-#' Example:
-#' \code{3dm_32_547_5724_1_ni_2024.laz}
 #'
 #' @param path Character vector. Paths to LAS/LAZ/COPC files or directories
 #'   containing such files.
@@ -33,10 +31,7 @@
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' check_names(f)
-
 check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, full.names = FALSE) {
-
-
   # ------------------------------------------------------------------
   # Resolve all LAS/LAZ/COPC files
   # ------------------------------------------------------------------

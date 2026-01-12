@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_names.R
 \name{check_names}
 \alias{check_names}
-\title{Validate LAS file names according to the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard}}
+\title{Validate LAS file names according to the ADV standard}
 \usage{
 check_names(
   path,
@@ -44,13 +44,9 @@ A \code{data.frame} with one row per file and columns:
 \description{
 \code{check_names()} verifies whether LAS/LAZ/COPC file names conform to the
 German AdV standard for tiled LiDAR data. File names are expected to
-follow the schema:
-}
-\details{
-\code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
-
-Example:
-\code{3dm_32_547_5724_1_ni_2024.laz}
+follow the schema: \code{prefix_utmzone_minx_miny_tilesize_region_year.laz}.
+Example: \code{3dm_32_547_5724_1_ni_2024.laz}.
+See the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard} for details.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")

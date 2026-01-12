@@ -20,7 +20,6 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' get_names(f)
 get_names <- function(path, full.names = FALSE) {
-
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {

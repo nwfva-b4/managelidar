@@ -22,7 +22,6 @@
 #'
 #' @export
 set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, dry_run = FALSE) {
-
   # ------------------------------------------------------------------
   # Check filenames
   # ------------------------------------------------------------------
@@ -45,7 +44,7 @@ set_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NUL
   message("Files to be renamed (from → to):")
   print(data.frame(
     from = basename(df$from),
-    to   = basename(df$to),
+    to = basename(df$to),
     stringsAsFactors = FALSE
   ), row.names = FALSE)
 

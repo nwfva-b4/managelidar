@@ -22,10 +22,7 @@
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_header(f)
-
-get_header <- function(path, full.names = FALSE){
-
-
+get_header <- function(path, full.names = FALSE) {
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
@@ -37,5 +34,4 @@ get_header <- function(path, full.names = FALSE){
   names(headers) <- if (full.names) files else basename(files)
 
   headers
-
 }

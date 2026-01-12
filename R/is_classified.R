@@ -36,14 +36,13 @@
 #' is_classified(f, add_classes = TRUE)
 #'
 is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
-
   is_classified_per_file <- function(file) {
-
     if (endsWith(file, ".copc.laz")) {
       # read first hierachies if COPC
       ans <- lasR::exec(
         lasR::reader(copc_depth = 1) + lasR::summarise(),
-        on = file)
+        on = file
+      )
     } else if (endsWith(file, ".las") || endsWith(file, ".laz")) {
       # read sample subset in center if las/laz
       header <- lidR::readLASheader(file)
@@ -51,7 +50,8 @@ is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
       yc <- header$`Min Y` + (header$`Max Y` - header$`Min Y`) / 2
       ans <- lasR::exec(
         lasR::reader_circles(xc, yc, 10) + lasR::summarise(),
-        on = file)
+        on = file
+      )
     }
 
     # check if all points are 0
@@ -61,16 +61,18 @@ is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
     if (!full.names) file <- basename(file)
 
     if (add_classes) {
-      data.frame(file = file,
-                 classified = classified,
-                 classes = I(list(as.character(names(ans$npoints_per_class))))
-                 )
+      data.frame(
+        file = file,
+        classified = classified,
+        classes = I(list(as.character(names(ans$npoints_per_class))))
+      )
     } else {
-      data.frame(file = file,
-                 classified = classified
-                 )
+      data.frame(
+        file = file,
+        classified = classified
+      )
     }
-    }
+  }
 
 
   # ------------------------------------------------------------------

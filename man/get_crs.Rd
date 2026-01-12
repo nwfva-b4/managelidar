@@ -31,7 +31,7 @@ which avoids loading the full point cloud into memory. It is suitable
 for quickly inspecting the CRS of multiple LAS/LAZ/COPC files.
 }
 \examples{
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_crs(f)
 
 }

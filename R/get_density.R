@@ -26,9 +26,7 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' get_density(f)
 get_density <- function(path, full.names = FALSE) {
-
-  get_density_per_file <- function(file){
-
+  get_density_per_file <- function(file) {
     header <- lidR::readLASheader(file)
 
     minx <- header$`Min X`
@@ -58,7 +56,6 @@ get_density <- function(path, full.names = FALSE) {
       stringsAsFactors = FALSE,
       row.names = NULL
     )
-
   }
 
   # ------------------------------------------------------------------
@@ -72,4 +69,3 @@ get_density <- function(path, full.names = FALSE) {
 
   data.table::rbindlist(map_las(files, get_density_per_file))
 }
-

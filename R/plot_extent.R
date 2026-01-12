@@ -14,10 +14,9 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' plot_extent(f)
 plot_extent <- function(path, full.names = FALSE) {
-  
   # get extent
   ext <- get_extent(path, as_sf = TRUE, full.names = full.names)
-  
+
   # ------------------------------------------------------------------
   # Plot
   # ------------------------------------------------------------------

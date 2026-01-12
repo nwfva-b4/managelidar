@@ -46,7 +46,6 @@
 #' csv_path <- system.file("extdata", "acquisition_dates_lgln.csv", package = "managelidar")
 #' get_date(f, from_csv = csv_path)
 get_date <- function(path, full.names = FALSE, from_csv = NULL, return_referenceyear = FALSE) {
-
   # Read LAS headers (always full paths internally)
   headers <- get_header(path, full.names = TRUE)
 
@@ -58,17 +57,21 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
     row.names = NULL
   )
 
-  files_gpstime_true  <- header_info$filename[header_info$is_gpstime]
+  files_gpstime_true <- header_info$filename[header_info$is_gpstime]
   files_gpstime_false <- header_info$filename[!header_info$is_gpstime]
 
   # Internal helper to extract dates via VPC
   extract_dates_vpc <- function(files, gpstime_flag) {
-    if (length(files) == 0) return(data.frame(filename = character(), date = as.POSIXct(character()), gpstime = logical()))
+    if (length(files) == 0) {
+      return(data.frame(filename = character(), date = as.POSIXct(character()), gpstime = logical()))
+    }
 
     vpc_path <- lasR::exec(
-      lasR::write_vpc(ofile = tempfile(fileext = ".vpc"),
-                      absolute_path = TRUE,
-                      use_gpstime = TRUE),
+      lasR::write_vpc(
+        ofile = tempfile(fileext = ".vpc"),
+        absolute_path = TRUE,
+        use_gpstime = TRUE
+      ),
       on = files
     )
     vpc <- yyjsonr::read_json_file(vpc_path)
@@ -93,15 +96,17 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
   }
 
   # Extract dates for GPS and non-GPS files
-  dates_gpstime_true  <- extract_dates_vpc(files_gpstime_true, TRUE)
+  dates_gpstime_true <- extract_dates_vpc(files_gpstime_true, TRUE)
   dates_gpstime_false <- extract_dates_vpc(files_gpstime_false, FALSE)
 
   # Override non-GPS dates with CSV if provided
   if (!is.null(from_csv) && file.exists(from_csv) && nrow(dates_gpstime_false) > 0) {
     acquisitions <- read.csv(from_csv) |>
-      dplyr::mutate(date_from_file = lubridate::ymd(date),
-                    minx = minx * 1000,
-                    miny = miny * 1000) |>
+      dplyr::mutate(
+        date_from_file = lubridate::ymd(date),
+        minx = minx * 1000,
+        miny = miny * 1000
+      ) |>
       dplyr::select(minx, miny, date_from_file)
 
     dates_gpstime_false <- dates_gpstime_false |>

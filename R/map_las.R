@@ -9,7 +9,6 @@
 #' @return A list with one element per file.
 #' @keywords internal
 map_las <- function(files, FUN) {
-
   n <- length(files)
 
   if (n == 0L) {
@@ -18,7 +17,6 @@ map_las <- function(files, FUN) {
 
   # use parallel only if worthwhile
   if (n >= 20L) {
-
     cores <- parallel::detectCores(logical = TRUE)
     workers <- max(1L, floor(cores / 2L))
     workers <- min(workers, n)

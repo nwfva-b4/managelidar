@@ -27,20 +27,18 @@
 #'
 #' @keywords internal
 resolve_las_paths <- function(paths) {
-
   paths <- fs::path_norm(fs::path_expand(paths))
 
   las_files <- unlist(lapply(paths, function(path) {
-
     if (fs::file_exists(path) && !fs::dir_exists(path)) {
-
       ext <- tolower(fs::path_ext(path))
 
       if (ext == "vpc") {
-
         vpc <- tryCatch(
           yyjsonr::read_json_file(path),
-          error = function(e) return(NULL)
+          error = function(e) {
+            return(NULL)
+          }
         )
 
         if (is.null(vpc)) {
@@ -62,7 +60,6 @@ resolve_las_paths <- function(paths) {
     }
 
     if (fs::dir_exists(path)) {
-
       return(fs::dir_ls(
         path,
         recurse = FALSE,

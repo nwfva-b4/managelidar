@@ -20,7 +20,6 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' get_lasversion(f)
 get_lasversion <- function(path, full.names = FALSE) {
-
   # ------------------------------------------------------------------
   # Read headers (single I/O layer)
   # ------------------------------------------------------------------
@@ -37,7 +36,7 @@ get_lasversion <- function(path, full.names = FALSE) {
     hdr <- headers[[i]]
 
     data.frame(
-      filename   = names(headers)[i],
+      filename = names(headers)[i],
       lasversion = paste0(
         hdr@PHB$`Version Major`,
         ".",

@@ -21,7 +21,6 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' get_extent(f)
 get_extent <- function(path, as_sf = FALSE, full.names = FALSE) {
-
   # ------------------------------------------------------------------
   # Resolve LAS files and build VPC if not provided
   # ------------------------------------------------------------------
@@ -65,4 +64,3 @@ get_extent <- function(path, as_sf = FALSE, full.names = FALSE) {
 
   ext
 }
-

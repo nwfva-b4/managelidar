@@ -29,7 +29,6 @@ get_intersection <- function(path1,
                              mode = "intersects",
                              as_sf = FALSE,
                              full.names = FALSE) {
-
   # ------------------------------------------------------------------
   # Validate mode
   # ------------------------------------------------------------------
@@ -48,8 +47,7 @@ get_intersection <- function(path1,
   # ------------------------------------------------------------------
   # Spatial predicate
   # ------------------------------------------------------------------
-  pred_fun <- switch(
-    mode,
+  pred_fun <- switch(mode,
     intersects = sf::st_intersects,
     equals     = sf::st_equals
   )

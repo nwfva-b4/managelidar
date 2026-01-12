@@ -47,34 +47,31 @@
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
 #' get_penetration(f)
-
-get_penetration <- function(path, full.names = FALSE){
-
-  get_penetration_per_file <- function(file){
+get_penetration <- function(path, full.names = FALSE) {
+  get_penetration_per_file <- function(file) {
     fileheader <- lidR::readLASheader(file)
 
-    pulses = fileheader$`Number of points by return`[1]
+    pulses <- fileheader$`Number of points by return`[1]
 
     # single return ratio
-    singleton = (fileheader$`Number of points by return`[[1]] - fileheader$`Number of points by return`[[2]]) / pulses
+    singleton <- (fileheader$`Number of points by return`[[1]] - fileheader$`Number of points by return`[[2]]) / pulses
     # two return ratio
-    doubleton = (fileheader$`Number of points by return`[[2]] - fileheader$`Number of points by return`[[3]]) / pulses
+    doubleton <- (fileheader$`Number of points by return`[[2]] - fileheader$`Number of points by return`[[3]]) / pulses
     # three return ratio
-    triple = (fileheader$`Number of points by return`[[3]] - fileheader$`Number of points by return`[[4]]) / pulses
+    triple <- (fileheader$`Number of points by return`[[3]] - fileheader$`Number of points by return`[[4]]) / pulses
     # four return ratio
-    quadruple = (fileheader$`Number of points by return`[[4]] - fileheader$`Number of points by return`[[5]]) / pulses
+    quadruple <- (fileheader$`Number of points by return`[[4]] - fileheader$`Number of points by return`[[5]]) / pulses
     # five return ratio
-    quintuple = (fileheader$`Number of points by return`[[5]] - fileheader$`Number of points by return`[[6]]) / pulses
+    quintuple <- (fileheader$`Number of points by return`[[5]] - fileheader$`Number of points by return`[[6]]) / pulses
     # six return ratio
-    sextuple = (fileheader$`Number of points by return`[[6]] - fileheader$`Number of points by return`[[7]]) / pulses
+    sextuple <- (fileheader$`Number of points by return`[[6]] - fileheader$`Number of points by return`[[7]]) / pulses
     # multi return ratio
-    multiton = fileheader$`Number of points by return`[[2]] / pulses
+    multiton <- fileheader$`Number of points by return`[[2]] / pulses
 
     # adjust filenames
     if (!full.names) file <- basename(file)
 
     return(data.frame(filename = file, single = round(singleton, 3), two = round(doubleton, 3), three = round(triple, 3), four = round(quadruple, 3), five = round(quintuple, 3), six = round(sextuple, 3), multiple = round(multiton, 3)))
-
   }
 
 
