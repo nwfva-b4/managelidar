@@ -82,5 +82,5 @@ is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
     stop("No LAS/LAZ/COPC files found.")
   }
 
-  do.call(rbind, lapply(files, is_classified_per_file))
+  data.table::rbindlist(map_las(files, is_classified_per_file))
 }

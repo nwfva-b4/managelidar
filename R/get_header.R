@@ -32,13 +32,9 @@ get_header <- function(path, full.names = FALSE){
     stop("No LAS/LAZ/COPC files found.")
   }
 
-  headers <- lapply(files, lidR::readLASheader)
+  headers <- map_las(files, lidR::readLASheader)
 
-  if (!full.names) {
-    names(headers) <- basename(files)
-  } else {
-    names(headers) <- files
-  }
+  names(headers) <- if (full.names) files else basename(files)
 
   headers
 

@@ -87,5 +87,5 @@ get_penetration <- function(path, full.names = FALSE){
     stop("No LAS/LAZ/COPC files found.")
   }
 
-  data.table::rbindlist(lapply(files, get_penetration_per_file))
+  data.table::rbindlist(map_las(files, get_penetration_per_file))
 }
