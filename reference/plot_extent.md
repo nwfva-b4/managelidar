@@ -7,7 +7,7 @@ existing Virtual Point Cloud (VPC).
 ## Usage
 
 ``` r
-plot_extent(path)
+plot_extent(path, full.names = FALSE)
 ```
 
 ## Arguments

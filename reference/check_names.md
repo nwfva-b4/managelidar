@@ -1,8 +1,11 @@
-# Validate LAS file names according to the [ADV standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
+# Validate LAS file names according to the ADV standard
 
 `check_names()` verifies whether LAS/LAZ/COPC file names conform to the
 German AdV standard for tiled LiDAR data. File names are expected to
-follow the schema:
+follow the schema: `prefix_utmzone_minx_miny_tilesize_region_year.laz`.
+Example: `3dm_32_547_5724_1_ni_2024.laz`. See the [ADV
+standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
+for details.
 
 ## Usage
 
@@ -67,12 +70,6 @@ A `data.frame` with one row per file and columns:
 - correct:
 
   Logical indicating whether the existing name matches the standard
-
-## Details
-
-`prefix_utmzone_minx_miny_tilesize_region_year.laz`
-
-Example: `3dm_32_547_5724_1_ni_2024.laz`
 
 ## Examples
 
