@@ -4,7 +4,7 @@
 \alias{plot_extent}
 \title{Plot the spatial extent of LAS files}
 \usage{
-plot_extent(path)
+plot_extent(path, full.names = FALSE)
 }
 \arguments{
 \item{path}{Character. Path(s) to LAS/LAZ/COPC files, a directory containing
