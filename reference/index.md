@@ -25,7 +25,8 @@
 - [`get_penetration()`](https://wiesehahn.github.io/managelidar/reference/get_penetration.md)
   : Compute pulse penetration ratios from LAS headers
 - [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
-  : Get the point cloud summary of LAS files
+  : Compute summary metrics for individual LAS files and optionally save
+  as JSON
 - [`is_classified()`](https://wiesehahn.github.io/managelidar/reference/is_classified.md)
   : Check whether LAS files are classified
 - [`laz_files`](https://wiesehahn.github.io/managelidar/reference/laz_files.md)
