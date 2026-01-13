@@ -1,67 +1,147 @@
-#' Get the point cloud summary of LAS files
+#' Compute summary metrics for individual LAS files and optionally save as JSON
 #'
-#' `get_summary` derives information for LAS files, such as number of points per class and histogram distribution of z or intensity values.
+#' `get_summary()` calculates standard summary metrics for LAS files, including:
+#' 
+#' * Temporal metrics (`t_min`, `t_median`, `t_max`)
+#' * Intensity metrics (`i_min`, `i_mean`, `i_median`, `i_max`, `i_p5`, `i_p95`, `i_sd`)
+#' * Elevation metrics (`z_min`, `z_median`, `z_max`)
+#' * Histograms (`i_histogram`, `z_histogram`) if `iwbin` and `zwbin` are greater than 0
+#' * Point counts and classifications (`npoints`, `nsingle`, `nwithheld`, `nsynthetic`, `npoints_per_return`, `npoints_per_class`)
+#' * Coordinate system (`epsg`)
 #'
-#' The function needs to read the actual point cloud data!
-#' To speed up the processing the function reads just a sample of points, which is slower than just reading the header information but much faster than reading the entire file.
-#' But the results are thus only valid for the subsample of points and do not necessarily reflect the entire file.
+#' Results can optionally be saved as JSON files per LAS file.
 #'
-#' @param path The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.
-#' @param full.names  Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default).
+#' @param path Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) file.
+#' @param out_dir Optional directory to save JSON summaries. If not set, the function returns a named list instead.
+#' @param full.names Logical. If `TRUE`, the returned list is named with full paths; otherwise, basenames are used.
+#' @param samplebased Logical. If `TRUE`, reads only a spatial subsample of each file (faster for large files).
+#' @param zwbin Numeric. Bin width (meters) for elevation histogram (`z_histogram`). Set `0` to skip `z_histogram`.
+#' @param iwbin Numeric. Bin width (intensity units) for intensity histogram (`i_histogram`). Set `0` to skip `i_histogram`.
+#' @param metrics Character vector of metrics to compute. Defaults to:
+#'   \code{c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max", "i_p5", "i_p95", "i_sd", "z_min", "z_median", "z_max")}.
 #'
-#' @returns A named list of summary information (`npoints`, `nsingle`, `nwithheld`, `nsynthetic`, `npoints_per_return`, `npoints_per_class`, `z_histogram`, `i_histogram`, `crs`, `epsg`)
+#' @details
+#' In comparison to `lasR::summarise` this function returns individual summaries per file instead of an aggregated summary among all files. 
+#' If `out_dir` is provided, a JSON file is created for each LAS file, with the same
+#' name but `.json` extension. Existing JSON files are skipped automatically. If `out_dir`
+#' is not provided, the function returns a named list where each element corresponds to a LAS file.
+#'
+#' Setting `iwbin = 0` or `zwbin = 0` disables calculation of intensity or elevation histograms,
+#' which can save time and memory for large datasets.
+#'
+#' Parallel processing is used automatically for large numbers of files through `map_las()`.
+#'
+#' @return If `out_dir` is not set, returns a named list, one element per LAS file. Each element is a list containing:
+#' \describe{
+#'   \item{npoints}{Total number of points}
+#'   \item{nsingle}{Number of single-return points}
+#'   \item{nwithheld}{Number of withheld points}
+#'   \item{nsynthetic}{Number of synthetic points}
+#'   \item{npoints_per_return}{Named vector of counts per return number}
+#'   \item{npoints_per_class}{Named vector of counts per classification code}
+#'   \item{z_histogram}{Elevation histogram (if `zwbin > 0`)}
+#'   \item{i_histogram}{Intensity histogram (if `iwbin > 0`)}
+#'   \item{epsg}{EPSG code of the LAS file CRS}
+#'   \item{metrics}{List of calculated summary metrics, e.g., min, median, max for time, intensity, and elevation}
+#' }
+#'
+#' If `out_dir` is set, the function returns `NULL` invisibly after writing JSON files.
+#'
 #' @export
-#'
-#' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' get_summary(f)
-#'
-get_summary <- function(path, full.names = FALSE) {
-  get_summary_file <- function(file) {
-    if (endsWith(file, ".copc.laz")) {
-      # read first hierachies if COPC
-      ans <- lasR::exec(lasR::reader(copc_depth = 1) + lasR::summarise(), on = file)
-    } else if (endsWith(file, ".las") || endsWith(file, ".laz")) {
-      # read sample subset in center if las/laz
-      header <- lidR::readLASheader(file)
-      xc <- header$`Min X` + (header$`Max X` - header$`Min X`) / 2
-      yc <- header$`Min Y` + (header$`Max Y` - header$`Min Y`) / 2
-      ans <- lasR::exec(lasR::reader_circles(xc, yc, 8) + lasR::summarise(), on = file)
-    }
+get_summary <- function(
+    path,
+    out_dir = NULL,
+    full.names = FALSE,
+    samplebased = FALSE,
+    zwbin = 10,
+    iwbin = 100,
+    metrics = c(
+      "t_min", "t_median", "t_max",
+      "i_min", "i_mean", "i_median", "i_max",
+      "i_p5", "i_p95", "i_sd",
+      "z_min", "z_median", "z_max"
+    )
+) {
 
-    if (full.names == FALSE) {
-      file <- basename(file)
-    }
+  # -------------------------------
+  # Resolve all LAS files
+  # -------------------------------
+  las_files <- resolve_las_paths(path)
 
-    return(list(filename = file, summary = ans))
+  if (length(las_files) == 0) {
+    message("No LAS/LAZ/COPC files found.")
+    return(invisible(list()))
   }
 
-  if (file.exists(path) && !dir.exists(path)) {
-    # Virtual Point Cloud
-    if (tools::file_ext(path) == "vpc") {
-      vpc <- yyjsonr::read_json_file(path)
-      f <- sapply(vpc$features$assets, function(x) x$data$href)
-      result <- lapply(f, get_summary_file)
-      names(result) <- sapply(result, function(x) basename(x$file))
-      return(result)
-    }
-    # LAZ file
-    else if (tools::file_ext(path) %in% c("las", "laz")) {
-      result <- list(get_summary_file(path))
-      names(result) <- basename(result[[1]]$file)
-      return(result)
-    } else {
-      stop("Unsupported file format. Supported formats: .las, .laz, .vpc")
-    }
+  # -------------------------------
+  # Skip already processed files if out_dir is set
+  # -------------------------------
+  if (!is.null(out_dir)) {
+    fs::dir_create(out_dir, recurse = TRUE)
+    json_files <- fs::path(out_dir, fs::path_file(fs::path_ext_set(las_files, "json")))
+    keep <- !file.exists(json_files)
+    n_skipped <- sum(!keep)
+    if (n_skipped > 0) message("Skipping ", n_skipped, " already processed files")
+    las_files <- las_files[keep]
   }
 
-  # Folder Path
-  else if (dir.exists(path)) {
-    f <- list.files(path, pattern = "\\.(las|laz)$", full.names = TRUE)
-    result <- lapply(f, get_summary_file)
-    names(result) <- sapply(result, function(x) basename(x$file))
-    return(result)
-  } else {
-    stop("Path does not exist: ", path)
+  if (length(las_files) == 0) {
+    message("Nothing to process.")
+    return(invisible(list()))
   }
+
+  # -------------------------------
+  # Worker function for a single file
+  # -------------------------------
+  get_summary_per_file <- function(file) {
+    tryCatch({
+
+      # ---- Reader selection ----
+      reader <- if (samplebased) {
+        if (endsWith(file, ".copc.laz")) {
+          lasR::reader(copc_depth = 1)
+        } else {
+          header <- lidR::readLASheader(file)
+          xc <- (header$`Min X` + header$`Max X`) / 2
+          yc <- (header$`Min Y` + header$`Max Y`) / 2
+          lasR::reader_circles(xc, yc, 10)
+        }
+      } else {
+        lasR::reader()
+      }
+
+      # ---- lasR pipeline ----
+      pipeline <- reader + lasR::summarise(zwbin = zwbin, iwbin = iwbin, metrics = metrics)
+      ans <- lasR::exec(pipeline, on = file, with = list(ncores = 1))
+
+      # ---- Cleanup ----
+      ans$crs <- NULL
+      ans <- lapply(ans, function(x) if (is.atomic(x) && !is.null(names(x))) as.list(x) else x)
+
+      # ---- Write JSON ----
+      if (!is.null(out_dir)) {
+        file_out <- fs::path(out_dir, fs::path_file(fs::path_ext_set(file, "json")))
+        jsonlite::write_json(ans, file_out, pretty = TRUE, auto_unbox = TRUE)
+        return(invisible(NULL))
+      }
+
+      # ---- Return ----
+      filename <- if (full.names) file else basename(file)
+      out <- list(ans)
+      names(out) <- filename
+      out
+
+    }, error = function(e) {
+      filename <- if (full.names) file else basename(file)
+      message("ERROR processing ", filename, ": ", conditionMessage(e))
+      out <- list(list(error = conditionMessage(e)))
+      names(out) <- filename
+      out
+    })
+  }
+
+  # -------------------------------
+  # Map over files
+  # -------------------------------
+  map_las(las_files, get_summary_per_file)
 }

@@ -2,28 +2,74 @@
 % Please edit documentation in R/get_summary.R
 \name{get_summary}
 \alias{get_summary}
-\title{Get the point cloud summary of LAS files}
+\title{Compute summary metrics for individual LAS files and optionally save as JSON}
 \usage{
-get_summary(path, full.names = FALSE)
+get_summary(
+  path,
+  out_dir = NULL,
+  full.names = FALSE,
+  samplebased = FALSE,
+  zwbin = 10,
+  iwbin = 100,
+  metrics = c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max",
+    "i_p5", "i_p95", "i_sd", "z_min", "z_median", "z_max")
+)
 }
 \arguments{
-\item{path}{The path to a LAS file (.las/.laz/.copc), to a directory which contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) file.}
 
-\item{full.names}{Whether to return the full file paths or just the filenames (default) Whether to return the full file path or just the file name (default).}
+\item{out_dir}{Optional directory to save JSON summaries. If not set, the function returns a named list instead.}
+
+\item{full.names}{Logical. If \code{TRUE}, the returned list is named with full paths; otherwise, basenames are used.}
+
+\item{samplebased}{Logical. If \code{TRUE}, reads only a spatial subsample of each file (faster for large files).}
+
+\item{zwbin}{Numeric. Bin width (meters) for elevation histogram (\code{z_histogram}). Set \code{0} to skip \code{z_histogram}.}
+
+\item{iwbin}{Numeric. Bin width (intensity units) for intensity histogram (\code{i_histogram}). Set \code{0} to skip \code{i_histogram}.}
+
+\item{metrics}{Character vector of metrics to compute. Defaults to:
+\code{c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max", "i_p5", "i_p95", "i_sd", "z_min", "z_median", "z_max")}.}
 }
 \value{
-A named list of summary information (\code{npoints}, \code{nsingle}, \code{nwithheld}, \code{nsynthetic}, \code{npoints_per_return}, \code{npoints_per_class}, \code{z_histogram}, \code{i_histogram}, \code{crs}, \code{epsg})
+If \code{out_dir} is not set, returns a named list, one element per LAS file. Each element is a list containing:
+\describe{
+\item{npoints}{Total number of points}
+\item{nsingle}{Number of single-return points}
+\item{nwithheld}{Number of withheld points}
+\item{nsynthetic}{Number of synthetic points}
+\item{npoints_per_return}{Named vector of counts per return number}
+\item{npoints_per_class}{Named vector of counts per classification code}
+\item{z_histogram}{Elevation histogram (if \code{zwbin > 0})}
+\item{i_histogram}{Intensity histogram (if \code{iwbin > 0})}
+\item{epsg}{EPSG code of the LAS file CRS}
+\item{metrics}{List of calculated summary metrics, e.g., min, median, max for time, intensity, and elevation}
+}
+
+If \code{out_dir} is set, the function returns \code{NULL} invisibly after writing JSON files.
 }
 \description{
-\code{get_summary} derives information for LAS files, such as number of points per class and histogram distribution of z or intensity values.
+\code{get_summary()} calculates standard summary metrics for LAS files, including:
 }
 \details{
-The function needs to read the actual point cloud data!
-To speed up the processing the function reads just a sample of points, which is slower than just reading the header information but much faster than reading the entire file.
-But the results are thus only valid for the subsample of points and do not necessarily reflect the entire file.
+\itemize{
+\item Temporal metrics (\code{t_min}, \code{t_median}, \code{t_max})
+\item Intensity metrics (\code{i_min}, \code{i_mean}, \code{i_median}, \code{i_max}, \code{i_p5}, \code{i_p95}, \code{i_sd})
+\item Elevation metrics (\code{z_min}, \code{z_median}, \code{z_max})
+\item Histograms (\code{i_histogram}, \code{z_histogram}) if \code{iwbin} and \code{zwbin} are greater than 0
+\item Point counts and classifications (\code{npoints}, \code{nsingle}, \code{nwithheld}, \code{nsynthetic}, \code{npoints_per_return}, \code{npoints_per_class})
+\item Coordinate system (\code{epsg})
 }
-\examples{
-f <- system.file("extdata", package = "managelidar")
-get_summary(f)
 
+Results can optionally be saved as JSON files per LAS file.
+
+In comparison to \code{lasR::summarise} this function returns individual summaries per file instead of an aggregated summary among all files.
+If \code{out_dir} is provided, a JSON file is created for each LAS file, with the same
+name but \code{.json} extension. Existing JSON files are skipped automatically. If \code{out_dir}
+is not provided, the function returns a named list where each element corresponds to a LAS file.
+
+Setting \code{iwbin = 0} or \code{zwbin = 0} disables calculation of intensity or elevation histograms,
+which can save time and memory for large datasets.
+
+Parallel processing is used automatically for large numbers of files through \code{map_las()}.
 }
