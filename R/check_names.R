@@ -60,72 +60,108 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   # Compute tile bounding boxes
   # ------------------------------------------------------------------
   bbox <- json$features$properties$`proj:bbox`
-  minx <- vapply(bbox, function(x) floor(round(x[1] / 1000, 2)), numeric(1))
-  miny <- vapply(bbox, function(x) floor(round(x[2] / 1000, 2)), numeric(1))
-  maxx <- vapply(bbox, function(x) floor(round(x[3] / 1000, 2)), numeric(1))
-  maxy <- vapply(bbox, function(x) floor(round(x[4] / 1000, 2)), numeric(1))
 
-  # take into account small inaccuracies (reduce tilesize if less than 50m larger)
-  tilesize <- ceiling(pmax(maxx - minx, maxy - miny, 1) - 0.05)
+  # small tile boundary offsets are ignored and extent is snapped to closest km-value
+  max_error <- 10
+  minx <- floor(vapply(bbox, function(x) (x[1] + max_error) / 1000, numeric(1)))
+  miny <- floor(vapply(bbox, function(x) (x[2] + max_error) / 1000, numeric(1)))
+  maxx <- ceiling(vapply(bbox, function(x) (x[3] - max_error) / 1000, numeric(1)))
+  maxy <- ceiling(vapply(bbox, function(x) (x[4] - max_error) / 1000, numeric(1)))
+
+  tilesize_x <- maxx - minx
+  tilesize_y <- maxy - miny
+  tilesize <- pmax(tilesize_x, tilesize_y)
 
 
   # ------------------------------------------------------------------
   # Determine region
   # ------------------------------------------------------------------
-  # get region via extent if not provided
   if (is.null(region)) {
-    # get region
-    state_codes <- c(
-      "Baden-Württemberg" = "bw",
-      "Bayern" = "by",
-      "Berlin" = "be",
-      "Brandenburg" = "bb",
-      "Bremen" = "hb",
-      "Hamburg" = "hh",
-      "Hessen" = "he",
-      "Mecklenburg-Vorpommern" = "mv",
-      "Niedersachsen" = "ni",
-      "Nordrhein-Westfalen" = "nw",
-      "Rheinland-Pfalz" = "rp",
-      "Saarland" = "sl",
-      "Sachsen" = "sn",
-      "Sachsen-Anhalt" = "st",
-      "Schleswig-Holstein" = "sh",
-      "Thüringen" = "th"
-    )
 
-    url <- "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-germany-land/exports/parquet?lang=en&timezone=Europe%2FBerlin"
-    states_sf <- arrow::read_parquet(file = url) |>
-      sf::st_as_sf() |>
-      sf::st_set_geometry("geo_shape") |>
-      dplyr::mutate(code = state_codes[lan_name]) |>
-      sf::st_set_crs(4326)
+    ## OPT: cache states per session
+    states_sf <- getOption("managelidar.states_sf")
+    if (is.null(states_sf)) {
 
-    extents <- json$features$bbox
+      state_codes <- c(
+        "Baden-Württemberg" = "bw",
+        "Bayern" = "by",
+        "Berlin" = "be",
+        "Brandenburg" = "bb",
+        "Bremen" = "hb",
+        "Hamburg" = "hh",
+        "Hessen" = "he",
+        "Mecklenburg-Vorpommern" = "mv",
+        "Niedersachsen" = "ni",
+        "Nordrhein-Westfalen" = "nw",
+        "Rheinland-Pfalz" = "rp",
+        "Saarland" = "sl",
+        "Sachsen" = "sn",
+        "Sachsen-Anhalt" = "st",
+        "Schleswig-Holstein" = "sh",
+        "Thüringen" = "th"
+      )
 
-    find_state_code <- function(bbox_coords, states_sf) {
-      bbox <- sf::st_as_sfc(sf::st_bbox(c(xmin = bbox_coords[1], ymin = bbox_coords[2], xmax = bbox_coords[4], ymax = bbox_coords[5]), crs = 4326))
+      states_sf <- arrow::read_parquet(
+        "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-germany-land/exports/parquet?lang=en&timezone=Europe%2FBerlin"
+      ) |>
+        sf::st_as_sf() |>
+        sf::st_set_geometry("geo_shape") |>
+        dplyr::mutate(code = state_codes[lan_name]) |>
+        sf::st_set_crs(4326)
 
-      sf::st_agr(states_sf) <- "constant"
-      intersections <- sf::st_intersection(states_sf, bbox)
-      intersections <- intersections |> dplyr::mutate(intersection_area = sf::st_area(geo_shape))
-
-      state_code <- intersections |>
-        dplyr::filter(intersection_area == max(intersection_area)) |>
-        dplyr::pull(code)
-
-      # set state code to "de" if no overlap with federal boundaries (e.g. at sea)
-      if (rlang::is_empty(state_code)) {
-        state_code <- "de"
-      }
-
-
-      return(state_code)
+      options(managelidar.states_sf = states_sf)
     }
 
-    # Apply the function to each bbox
-    region <- sapply(extents, find_state_code, states_sf = states_sf)
+    sf::st_agr(states_sf) <- "constant"
+
+    # ------------------------------------------------------------------
+    # Build tile bounding boxes as sf polygons
+    # ------------------------------------------------------------------
+    tile_geoms <- lapply(json$features$bbox, function(b) {
+      sf::st_as_sfc(
+        sf::st_bbox(
+          c(
+            xmin = b[1],
+            ymin = b[2],
+            xmax = b[4],
+            ymax = b[5]
+          ),
+          crs = 4326
+        )
+      )[[1]]  # extract sfg from sfc
+    })
+
+    tile_sf <- sf::st_sf(
+      tile_id = seq_along(tile_geoms),
+      geometry = sf::st_sfc(tile_geoms, crs = 4326)
+    )
+
+    # ------------------------------------------------------------------
+    # Intersect tiles with states
+    # ------------------------------------------------------------------
+    intersections <- suppressWarnings(
+      sf::st_intersection(tile_sf, states_sf)
+    )
+
+    if (nrow(intersections) > 0) {
+
+      intersections$area <- sf::st_area(intersections)
+
+      region_map <- intersections |>
+        dplyr::group_by(tile_id) |>
+        dplyr::slice_max(area, n = 1, with_ties = FALSE) |>
+        dplyr::ungroup() |>
+        dplyr::select(tile_id, code)
+
+      # default region = "de" (offshore / no overlap)
+      region <- rep("de", nrow(tile_sf))
+      region[region_map$tile_id] <- region_map$code
+
+    } else {
+      region <- rep("de", nrow(tile_sf))
+    }
   }
+
 
   # ------------------------------------------------------------------
   # Determine year
