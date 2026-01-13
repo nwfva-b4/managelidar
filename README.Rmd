@@ -19,9 +19,9 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-The goal of managelidar is to facilitate the handling and management of lidar data files (`*.las/laz`). 
+The goal of managelidar is to facilitate the handling and management of lidar data files (`*.las/laz/copc`). 
 Its's main purpose is to convert new incoming data to data with certain quality standards. Further, it provides functions to facilitate the quality check of incoming ALS data. 
-`managelidar` makes use of functions provided by {lidR} and {lasR}. Most functions which provide information about 3D point cloud files are working without reading the entire files, as this would require long computations for large collections of data. Instead, attributes are read from the file header where possible.  
+`managelidar` makes use of functions provided by {lidR} and {lasR}. Most functions which provide information about 3D point cloud files are working without reading the entire files, as this would require long computations for large collections of data. Instead, attributes are read from the file header where possible. If applied on large list of files many functions use parallel processing (via {mirai}).
 
 ## Installation
 
@@ -45,7 +45,7 @@ This is a basic function which queries the spatial extents of all lidar data fil
 
 ```{r get_extent}
 library(managelidar)
-f <- system.file("extdata", package="managelidar")
+f <- system.file("extdata", package = "managelidar")
 get_extent(f)
 ```
 
