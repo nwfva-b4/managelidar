@@ -14,6 +14,8 @@
   : Get approximate point and pulse density of LAS files
 - [`get_extent()`](https://wiesehahn.github.io/managelidar/reference/get_extent.md)
   : Get the spatial extent of LAS files
+- [`get_gpkg()`](https://wiesehahn.github.io/managelidar/reference/get_gpkg.md)
+  : Create a Geopackage containing metadata of LAS files
 - [`get_header()`](https://wiesehahn.github.io/managelidar/reference/get_header.md)
   : Retrieve LAS file headers (metadata)
 - [`get_intersection()`](https://wiesehahn.github.io/managelidar/reference/get_intersection.md)
