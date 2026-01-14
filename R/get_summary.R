@@ -1,7 +1,7 @@
 #' Compute summary metrics for individual LAS files and optionally save as JSON
 #'
 #' `get_summary()` calculates standard summary metrics for LAS files, including:
-#' 
+#'
 #' * Temporal metrics (`t_min`, `t_median`, `t_max`)
 #' * Intensity metrics (`i_min`, `i_mean`, `i_median`, `i_max`, `i_p5`, `i_p95`, `i_sd`)
 #' * Elevation metrics (`z_min`, `z_median`, `z_max`)
@@ -21,7 +21,7 @@
 #'   \code{c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max", "i_p5", "i_p95", "i_sd", "z_min", "z_median", "z_max")}.
 #'
 #' @details
-#' In comparison to `lasR::summarise` this function returns individual summaries per file instead of an aggregated summary among all files. 
+#' In comparison to `lasR::summarise` this function returns individual summaries per file instead of an aggregated summary among all files.
 #' If `out_dir` is provided, a JSON file is created for each LAS file, with the same
 #' name but `.json` extension. Existing JSON files are skipped automatically. If `out_dir`
 #' is not provided, the function returns a named list where each element corresponds to a LAS file.
@@ -49,20 +49,19 @@
 #'
 #' @export
 get_summary <- function(
-    path,
-    out_dir = NULL,
-    full.names = FALSE,
-    samplebased = FALSE,
-    zwbin = 10,
-    iwbin = 100,
-    metrics = c(
-      "t_min", "t_median", "t_max",
-      "i_min", "i_mean", "i_median", "i_max",
-      "i_p5", "i_p95", "i_sd",
-      "z_min", "z_median", "z_max"
-    )
+  path,
+  out_dir = NULL,
+  full.names = FALSE,
+  samplebased = FALSE,
+  zwbin = 10,
+  iwbin = 100,
+  metrics = c(
+    "t_min", "t_median", "t_max",
+    "i_min", "i_mean", "i_median", "i_max",
+    "i_p5", "i_p95", "i_sd",
+    "z_min", "z_median", "z_max"
+  )
 ) {
-
   # -------------------------------
   # Resolve all LAS files
   # -------------------------------
@@ -94,54 +93,60 @@ get_summary <- function(
   # Worker function for a single file
   # -------------------------------
   get_summary_per_file <- function(file) {
-    tryCatch({
-
-      # ---- Reader selection ----
-      reader <- if (samplebased) {
-        if (endsWith(file, ".copc.laz")) {
-          lasR::reader(copc_depth = 1)
+    tryCatch(
+      {
+        # ---- Reader selection ----
+        reader <- if (samplebased) {
+          if (endsWith(file, ".copc.laz")) {
+            lasR::reader(copc_depth = 1)
+          } else {
+            header <- lidR::readLASheader(file)
+            xc <- (header$`Min X` + header$`Max X`) / 2
+            yc <- (header$`Min Y` + header$`Max Y`) / 2
+            lasR::reader_circles(xc, yc, 10)
+          }
         } else {
-          header <- lidR::readLASheader(file)
-          xc <- (header$`Min X` + header$`Max X`) / 2
-          yc <- (header$`Min Y` + header$`Max Y`) / 2
-          lasR::reader_circles(xc, yc, 10)
+          lasR::reader()
         }
-      } else {
-        lasR::reader()
+
+        # ---- lasR pipeline ----
+        pipeline <- reader + lasR::summarise(zwbin = zwbin, iwbin = iwbin, metrics = metrics)
+        ans <- lasR::exec(pipeline, on = file, with = list(ncores = 1))
+
+        # ---- Cleanup ----
+        ans$crs <- NULL
+        ans <- lapply(ans, function(x) if (is.atomic(x) && !is.null(names(x))) as.list(x) else x)
+
+        # ---- Write JSON ----
+        if (!is.null(out_dir)) {
+          file_out <- fs::path(out_dir, fs::path_file(fs::path_ext_set(file, "json")))
+          jsonlite::write_json(ans, file_out, pretty = TRUE, auto_unbox = TRUE)
+          return(invisible(NULL))
+        }
+
+        # ---- Return ----
+        filename <- if (full.names) file else basename(file)
+        out <- list(ans)
+        names(out) <- filename
+        out
+      },
+      error = function(e) {
+        filename <- if (full.names) file else basename(file)
+        message("ERROR processing ", filename, ": ", conditionMessage(e))
+        out <- list(list(error = conditionMessage(e)))
+        names(out) <- filename
+        out
       }
-
-      # ---- lasR pipeline ----
-      pipeline <- reader + lasR::summarise(zwbin = zwbin, iwbin = iwbin, metrics = metrics)
-      ans <- lasR::exec(pipeline, on = file, with = list(ncores = 1))
-
-      # ---- Cleanup ----
-      ans$crs <- NULL
-      ans <- lapply(ans, function(x) if (is.atomic(x) && !is.null(names(x))) as.list(x) else x)
-
-      # ---- Write JSON ----
-      if (!is.null(out_dir)) {
-        file_out <- fs::path(out_dir, fs::path_file(fs::path_ext_set(file, "json")))
-        jsonlite::write_json(ans, file_out, pretty = TRUE, auto_unbox = TRUE)
-        return(invisible(NULL))
-      }
-
-      # ---- Return ----
-      filename <- if (full.names) file else basename(file)
-      out <- list(ans)
-      names(out) <- filename
-      out
-
-    }, error = function(e) {
-      filename <- if (full.names) file else basename(file)
-      message("ERROR processing ", filename, ": ", conditionMessage(e))
-      out <- list(list(error = conditionMessage(e)))
-      names(out) <- filename
-      out
-    })
+    )
   }
 
   # -------------------------------
   # Map over files
   # -------------------------------
-  map_las(las_files, get_summary_per_file)
+  res <- map_las(las_files, get_summary_per_file)
+
+  # Flatten one level so filenames are top-level keys
+  res <- unlist(res, recursive = FALSE)
+
+  res
 }
