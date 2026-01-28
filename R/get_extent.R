@@ -24,24 +24,11 @@ get_extent <- function(path, as_sf = FALSE, full.names = FALSE) {
   # ------------------------------------------------------------------
   # Resolve LAS files and build VPC if not provided
   # ------------------------------------------------------------------
-  if (all(tools::file_ext(path) == "vpc") && length(path) == 1 && file.exists(path)) {
-    vpc_file <- path
-  } else {
-    # resolve LAS/LAZ/COPC files
-    files <- resolve_las_paths(path)
-    if (length(files) == 0) stop("No LAS/LAZ/COPC files found.")
-
-    # build temporary VPC for all files
-    vpc_file <- lasR::exec(
-      lasR::write_vpc(tempfile(fileext = ".vpc"), absolute_path = TRUE),
-      on = files
-    )
-  }
+  vpc <- resolve_vpc(path)
 
   # ------------------------------------------------------------------
   # Read bbox info from VPC
   # ------------------------------------------------------------------
-  vpc <- yyjsonr::read_json_file(vpc_file)
 
   ext <- data.frame(
     filename = sapply(vpc$features$assets, function(x) x$data$href),
@@ -55,7 +42,14 @@ get_extent <- function(path, as_sf = FALSE, full.names = FALSE) {
 
   # optionally return as sf
   if (as_sf) {
-    ext <- sf::st_sf(ext, geometry = sf::st_read(vpc_file)$geometry) |>
+    geometries <- lapply(vpc$features$geometry, function(geom) {
+      sf::st_polygon(geom$coordinates)
+    })
+
+    geom_column <- sf::st_sfc(geometries, crs = 4326)
+
+    # Create sf object
+    ext <- sf::st_sf(ext, geometry = geom_column) |>
       sf::st_zm()
   }
 
