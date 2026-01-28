@@ -37,6 +37,11 @@ or equal file extents.
 \code{get_intersection()} identifies LAS/LAZ/COPC files whose spatial extents
 intersect or are spatially equal between two inputs.
 }
+\details{
+This function simply checks for intersection between two inputs. \code{\link{check_multitemporal}}
+in contrast is a newer addition and works with a single input (which can be a vector of multiple files/folders),
+in most cases \code{\link{get_first}} / \code{\link{get_latest}} might be the best choice.
+}
 \examples{
 folder <- system.file("extdata", package = "managelidar")
 file <- list.files(folder, full.names = TRUE)[1]

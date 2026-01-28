@@ -18,6 +18,11 @@
 #'   a `data.frame` or `sf` object with column `filename` for intersecting
 #'   or equal file extents.
 #'
+#' @details
+#' This function simply checks for intersection between two inputs. \code{\link{check_multitemporal}}
+#' in contrast is a newer addition and works with a single input (which can be a vector of multiple files/folders),
+#' in most cases \code{\link{get_first}} / \code{\link{get_latest}} might be the best choice.
+#'
 #' @export
 #'
 #' @examples
