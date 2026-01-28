@@ -1,9 +1,9 @@
 # Resolve LAS/LAZ/COPC input paths
 
-Resolves a character vector of file system paths into a flat character
-vector of LAS/LAZ/COPC file paths. Inputs may be individual files,
-directories, or `.vpc` files. Unsupported paths and formats are silently
-ignored.
+Resolves a character vector of file system paths or VPC objects into a
+flat character vector of LAS/LAZ/COPC file paths. Inputs may be
+individual files, directories, `.vpc` files, or VPC objects already
+loaded in R. Unsupported paths and formats are silently ignored.
 
 ## Usage
 
@@ -15,7 +15,8 @@ resolve_las_paths(paths)
 
 - paths:
 
-  Character vector of file or directory paths.
+  Character vector of file or directory paths, or a list that may
+  contain VPC objects (lists with `type = "FeatureCollection"`).
 
 ## Value
 
@@ -34,6 +35,9 @@ Supported inputs:
 - Directories (non-recursive search)
 
 - `.vpc` files (assets are extracted from the VPC JSON)
+
+- VPC objects already loaded in R (lists with
+  `type = "FeatureCollection"`)
 
 Unsupported file formats, non-existent paths, empty directories, and
 unreadable `.vpc` files are silently skipped.
