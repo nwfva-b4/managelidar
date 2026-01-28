@@ -1,9 +1,7 @@
 # Get the Coordinate Reference System (CRS) of LAS files
 
-`get_crs()` extracts the coordinate reference system (EPSG code) from
-the headers of LAS/LAZ/COPC files. It works on individual files,
-directories containing LAS files, or Virtual Point Cloud (.vpc) files
-referencing LAS files.
+`get_crs()` efficiently extracts and returns the coordinate reference
+system (EPSG code) of LAS files.
 
 ## Usage
 
@@ -37,23 +35,14 @@ A `data.frame` with two columns:
 
 ## Details
 
-This function reads only the LAS file headers using
-[`get_header()`](https://wiesehahn.github.io/managelidar/reference/get_header.md),
-which avoids loading the full point cloud into memory. It is suitable
-for quickly inspecting the CRS of multiple LAS/LAZ/COPC files.
+This function efficiently reads the Coordinate Reference System of LAS
+files from VPC. It is suitable for quickly inspecting the CRS of
+multiple LAS/LAZ/COPC files.
 
 ## Examples
 
 ``` r
 f <- system.file("extdata", package = "managelidar")
 get_crs(f)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
+#> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

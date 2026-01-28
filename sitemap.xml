@@ -6,16 +6,20 @@
 <url><loc>https://wiesehahn.github.io/managelidar/articles/index.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/authors.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/index.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/check_multitemporal.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/check_names.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/check_tiling.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_crs.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_data.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_date.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_density.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_extent.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_first.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_gpkg.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_header.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_intersection.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_lasversion.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/get_latest.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_names.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_penetration.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/get_summary.html</loc></url>
@@ -24,9 +28,11 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/laz_files.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/managelidar-package.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/map_las.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/merge_vpcs.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_las_paths.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_vpc.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/set_names.html</loc></url>
 </urlset>
 
