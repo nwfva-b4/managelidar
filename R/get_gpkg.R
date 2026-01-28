@@ -30,23 +30,7 @@ get_gpkg <- function(path,
   # ------------------------------------------------------------------
   # Resolve LAS files and build VPC if not provided
   # ------------------------------------------------------------------
-  if (length(path) == 1 && tools::file_ext(path) == "vpc" && file.exists(path)) {
-    vpc_file <- path
-  } else {
-    las_files <- resolve_las_paths(path)
-    if (length(las_files) == 0) {
-      stop("No LAS/LAZ/COPC files found.")
-    }
-
-    vpc_file <- lasR::exec(
-      lasR::write_vpc(
-        tempfile(fileext = ".vpc"),
-        absolute_path = TRUE,
-        use_gpstime = TRUE
-      ),
-      on = las_files
-    )
-  }
+  vpc_file <- resolve_vpc(path, out_file = tempfile(fileext = ".vpc"))
 
   # ------------------------------------------------------------------
   # Read VPC as sf
