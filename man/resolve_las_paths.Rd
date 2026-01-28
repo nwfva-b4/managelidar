@@ -7,7 +7,8 @@
 resolve_las_paths(paths)
 }
 \arguments{
-\item{paths}{Character vector of file or directory paths.}
+\item{paths}{Character vector of file or directory paths, or a list that may
+contain VPC objects (lists with \code{type = "FeatureCollection"}).}
 }
 \value{
 A character vector of resolved LAS/LAZ/COPC file paths.
@@ -15,10 +16,10 @@ Returns an empty character vector (invisibly) if no valid files
 are found.
 }
 \description{
-Resolves a character vector of file system paths into a flat character
-vector of LAS/LAZ/COPC file paths. Inputs may be individual files,
-directories, or \code{.vpc} files. Unsupported paths and formats are silently
-ignored.
+Resolves a character vector of file system paths or VPC objects into a flat
+character vector of LAS/LAZ/COPC file paths. Inputs may be individual files,
+directories, \code{.vpc} files, or VPC objects already loaded in R. Unsupported
+paths and formats are silently ignored.
 }
 \details{
 This function is intended for internal use. It performs no validation
@@ -29,6 +30,7 @@ Supported inputs:
 \item Individual \code{.las}, \code{.laz}, or \code{.copc} files
 \item Directories (non-recursive search)
 \item \code{.vpc} files (assets are extracted from the VPC JSON)
+\item VPC objects already loaded in R (lists with \code{type = "FeatureCollection"})
 }
 
 Unsupported file formats, non-existent paths, empty directories,
