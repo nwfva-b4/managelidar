@@ -21,13 +21,10 @@ A \code{data.frame} with two columns:
 }
 }
 \description{
-\code{get_crs()} extracts the coordinate reference system (EPSG code) from the
-headers of LAS/LAZ/COPC files. It works on individual files, directories
-containing LAS files, or Virtual Point Cloud (.vpc) files referencing LAS files.
+\code{get_crs()} efficiently extracts and returns the coordinate reference system (EPSG code) of LAS files.
 }
 \details{
-This function reads only the LAS file headers using \code{get_header()},
-which avoids loading the full point cloud into memory. It is suitable
+This function efficiently reads the Coordinate Reference System of LAS files from VPC. It is suitable
 for quickly inspecting the CRS of multiple LAS/LAZ/COPC files.
 }
 \examples{

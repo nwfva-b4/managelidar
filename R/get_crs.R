@@ -1,8 +1,6 @@
 #' Get the Coordinate Reference System (CRS) of LAS files
 #'
-#' `get_crs()` extracts the coordinate reference system (EPSG code) from the
-#' headers of LAS/LAZ/COPC files. It works on individual files, directories
-#' containing LAS files, or Virtual Point Cloud (.vpc) files referencing LAS files.
+#' `get_crs()` efficiently extracts and returns the coordinate reference system (EPSG code) of LAS files.
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
 #'   or a Virtual Point Cloud (.vpc) referencing LAS files.
@@ -16,8 +14,7 @@
 #' }
 #'
 #' @details
-#' This function reads only the LAS file headers using \code{get_header()},
-#' which avoids loading the full point cloud into memory. It is suitable
+#' This function efficiently reads the Coordinate Reference System of LAS files from VPC. It is suitable
 #' for quickly inspecting the CRS of multiple LAS/LAZ/COPC files.
 #'
 #' @export
@@ -27,14 +24,17 @@
 #' get_crs(f)
 #'
 get_crs <- function(path, full.names = FALSE) {
-  header <- get_header(path, full.names = full.names)
+  vpc <- resolve_vpc(path)
 
-  do.call(rbind, lapply(seq_along(header), function(i) {
-    hdr <- header[[i]]
-    data.frame(
-      filename = names(header)[i],
-      crs = lidR::epsg(hdr),
-      stringsAsFactors = FALSE
-    )
-  }))
+  res <- data.frame(
+    filename = sapply(vpc$features$assets, function(x) x$data$href),
+    crs = sapply(vpc$features$properties, function(x) x$`proj:epsg`)
+  )
+
+  # Adjust filenames
+  if (!full.names) {
+    res$filename <- basename(res$filename)
+  }
+
+  res
 }
