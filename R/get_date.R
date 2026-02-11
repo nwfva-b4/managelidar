@@ -2,10 +2,10 @@
 #'
 #' `get_date()` derives the acquisition date for LAS/LAZ/COPC files.
 #'
-#' This function attempts to determine the acquisition date for LAS files either from
-#' embedded GPS time in the point cloud (LAS 1.3+), from processing date encoded in the LAS header or from an external CSV file
-#' containing reference dates for tiles without GPS time encoding.
-#' For files without GPS time and without CSV input, the returned date will be `NA`.
+#' This function attempts to determine the acquisition date for LASfiles from embedded GPStime in the point cloud
+#' where possible (LAS 1.3+). If this is not possible the date is extracted from  processing date encoded in the LASheader.
+#' If a valid CSV-file is provided the latest acquisition date prior to the processing date will be returned for files without
+#' GPStime instead of the processing date.
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
 #'   or a Virtual Point Cloud (.vpc) referencing these files.
@@ -24,14 +24,16 @@
 #'   \item{filename}{Filename of the LAS file.}
 #'   \item{date}{Acquisition date (POSIXct for GPS-encoded files, Date for others)
 #'                or reference year if `return_referenceyear = TRUE`.}
-#'   \item{gpstime}{Logical. `TRUE` if the date comes from GPS time, `FALSE` otherwise.}
+#'   \item{from}{Character. One of `data` (for files with valid GPStime data), `csv`
+#'                (for other files if corresponding date is in CSV file) or `header`
+#'                (for other files)}
 #' }
 #'
 #' @details
 #' - For LAS 1.3+ files with GPS time encoding, the function extracts the date of the first point.
 #' - For older files without GPS time, if `from_csv` is provided, the function will attempt
-#'   to assign the closest acquisition date from the CSV based on tile coordinates.
-#' - If neither GPS time nor CSV data is available, the date is returned as `NA`.
+#'   to assign the closest acquisition date prior to the processing date from the CSV file, based on tile coordinates.
+#' - If neither GPStime nor CSV data is available, the date is from the LASheader (processing date).
 #' - `return_referenceyear = TRUE` shifts December acquisitions to the following year
 #'   to standardize reference years.
 #'
@@ -66,6 +68,7 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
       return(data.frame(filename = character(), date = as.POSIXct(character()), gpstime = logical()))
     }
 
+    # this will extract datetime from first points gpstimestamp and fall back to datetime in LASheader (processed) otherwise
     vpc_path <- lasR::exec(
       lasR::write_vpc(
         ofile = tempfile(fileext = ".vpc"),
@@ -87,7 +90,7 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
     if (gpstime_flag) {
       df$date <- lubridate::ymd_hms(df$date)
     } else {
-      df$date <- as.Date(lubridate::ymd_hms(df$date))
+      df$date <- lubridate::ymd_hms(df$date)
       df$xmin <- sapply(vpc$features$properties, function(x) x$`proj:bbox`[1])
       df$ymin <- sapply(vpc$features$properties, function(x) x$`proj:bbox`[2])
     }
@@ -97,6 +100,9 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
 
   # Extract dates for GPS and non-GPS files
   dates_gpstime_true <- extract_dates_vpc(files_gpstime_true, TRUE)
+  dates_gpstime_true <- dates_gpstime_true |>
+    dplyr::mutate(from = "data")
+
   dates_gpstime_false <- extract_dates_vpc(files_gpstime_false, FALSE)
 
   # Override non-GPS dates with CSV if provided
@@ -111,14 +117,21 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
 
     dates_gpstime_false <- dates_gpstime_false |>
       dplyr::left_join(acquisitions, by = c("xmin" = "minx", "ymin" = "miny")) |>
+      # in these cases (gpstime = FLASE) date was extracted from header, by definition this is the processing date
+      # and should be later than the actual acquisition date. So we get all dates from the csv file for each tile
+      # which are earlier than the processing date, from these we than get the latest date which is the closest one
+      # prior to processing
       dplyr::filter(date_from_file <= date) |>
       dplyr::group_by(xmin, ymin, date) |>
       dplyr::slice_max(order_by = date_from_file, n = 1, with_ties = FALSE) |>
       dplyr::ungroup() |>
-      dplyr::select(filename, date = date_from_file, gpstime)
-  } else if (nrow(dates_gpstime_false) > 0) {
+      dplyr::mutate(from = "csv") |>
+      dplyr::select(filename, date = date_from_file, from)
+  }
+  else if (nrow(dates_gpstime_false) > 0) {
     dates_gpstime_false <- dates_gpstime_false |>
-      dplyr::select(filename, date, gpstime)
+      dplyr::mutate(from = "header") |>
+      dplyr::select(filename, date, from)
   }
 
   # Combine GPS and non-GPS results

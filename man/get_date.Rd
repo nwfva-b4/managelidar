@@ -33,22 +33,24 @@ A \code{data.frame} with columns:
 \item{filename}{Filename of the LAS file.}
 \item{date}{Acquisition date (POSIXct for GPS-encoded files, Date for others)
 or reference year if \code{return_referenceyear = TRUE}.}
-\item{gpstime}{Logical. \code{TRUE} if the date comes from GPS time, \code{FALSE} otherwise.}
+\item{from}{Character. One of \code{data} (for files with valid GPStime data), \code{csv}
+(for other files if corresponding date is in CSV file) or \code{header}
+(for other files)}
 }
 }
 \description{
 \code{get_date()} derives the acquisition date for LAS/LAZ/COPC files.
 }
 \details{
-This function attempts to determine the acquisition date for LAS files either from
-embedded GPS time in the point cloud (LAS 1.3+), from processing date encoded in the LAS header or from an external CSV file
-containing reference dates for tiles without GPS time encoding.
-For files without GPS time and without CSV input, the returned date will be \code{NA}.
+This function attempts to determine the acquisition date for LASfiles from embedded GPStime in the point cloud
+where possible (LAS 1.3+). If this is not possible the date is extracted from  processing date encoded in the LASheader.
+If a valid CSV-file is provided the latest acquisition date prior to the processing date will be returned for files without
+GPStime instead of the processing date.
 \itemize{
 \item For LAS 1.3+ files with GPS time encoding, the function extracts the date of the first point.
 \item For older files without GPS time, if \code{from_csv} is provided, the function will attempt
-to assign the closest acquisition date from the CSV based on tile coordinates.
-\item If neither GPS time nor CSV data is available, the date is returned as \code{NA}.
+to assign the closest acquisition date prior to the processing date from the CSV file, based on tile coordinates.
+\item If neither GPStime nor CSV data is available, the date is from the LASheader (processing date).
 \item \code{return_referenceyear = TRUE} shifts December acquisitions to the following year
 to standardize reference years.
 }
