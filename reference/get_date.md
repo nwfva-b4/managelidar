@@ -52,28 +52,30 @@ A `data.frame` with columns:
   Acquisition date (POSIXct for GPS-encoded files, Date for others) or
   reference year if `return_referenceyear = TRUE`.
 
-- gpstime:
+- from:
 
-  Logical. `TRUE` if the date comes from GPS time, `FALSE` otherwise.
+  Character. One of `data` (for files with valid GPStime data), `csv`
+  (for other files if corresponding date is in CSV file) or `header`
+  (for other files)
 
 ## Details
 
-This function attempts to determine the acquisition date for LAS files
-either from embedded GPS time in the point cloud (LAS 1.3+), from
-processing date encoded in the LAS header or from an external CSV file
-containing reference dates for tiles without GPS time encoding. For
-files without GPS time and without CSV input, the returned date will be
-`NA`.
+This function attempts to determine the acquisition date for LASfiles
+from embedded GPStime in the point cloud where possible (LAS 1.3+). If
+this is not possible the date is extracted from processing date encoded
+in the LASheader. If a valid CSV-file is provided the latest acquisition
+date prior to the processing date will be returned for files without
+GPStime instead of the processing date.
 
 - For LAS 1.3+ files with GPS time encoding, the function extracts the
   date of the first point.
 
 - For older files without GPS time, if `from_csv` is provided, the
-  function will attempt to assign the closest acquisition date from the
-  CSV based on tile coordinates.
+  function will attempt to assign the closest acquisition date prior to
+  the processing date from the CSV file, based on tile coordinates.
 
-- If neither GPS time nor CSV data is available, the date is returned as
-  `NA`.
+- If neither GPStime nor CSV data is available, the date is from the
+  LASheader (processing date).
 
 - `return_referenceyear = TRUE` shifts December acquisitions to the
   following year to standardize reference years.

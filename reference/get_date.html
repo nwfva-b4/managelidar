@@ -86,20 +86,22 @@ Default is <code>FALSE</code>.</p></dd>
 <dd><p>Acquisition date (POSIXct for GPS-encoded files, Date for others)
 or reference year if <code>return_referenceyear = TRUE</code>.</p></dd>
 
-<dt>gpstime</dt>
-<dd><p>Logical. <code>TRUE</code> if the date comes from GPS time, <code>FALSE</code> otherwise.</p></dd>
+<dt>from</dt>
+<dd><p>Character. One of <code>data</code> (for files with valid GPStime data), <code>csv</code>
+(for other files if corresponding date is in CSV file) or <code>header</code>
+(for other files)</p></dd>
 
 
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function attempts to determine the acquisition date for LAS files either from
-embedded GPS time in the point cloud (LAS 1.3+), from processing date encoded in the LAS header or from an external CSV file
-containing reference dates for tiles without GPS time encoding.
-For files without GPS time and without CSV input, the returned date will be <code>NA</code>.</p><ul><li><p>For LAS 1.3+ files with GPS time encoding, the function extracts the date of the first point.</p></li>
+    <p>This function attempts to determine the acquisition date for LASfiles from embedded GPStime in the point cloud
+where possible (LAS 1.3+). If this is not possible the date is extracted from  processing date encoded in the LASheader.
+If a valid CSV-file is provided the latest acquisition date prior to the processing date will be returned for files without
+GPStime instead of the processing date.</p><ul><li><p>For LAS 1.3+ files with GPS time encoding, the function extracts the date of the first point.</p></li>
 <li><p>For older files without GPS time, if <code>from_csv</code> is provided, the function will attempt
-to assign the closest acquisition date from the CSV based on tile coordinates.</p></li>
-<li><p>If neither GPS time nor CSV data is available, the date is returned as <code>NA</code>.</p></li>
+to assign the closest acquisition date prior to the processing date from the CSV file, based on tile coordinates.</p></li>
+<li><p>If neither GPStime nor CSV data is available, the date is from the LASheader (processing date).</p></li>
 <li><p><code>return_referenceyear = TRUE</code> shifts December acquisitions to the following year
 to standardize reference years.</p></li>
 </ul></div>
