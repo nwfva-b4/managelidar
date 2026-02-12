@@ -117,6 +117,8 @@ get_extent(las_files)
   : Validate LAS file names according to the ADV standard
 - [`check_tiling()`](https://wiesehahn.github.io/managelidar/reference/check_tiling.md)
   : Check if tiles are valid (correct size and aligned to grid)
+- [`filter_spatial()`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md)
+  : Filter point cloud files by spatial extent
 - [`get_crs()`](https://wiesehahn.github.io/managelidar/reference/get_crs.md)
   : Get the Coordinate Reference System (CRS) of LAS files
 - [`get_data()`](https://wiesehahn.github.io/managelidar/reference/get_data.md)
