@@ -36,9 +36,6 @@ resolve_vpc <- function(paths, out_file = NULL) {
   vpc_objects <- paths[is_vpc_object]
   file_paths <- unlist(paths[!is_vpc_object])
 
-  vpc_objects <- paths[is_vpc_object]
-  file_paths <- unlist(paths[!is_vpc_object])
-
   # Normalize and expand file paths
   if (length(file_paths) > 0) {
     file_paths <- fs::path_norm(fs::path_expand(file_paths))
