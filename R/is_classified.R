@@ -81,7 +81,8 @@ is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
-    stop("No LAS/LAZ/COPC files found.")
+    warning("No LAS/LAZ/COPC files found.")
+    return(invisible(NULL))
   }
 
   data.table::rbindlist(map_las(files, is_classified_per_file))

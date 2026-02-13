@@ -46,6 +46,11 @@
 get_first <- function(path, entire_tiles = TRUE, tolerance = 1, full.names = FALSE, multitemporal_only = FALSE, out_file = NULL) {
   vpc <- resolve_vpc(path)
 
+  # Check if resolve_vpc returned NULL
+  if (is.null(vpc)) {
+    return(invisible(NULL))
+  }
+
   tiles <- check_multitemporal(path = vpc, entire_tiles = entire_tiles, tolerance = tolerance, multitemporal_only = multitemporal_only, full.names = TRUE)
 
   # get only first/last acquisition of tiles with multi-temporal data

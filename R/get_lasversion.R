@@ -25,10 +25,6 @@ get_lasversion <- function(path, full.names = FALSE) {
   # ------------------------------------------------------------------
   headers <- get_header(path, full.names = full.names)
 
-  if (length(headers) == 0) {
-    stop("No LAS/LAZ/COPC files found.")
-  }
-
   # ------------------------------------------------------------------
   # Extract LAS version
   # ------------------------------------------------------------------

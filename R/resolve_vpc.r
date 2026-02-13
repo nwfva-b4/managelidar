@@ -79,8 +79,26 @@ resolve_vpc <- function(paths, out_file = NULL) {
   # Read all VPC files into objects
   # ------------------------------------------------------------
   if (length(to_merge_files) > 0) {
-    vpc_objs_from_files <- lapply(to_merge_files, yyjsonr::read_json_file)
+    vpc_objs_from_files <- lapply(to_merge_files, function(file) {
+      tryCatch(
+        yyjsonr::read_json_file(file),
+        error = function(e) {
+          warning("Could not read VPC file: ", file)
+          return(NULL)
+        }
+      )
+    })
+    # Remove NULL entries from failed reads
+    vpc_objs_from_files <- vpc_objs_from_files[!vapply(vpc_objs_from_files, is.null, logical(1))]
     to_merge_objects <- c(to_merge_objects, vpc_objs_from_files)
+  }
+
+  # ------------------------------------------------------------
+  # Check if we have any valid VPC objects
+  # ------------------------------------------------------------
+  if (length(to_merge_objects) == 0) {
+    warning("No valid VPC objects or LAS/LAZ/COPC files found")
+    return(invisible(NULL))
   }
 
   # ------------------------------------------------------------
@@ -126,75 +144,3 @@ resolve_vpc <- function(paths, out_file = NULL) {
     return(out_file)
   }
 }
-
-#' #' Resolve input paths to a single deduplicated VPC
-#' #'
-#' #' Takes a mix of LAS/LAZ/COPC files and `.vpc` files, merges them if needed,
-#' #' deduplicates tiles (based on storage location), and returns a VPC object or file path.
-#' #'
-#' #' @param paths Character vector of input paths.
-#' #' @param out_file Optional. Path where the VPC should be saved. If NULL (default),
-#' #'   returns the VPC as an R object. If provided, saves to file and returns the file path.
-#' #'
-#' #' @return If `out_file` is NULL, returns a list containing the VPC structure.
-#' #'   If `out_file` is provided, returns the path to the saved `.vpc` file.
-#' #'
-#' #' @keywords internal
-#' resolve_vpc <- function(paths, out_file = NULL) {
-#'
-#'   paths <- fs::path_norm(fs::path_expand(paths))
-#'
-#'   # Separate VPC vs non-VPC
-#'   vpc_files <- paths[
-#'     fs::file_exists(paths) &
-#'       tolower(fs::path_ext(paths)) == "vpc"
-#'   ]
-#'
-#'   non_vpc <- setdiff(paths, vpc_files)
-#'
-#'   # Resolve LAS files
-#'   las_files <- if (length(non_vpc) > 0) resolve_las_paths(non_vpc) else character()
-#'
-#'   # Temporary list to hold all VPC files for merging
-#'   to_merge <- vpc_files
-#'
-#'   # ------------------------------------------------------------
-#'   # If there are LAS files, create a temporary VPC
-#'   # ------------------------------------------------------------
-#'   if (length(las_files) > 0) {
-#'     las_vpc <- lasR::exec(
-#'       lasR::write_vpc(
-#'         tempfile(fileext = ".vpc"),
-#'         absolute_path = TRUE,
-#'         use_gpstime = TRUE
-#'       ),
-#'       on = las_files
-#'     )
-#'     to_merge <- c(to_merge, las_vpc)
-#'   }
-#'
-#'   # ------------------------------------------------------------
-#'   # If only one VPC, read it and return based on out_file
-#'   # ------------------------------------------------------------
-#'   if (length(to_merge) == 1) {
-#'     if (is.null(out_file)) {
-#'       return(yyjsonr::read_json_file(to_merge))
-#'     } else {
-#'       fs::file_copy(to_merge, out_file, overwrite = TRUE)
-#'       return(out_file)
-#'     }
-#'   }
-#'
-#'   # ------------------------------------------------------------
-#'   # Merge multiple VPCs
-#'   # ------------------------------------------------------------
-#'   merged_vpc <- merge_vpcs(to_merge)
-#'
-#'   # Return based on out_file parameter
-#'   if (is.null(out_file)) {
-#'     return(merged_vpc)
-#'   } else {
-#'     jsonlite::write_json(merged_vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
-#'     return(out_file)
-#'   }
-#' }

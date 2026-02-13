@@ -26,6 +26,11 @@ get_extent <- function(path, as_sf = FALSE, full.names = FALSE) {
   # ------------------------------------------------------------------
   vpc <- resolve_vpc(path)
 
+  # Check if resolve_vpc returned NULL
+  if (is.null(vpc)) {
+    return(invisible(NULL))
+  }
+
   # ------------------------------------------------------------------
   # Read bbox info from VPC
   # ------------------------------------------------------------------

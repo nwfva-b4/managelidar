@@ -65,11 +65,11 @@ get_summary <- function(
   # -------------------------------
   # Resolve all LAS files
   # -------------------------------
-  las_files <- resolve_las_paths(path)
+  files <- resolve_las_paths(path)
 
-  if (length(las_files) == 0) {
-    message("No LAS/LAZ/COPC files found.")
-    return(invisible(list()))
+  if (length(files) == 0) {
+    warning("No LAS/LAZ/COPC files found.")
+    return(invisible(NULL))
   }
 
   # -------------------------------
@@ -77,14 +77,14 @@ get_summary <- function(
   # -------------------------------
   if (!is.null(out_dir)) {
     fs::dir_create(out_dir, recurse = TRUE)
-    json_files <- fs::path(out_dir, fs::path_file(fs::path_ext_set(las_files, "json")))
+    json_files <- fs::path(out_dir, fs::path_file(fs::path_ext_set(files, "json")))
     keep <- !file.exists(json_files)
     n_skipped <- sum(!keep)
     if (n_skipped > 0) message("Skipping ", n_skipped, " already processed files")
-    las_files <- las_files[keep]
+    files <- files[keep]
   }
 
-  if (length(las_files) == 0) {
+  if (length(files) == 0) {
     message("Nothing to process.")
     return(invisible(list()))
   }
@@ -143,7 +143,7 @@ get_summary <- function(
   # -------------------------------
   # Map over files
   # -------------------------------
-  res <- map_las(las_files, get_summary_per_file)
+  res <- map_las(files, get_summary_per_file)
 
   # Flatten one level so filenames are top-level keys
   res <- unlist(res, recursive = FALSE)

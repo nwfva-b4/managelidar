@@ -36,8 +36,11 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   # Resolve all LAS/LAZ/COPC files
   # ------------------------------------------------------------------
   files <- resolve_las_paths(path)
-  if (length(files) == 0) stop("No LAS/LAZ/COPC files found.")
 
+  if (length(files) == 0) {
+    warning("No LAS/LAZ/COPC files found.")
+    return(invisible(NULL))
+  }
 
   # ------------------------------------------------------------------
   # Build a temporary VPC to extract metadata (bbox + datetime)
@@ -77,11 +80,9 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   # Determine region
   # ------------------------------------------------------------------
   if (is.null(region)) {
-
     ## OPT: cache states per session
     states_sf <- getOption("managelidar.states_sf")
     if (is.null(states_sf)) {
-
       state_codes <- c(
         "Baden-Württemberg" = "bw",
         "Bayern" = "by",
@@ -128,7 +129,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
           ),
           crs = 4326
         )
-      )[[1]]  # extract sfg from sfc
+      )[[1]] # extract sfg from sfc
     })
 
     tile_sf <- sf::st_sf(
@@ -144,7 +145,6 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     )
 
     if (nrow(intersections) > 0) {
-
       intersections$area <- sf::st_area(intersections)
 
       region_map <- intersections |>
@@ -156,7 +156,6 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
       # default region = "de" (offshore / no overlap)
       region <- rep("de", nrow(tile_sf))
       region[region_map$tile_id] <- region_map$code
-
     } else {
       region <- rep("de", nrow(tile_sf))
     }

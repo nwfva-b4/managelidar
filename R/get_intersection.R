@@ -29,11 +29,7 @@
 #' folder <- system.file("extdata", package = "managelidar")
 #' file <- list.files(folder, full.names = TRUE)[1]
 #' get_intersection(folder, file)
-get_intersection <- function(path1,
-                             path2,
-                             mode = "intersects",
-                             as_sf = FALSE,
-                             full.names = FALSE) {
+get_intersection <- function(path1, path2, mode = "intersects", as_sf = FALSE, full.names = FALSE) {
   # ------------------------------------------------------------------
   # Validate mode
   # ------------------------------------------------------------------
@@ -46,7 +42,8 @@ get_intersection <- function(path1,
   ext2 <- get_extent(path2, as_sf = TRUE, full.names = full.names)
 
   if (nrow(ext1) == 0 || nrow(ext2) == 0) {
-    stop("No LAS/LAZ/COPC files found in one or both inputs.")
+    warning("No LAS/LAZ/COPC files found.")
+    return(invisible(NULL))
   }
 
   # ------------------------------------------------------------------

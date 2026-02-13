@@ -40,6 +40,11 @@ check_multitemporal <- function(path, entire_tiles = TRUE, tolerance = 1, full.n
   # ------------------------------------------------------------------
   vpc <- resolve_vpc(path)
 
+  # Check if resolve_vpc returned NULL
+  if (is.null(vpc)) {
+    return(invisible(NULL))
+  }
+
   # ------------------------------------------------------------------
   # Read bbox and date info from VPC
   # ------------------------------------------------------------------

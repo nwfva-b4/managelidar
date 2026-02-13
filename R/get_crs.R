@@ -26,6 +26,11 @@
 get_crs <- function(path, full.names = FALSE) {
   vpc <- resolve_vpc(path)
 
+  # Check if resolve_vpc returned NULL
+  if (is.null(vpc)) {
+    return(invisible(NULL))
+  }
+
   res <- data.frame(
     filename = sapply(vpc$features$assets, function(x) x$data$href),
     crs = sapply(vpc$features$properties, function(x) x$`proj:epsg`)

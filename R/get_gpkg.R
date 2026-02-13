@@ -22,15 +22,16 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' get_gpkg(f, tempfile(fileext = ".gpkg"))
 #'
-get_gpkg <- function(path,
-                     out_file = tempfile(fileext = ".gpkg"),
-                     overwrite = FALSE,
-                     crs = 25832,
-                     metrics = NULL) {
+get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = FALSE, crs = 25832, metrics = NULL) {
   # ------------------------------------------------------------------
   # Resolve LAS files and build VPC if not provided
   # ------------------------------------------------------------------
   vpc_file <- resolve_vpc(path, out_file = tempfile(fileext = ".vpc"))
+
+  # Check if resolve_vpc returned NULL
+  if (is.null(vpc_file)) {
+    return(invisible(NULL))
+  }
 
   # ------------------------------------------------------------------
   # Read VPC as sf
