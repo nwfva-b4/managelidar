@@ -44,6 +44,11 @@ filter_spatial <- function(path, extent, crs = NULL, out_file = NULL) {
   # Resolve to VPC (always as object, never write to file)
   vpc <- resolve_vpc(path, out_file = NULL)
 
+  # Check if resolve_vpc returned NULL
+  if (is.null(vpc)) {
+    return(invisible(NULL))
+  }
+
   if (nrow(vpc$features) == 0) {
     warning("No features in VPC to filter")
     return(invisible(NULL))
@@ -123,4 +128,50 @@ filter_spatial <- function(path, extent, crs = NULL, out_file = NULL) {
     jsonlite::write_json(vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
     return(out_file)
   }
+}
+
+#' Internal helper to normalize different extent formats to sf
+#'
+#' @param extent Spatial extent (numeric vector, sf, or sfc object)
+#' @param crs CRS of the extent (required for numeric vectors)
+#'
+#' @return An sf object with geometry
+#'
+#' @keywords internal
+normalize_extent_to_sf <- function(extent, crs = NULL) {
+  # Already sf/sfc
+  if (inherits(extent, "sf")) {
+    return(extent)
+  }
+
+  if (inherits(extent, "sfc")) {
+    return(sf::st_sf(geometry = extent))
+  }
+
+  # Numeric vector
+  if (is.numeric(extent)) {
+    if (length(extent) == 2) {
+      # Single point
+      geom <- sf::st_point(extent)
+    } else if (length(extent) == 4) {
+      # Bbox -> polygon
+      geom <- sf::st_polygon(list(matrix(c(
+        extent[1], extent[2],
+        extent[3], extent[2],
+        extent[3], extent[4],
+        extent[1], extent[4],
+        extent[1], extent[2]
+      ), ncol = 2, byrow = TRUE)))
+    } else {
+      stop("Numeric extent must be length 2 (x, y) or 4 (xmin, ymin, xmax, ymax)")
+    }
+
+    if (is.null(crs)) {
+      stop("Must provide 'crs' when extent is a numeric vector")
+    }
+
+    return(sf::st_sf(geometry = sf::st_sfc(geom, crs = crs)))
+  }
+
+  stop("Unsupported extent type. Use numeric vector or sf object.")
 }
