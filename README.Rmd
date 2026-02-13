@@ -48,21 +48,33 @@ Just some basic examples for package usage.
 ```{r get_extent}
 library(managelidar)
 
+# create various valid input paths
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*.laz")
-las_file <- las_files[1] 
-vpc_file <- tempfile(fileext = ".vpc"); lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
+las_file <- las_files[1]
+vpc_file <- tempfile(fileext = ".vpc")
+lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
 vpc_obj <- yyjsonr::read_json_file(vpc_file)
 mixed <- c(folder, las_file)
 
-paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)  
+paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
 
-# get the Coordinate reference system for all types of input
+# get the Coordinate Reference System for all types of input
 lapply(paths, get_crs)
 
 # get the extent (bbox) from LASfiles
 get_extent(las_files)
 
+# get names of files intersecting an extent
+las_files |>
+  filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
+  get_names()
+
+# combine with temporal filter
+las_files |>
+  filter_temporal("2024-03") |>
+  filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
+  get_names()
 ```
 
 
