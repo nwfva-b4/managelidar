@@ -10,6 +10,8 @@
   : Check if tiles are valid (correct size and aligned to grid)
 - [`filter_spatial()`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md)
   : Filter point cloud files by spatial extent
+- [`filter_temporal()`](https://wiesehahn.github.io/managelidar/reference/filter_temporal.md)
+  : Filter point cloud files by temporal extent
 - [`get_crs()`](https://wiesehahn.github.io/managelidar/reference/get_crs.md)
   : Get the Coordinate Reference System (CRS) of LAS files
 - [`get_data()`](https://wiesehahn.github.io/managelidar/reference/get_data.md)
