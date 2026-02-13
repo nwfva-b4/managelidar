@@ -47,17 +47,19 @@ Just some basic examples for package usage.
 ``` r
 library(managelidar)
 
+# create various valid input paths
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*.laz")
-las_file <- las_files[1] 
-vpc_file <- tempfile(fileext = ".vpc"); lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
-#> [1] "C:\\Users\\JWIESE~1\\AppData\\Local\\Temp\\RtmpWm4m4p\\file13f832ae6ba3.vpc"
+las_file <- las_files[1]
+vpc_file <- tempfile(fileext = ".vpc")
+lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
+#> [1] "C:\\Users\\JWIESE~1\\AppData\\Local\\Temp\\RtmpghBJtg\\file16ffcbda271a.vpc"
 vpc_obj <- yyjsonr::read_json_file(vpc_file)
 mixed <- c(folder, las_file)
 
-paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)  
+paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
 
-# get the Coordinate reference system for all types of input
+# get the Coordinate Reference System for all types of input
 lapply(paths, get_crs)
 #> [[1]]
 #>                            filename   crs
@@ -105,4 +107,17 @@ get_extent(las_files)
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
 #> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
+
+# get names of files intersecting an extent
+las_files |>
+  filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
+  get_names()
+#> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
+
+# combine with temporal filter
+las_files |>
+  filter_temporal("2024-03") |>
+  filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
+  get_names()
+#> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 ```
