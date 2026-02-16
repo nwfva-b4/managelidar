@@ -1,5 +1,9 @@
 #' Check for multi-temporal coverage in LAS/LAZ files
 #'
+#' Analyzes tiles for multi-temporal coverage.
+#' Returns a data frame with tile information including whether each tile
+#' has multiple observations and how many.
+#' 
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
 #'   or a Virtual Point Cloud (.vpc) referencing LAS files.
 #' @param entire_tiles Logical. If TRUE, only considers tiles that are exactly 1000x1000 m
@@ -23,26 +27,34 @@
 #' coverage). It reads extent and date information from a VPC (Virtual Point Cloud) file,
 #' optionally snaps coordinates to a regular grid, and groups observations by spatial extent.
 #'
-#' When \code{entire_tiles = TRUE}, only tiles that are exactly 1000x1000 m and
+#' When \code{entire_tiles = TRUE}, only tiles that are 1000x1000 m and
 #' aligned to a 1000 m grid are included in the analysis.
 #'
 #' When \code{tolerance > 0}, coordinates within that distance of a grid line are
-#' snapped to handle minor floating point inaccuracies.
+#' snapped to handle minor inaccuracies.
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
-#' check_multitemporal(f)
+#' is_multitemporal(f)
 #'
+#' @seealso \code{\link{filter_multitemporal}}
+#' 
 #' @export
-check_multitemporal <- function(path, entire_tiles = TRUE, tolerance = 1, full.names = FALSE, multitemporal_only = FALSE) {
+is_multitemporal <- function(path, entire_tiles = TRUE, tolerance = 1, full.names = FALSE, multitemporal_only = FALSE) {
   # ------------------------------------------------------------------
   # Resolve files and build VPC if not provided
   # ------------------------------------------------------------------
   vpc <- resolve_vpc(path)
 
-  # Check if resolve_vpc returned NULL
-  if (is.null(vpc)) {
-    return(invisible(NULL))
+  # Check if VPC has features
+  if (is.null(vpc) || nrow(vpc$features) == 0) {
+    return(data.frame(
+      filename = character(0),
+      tile = character(0),
+      date = as.Date(character(0)),
+      multitemporal = logical(0),
+      observations = integer(0)
+    ))
   }
 
   # ------------------------------------------------------------------
