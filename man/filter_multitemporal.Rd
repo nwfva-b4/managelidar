@@ -4,7 +4,7 @@
 \alias{filter_multitemporal}
 \title{Filter to multi-temporal tiles}
 \usage{
-filter_multitemporal(path, entire_tiles = TRUE, tolerance = 1, out_file = NULL)
+filter_multitemporal(path, entire_tiles = TRUE, tolerance = 1)
 }
 \arguments{
 \item{path}{Character vector of input paths, a VPC file path, or a VPC object
@@ -16,18 +16,10 @@ and aligned to a 1000m grid (default: TRUE)}
 \item{tolerance}{Numeric. Tolerance in coordinate units for snapping extents to grid
 (default: 1, submeter inaccuracies are ignored). If > 0, coordinates within this distance of a grid line will be
 snapped before processing. Set to 0 to disable snapping.}
-
-\item{out_file}{Optional. Path where the filtered VPC should be saved.
-If NULL (default), returns the VPC as an R object.
-If provided, saves to file and returns the file path.
-Must have \code{.vpc} extension and must not already exist.
-File is only created if filtering returns results.}
 }
 \value{
-If \code{out_file} is NULL, returns a VPC object (list) containing only
-tiles with multiple temporal observations. If \code{out_file} is provided and results
-exist, returns the path to the saved \code{.vpc} file. Returns NULL invisibly
-if no multi-temporal tiles are found.
+A VPC object (list) containing only tiles with multiple temporal observations.
+Returns NULL invisibly if no multi-temporal tiles are found.
 }
 \description{
 Identifies and filters tiles that have been observed multiple times
@@ -43,10 +35,33 @@ aligned to a 1000 m grid are included in the analysis.
 
 When \code{tolerance > 0}, coordinates within that distance of a grid line are
 snapped to handle minor floating point inaccuracies.
+
+\strong{Important:} The returned VPC contains \emph{all} observations for multi-temporal
+tiles, meaning multiple files may reference the same spatial tile. This is typically
+not suitable for direct processing in most workflows in lasR, as data will be processed together.
+E.g. creating a Canopy Height Model based on multi-temporal VPCs will result in a single CHM raster based on
+lidar data from all acquisitions instead of a separate CHM raster for each acquisition time.
+
+Usually you want to use \code{\link{filter_first}} or \code{\link{filter_latest}} instead.
+
+This intermediate filtering step might be useful when you need to:
+\itemize{
+\item Identify which tiles have multi-temporal data before selecting a time period
+\item Explicitly want to work with combined multi-temporal data
+}
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
-vpc <- filter_multitemporal(f)
+
+# Identify multi-temporal tiles
+vpc_multi <- filter_multitemporal(f)
+
+
+# Or chain filters for specific workflows:
+vpc <- f |>
+  filter_multitemporal() |>
+  filter_temporal("2024") |>
+  filter_latest()
 
 }
 \seealso{
