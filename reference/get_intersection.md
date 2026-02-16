@@ -51,12 +51,12 @@ equal file extents.
 ## Details
 
 This function simply checks for intersection between two inputs.
-[`check_multitemporal`](https://wiesehahn.github.io/managelidar/reference/check_multitemporal.md)
+[`is_multitemporal`](https://wiesehahn.github.io/managelidar/reference/is_multitemporal.md)
 in contrast is a newer addition and works with a single input (which can
 be a vector of multiple files/folders), in most cases
-[`get_first`](https://wiesehahn.github.io/managelidar/reference/get_first.md)
+[`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
 /
-[`get_latest`](https://wiesehahn.github.io/managelidar/reference/get_latest.md)
+[`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
 might be the best choice.
 
 ## Examples
