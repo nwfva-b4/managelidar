@@ -108,7 +108,7 @@ resolve_vpc <- function(paths, out_file = NULL) {
     if (is.null(out_file)) {
       return(to_merge_objects[[1]])
     } else {
-      jsonlite::write_json(to_merge_objects[[1]], out_file, pretty = TRUE, auto_unbox = TRUE)
+      yyjsonr::write_json_file(to_merge_objects[[1]], out_file, pretty = TRUE, auto_unbox = TRUE)
       return(out_file)
     }
   }
@@ -140,7 +140,7 @@ resolve_vpc <- function(paths, out_file = NULL) {
   if (is.null(out_file)) {
     return(merged_vpc)
   } else {
-    jsonlite::write_json(merged_vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
+    yyjsonr::write_json_file(merged_vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
     return(out_file)
   }
 }

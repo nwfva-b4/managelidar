@@ -56,7 +56,7 @@ merge_vpcs <- function(vpc_files, out_file = NULL, overwrite = FALSE) {
     if (file.exists(out_file) && !overwrite) {
       stop("Output file exists: ", out_file)
     }
-    jsonlite::write_json(merged_vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
+    yyjsonr::write_json_file(merged_vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
     message("Wrote merged VPC: ", out_file)
   }
 

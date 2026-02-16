@@ -120,7 +120,7 @@ get_summary <- function(
         # ---- Write JSON ----
         if (!is.null(out_dir)) {
           file_out <- fs::path(out_dir, fs::path_file(fs::path_ext_set(file, "json")))
-          jsonlite::write_json(ans, file_out, pretty = TRUE, auto_unbox = TRUE)
+          yyjsonr::write_json_file(ans, file_out, pretty = TRUE, auto_unbox = TRUE)
           return(invisible(NULL))
         }
 

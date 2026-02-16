@@ -90,7 +90,7 @@ get_first <- function(path, entire_tiles = TRUE, tolerance = 1, full.names = FAL
     vpc_multitemporal$features <- features
 
 
-    jsonlite::write_json(vpc_multitemporal, out_file, pretty = TRUE, auto_unbox = TRUE)
+    yyjsonr::write_json_file(vpc_multitemporal, out_file, pretty = TRUE, auto_unbox = TRUE)
     return(out_file)
   }
 }

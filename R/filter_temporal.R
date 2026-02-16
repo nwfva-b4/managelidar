@@ -115,7 +115,7 @@ filter_temporal <- function(path, start, end = NULL, out_file = NULL) {
   if (is.null(out_file)) {
     return(vpc)
   } else {
-    jsonlite::write_json(vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
+    yyjsonr::write_json_file(vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
     return(out_file)
   }
 }
