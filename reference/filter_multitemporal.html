@@ -45,7 +45,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">filter_multitemporal</span><span class="op">(</span><span class="va">path</span>, entire_tiles <span class="op">=</span> <span class="cn">TRUE</span>, tolerance <span class="op">=</span> <span class="fl">1</span>, out_file <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">filter_multitemporal</span><span class="op">(</span><span class="va">path</span>, entire_tiles <span class="op">=</span> <span class="cn">TRUE</span>, tolerance <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,21 +67,11 @@ and aligned to a 1000m grid (default: TRUE)</p></dd>
 (default: 1, submeter inaccuracies are ignored). If &gt; 0, coordinates within this distance of a grid line will be
 snapped before processing. Set to 0 to disable snapping.</p></dd>
 
-
-<dt id="arg-out-file">out_file<a class="anchor" aria-label="anchor" href="#arg-out-file"></a></dt>
-<dd><p>Optional. Path where the filtered VPC should be saved.
-If NULL (default), returns the VPC as an R object.
-If provided, saves to file and returns the file path.
-Must have <code>.vpc</code> extension and must not already exist.
-File is only created if filtering returns results.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>If <code>out_file</code> is NULL, returns a VPC object (list) containing only
-tiles with multiple temporal observations. If <code>out_file</code> is provided and results
-exist, returns the path to the saved <code>.vpc</code> file. Returns NULL invisibly
-if no multi-temporal tiles are found.</p>
+    <p>A VPC object (list) containing only tiles with multiple temporal observations.
+Returns NULL invisibly if no multi-temporal tiles are found.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -92,7 +82,15 @@ optionally snaps coordinates to a regular grid, and groups observations by spati
 aligned to a 1000 m grid are included in the analysis.</p>
 <p>When <code>tolerance &gt; 0</code>, coordinates within that distance of a grid line are
 snapped to handle minor floating point inaccuracies.</p>
-    </div>
+<p><strong>Important:</strong> The returned VPC contains <em>all</em> observations for multi-temporal
+tiles, meaning multiple files may reference the same spatial tile. This is typically
+not suitable for direct processing in most workflows in lasR, as data will be processed together.
+E.g. creating a Canopy Height Model based on multi-temporal VPCs will result in a single CHM raster based on
+lidar data from all acquisitions instead of a separate CHM raster for each acquisition time.</p>
+<p>Usually you want to use <code><a href="filter_first.html">filter_first</a></code> or <code><a href="filter_latest.html">filter_latest</a></code> instead.</p>
+<p>This intermediate filtering step might be useful when you need to:</p><ul><li><p>Identify which tiles have multi-temporal data before selecting a time period</p></li>
+<li><p>Explicitly want to work with combined multi-temporal data</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="filter_first.html">filter_first</a></code>, <code><a href="filter_latest.html">filter_latest</a></code>,
@@ -102,7 +100,17 @@ snapped to handle minor floating point inaccuracies.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">vpc</span> <span class="op">&lt;-</span> <span class="fu">filter_multitemporal</span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Identify multi-temporal tiles</span></span></span>
+<span class="r-in"><span><span class="va">vpc_multi</span> <span class="op">&lt;-</span> <span class="fu">filter_multitemporal</span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Or chain filters for specific workflows:</span></span></span>
+<span class="r-in"><span><span class="va">vpc</span> <span class="op">&lt;-</span> <span class="va">f</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">filter_multitemporal</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="filter_temporal.html">filter_temporal</a></span><span class="op">(</span><span class="st">"2024"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="filter_latest.html">filter_latest</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

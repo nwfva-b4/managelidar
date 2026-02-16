@@ -6,7 +6,7 @@ Identifies and filters tiles that have been observed multiple times
 ## Usage
 
 ``` r
-filter_multitemporal(path, entire_tiles = TRUE, tolerance = 1, out_file = NULL)
+filter_multitemporal(path, entire_tiles = TRUE, tolerance = 1)
 ```
 
 ## Arguments
@@ -29,19 +29,11 @@ filter_multitemporal(path, entire_tiles = TRUE, tolerance = 1, out_file = NULL)
   within this distance of a grid line will be snapped before processing.
   Set to 0 to disable snapping.
 
-- out_file:
-
-  Optional. Path where the filtered VPC should be saved. If NULL
-  (default), returns the VPC as an R object. If provided, saves to file
-  and returns the file path. Must have `.vpc` extension and must not
-  already exist. File is only created if filtering returns results.
-
 ## Value
 
-If `out_file` is NULL, returns a VPC object (list) containing only tiles
-with multiple temporal observations. If `out_file` is provided and
-results exist, returns the path to the saved `.vpc` file. Returns NULL
-invisibly if no multi-temporal tiles are found.
+A VPC object (list) containing only tiles with multiple temporal
+observations. Returns NULL invisibly if no multi-temporal tiles are
+found.
 
 ## Details
 
@@ -56,6 +48,27 @@ aligned to a 1000 m grid are included in the analysis.
 When `tolerance > 0`, coordinates within that distance of a grid line
 are snapped to handle minor floating point inaccuracies.
 
+**Important:** The returned VPC contains *all* observations for
+multi-temporal tiles, meaning multiple files may reference the same
+spatial tile. This is typically not suitable for direct processing in
+most workflows in lasR, as data will be processed together. E.g.
+creating a Canopy Height Model based on multi-temporal VPCs will result
+in a single CHM raster based on lidar data from all acquisitions instead
+of a separate CHM raster for each acquisition time.
+
+Usually you want to use
+[`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
+or
+[`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
+instead.
+
+This intermediate filtering step might be useful when you need to:
+
+- Identify which tiles have multi-temporal data before selecting a time
+  period
+
+- Explicitly want to work with combined multi-temporal data
+
 ## See also
 
 [`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md),
@@ -68,6 +81,16 @@ are snapped to handle minor floating point inaccuracies.
 
 ``` r
 f <- system.file("extdata", package = "managelidar")
-vpc <- filter_multitemporal(f)
+
+# Identify multi-temporal tiles
+vpc_multi <- filter_multitemporal(f)
+#> Error in loadNamespace(x): there is no package called ‘lasR’
+
+
+# Or chain filters for specific workflows:
+vpc <- f |>
+  filter_multitemporal() |>
+  filter_temporal("2024") |>
+  filter_latest()
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```
