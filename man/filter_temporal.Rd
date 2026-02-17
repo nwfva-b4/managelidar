@@ -4,7 +4,7 @@
 \alias{filter_temporal}
 \title{Filter point cloud files by temporal extent}
 \usage{
-filter_temporal(path, start, end = NULL, out_file = NULL)
+filter_temporal(path, start, end = NULL, verbose = TRUE)
 }
 \arguments{
 \item{path}{Character vector of input paths, a VPC file path, or a VPC object
@@ -25,42 +25,35 @@ granularity of \code{start}:
 \item Full datetime: same as start (exact match)
 }}
 
-\item{out_file}{Optional. Path where the filtered VPC should be saved.
-If NULL (default), returns the VPC as an R object.
-If provided, saves to file and returns the file path.
-Must have \code{.vpc} extension and must not already exist.
-File is only created if filtering returns results.}
+\item{verbose}{Logical. If TRUE (default), prints information about filtering results.}
 }
 \value{
-If \code{out_file} is NULL, returns a VPC object (list) containing only
-features within the temporal range. If \code{out_file} is provided and results
-exist, returns the path to the saved \code{.vpc} file. Returns NULL invisibly
-if no features match the filter.
+A VPC object (list) containing only features within the temporal range.
+Returns NULL invisibly if no features match the filter.
 }
 \description{
 Filter point cloud files by temporal extent
 }
 \examples{
-\dontrun{
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+
 # Filter by single day (all features from that day)
-las_files |> filter_temporal("2024-03-27")
+vpc <- las_files |> filter_temporal("2024-03-27")
 
 # Filter by month (all features from March 2024)
-las_files |> filter_temporal("2024-03")
+vpc <- las_files |> filter_temporal("2024-03")
 
 # Filter by year (all features from 2024)
-las_files |> filter_temporal("2024")
+vpc <- las_files |> filter_temporal("2024")
 
 # Filter by explicit date range
-las_files |> filter_temporal("2024-03-01", "2024-03-31")
+vpc <- las_files |> filter_temporal("2024-03-01", "2024-03-31")
 
 # Filter by datetime range
-las_files |> filter_temporal("2024-03-27T00:00:00Z", "2024-03-27T12:00:00Z")
+vpc <- las_files |> filter_temporal("2024-03-27T00:00:00Z", "2024-03-27T12:00:00Z")
 
 # Using Date objects
-las_files |> filter_temporal(as.Date("2024-03-27"))
+vpc <- las_files |> filter_temporal(as.Date("2024-03-27"))
 
-# Save to file
-las_files |> filter_temporal("2024-03", out_file = "march.vpc")
-}
 }

@@ -13,47 +13,32 @@
 #'   snapped before processing. Set to 0 to disable snapping.
 #' @param multitemporal_only Logical. If `TRUE`, only returns tiles with multiple
 #'   acquisitions. If `FALSE` (default), includes all tiles.
-#' @param out_file Optional. Path where the filtered VPC should be saved.
-#'   If NULL (default), returns the VPC as an R object.
-#'   If provided, saves to file and returns the file path.
-#'   Must have `.vpc` extension and must not already exist.
-#'   File is only created if filtering returns results.
+#' @param verbose Logical. If TRUE (default), prints information about filtering results.
 #'
-#' @return If `out_file` is NULL, returns a VPC object (list) containing only
-#'   the first acquisition for each tile. If `out_file` is provided and results
-#'   exist, returns the path to the saved `.vpc` file. Returns NULL invisibly
-#'   if no features match the filter.
+#' @return A VPC object (list) containing only the first acquisition for each tile.
+#'   Returns NULL invisibly if no features match the filter.
 #'
 #' @details
 #' The function performs the following steps:
 #' \enumerate{
 #'   \item Resolves input paths to a VPC object
-#'   \item Checks for multi-temporal coverage using \code{\link{filter_multitemporal}}
+#'   \item Analyzes tiles for multi-temporal coverage
 #'   \item Groups tiles by location and selects the earliest acquisition for each
-#'   \item Returns either a VPC object or writes a filtered VPC file
+#'   \item Returns a filtered VPC object
 #' }
 #'
 #' @examples
 #' f <- system.file("extdata", package = "managelidar")
-#' vpc <- filter_first(f)
+#'
+#' # get first acquisition per tile (entire tiles only, with 10m tolerance)
+#' vpc <- filter_first(f, tolerance = 10)
 #'
 #' @seealso \code{\link{filter_latest}}, \code{\link{filter_spatial}},
 #'   \code{\link{filter_multitemporal}}, \code{\link{resolve_vpc}}
 #'
 #' @export
 #'
-filter_first <- function(path, entire_tiles = TRUE, tolerance = 1, multitemporal_only = FALSE, out_file = NULL) {
-
-  # Validate out_file if provided
-  if (!is.null(out_file)) {
-    if (tolower(fs::path_ext(out_file)) != "vpc") {
-      stop("out_file must have .vpc extension")
-    }
-    if (fs::file_exists(out_file)) {
-      stop("Output file already exists: ", out_file)
-    }
-  }
-
+filter_first <- function(path, entire_tiles = TRUE, tolerance = 1, multitemporal_only = FALSE, verbose = TRUE) {
   # Resolve to VPC (always as object, never write to file)
   vpc <- resolve_vpc(path, out_file = NULL)
 
@@ -62,16 +47,30 @@ filter_first <- function(path, entire_tiles = TRUE, tolerance = 1, multitemporal
     return(invisible(NULL))
   }
 
-  if (nrow(vpc$features) == 0) {
+  n_input <- nrow(vpc$features)
+
+  if (n_input == 0) {
     warning("No features in VPC to filter")
     return(invisible(NULL))
   }
 
-  # Get multi-temporal tile information
-  tiles <- is_multitemporal(path = vpc, entire_tiles = entire_tiles, 
-                                tolerance = tolerance, 
-                                multitemporal_only = multitemporal_only, 
-                                full.names = TRUE)
+  # Analyze tiles for multi-temporal coverage
+  tiles <- is_multitemporal(
+    path = vpc, entire_tiles = entire_tiles,
+    tolerance = tolerance,
+    multitemporal_only = multitemporal_only,
+    full.names = TRUE
+  )
+
+  if (nrow(tiles) == 0) {
+    warning("No tiles found matching criteria, consider increasing `tolerance` or set `entire_tiles=FALSE`")
+    return(invisible(NULL))
+  }
+
+  # Get statistics before filtering
+  n_tiles <- length(unique(tiles$tile))
+  multitemporal_tiles <- unique(tiles$tile[tiles$multitemporal])
+  n_multitemporal_tiles <- length(multitemporal_tiles)
 
   # Get only first acquisition of tiles
   selected_acquisitions <- tiles |>
@@ -95,11 +94,17 @@ filter_first <- function(path, entire_tiles = TRUE, tolerance = 1, multitemporal
     dplyr::filter(href %in% files_to_keep) |>
     dplyr::select(-href)
 
-  # Return based on out_file parameter
-  if (is.null(out_file)) {
-    return(vpc)
-  } else {
-    yyjsonr::write_json_file(vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
-    return(out_file)
+  n_output <- nrow(vpc$features)
+
+  # Print information
+  if (verbose) {
+    message("Filter first acquisition")
+    message(sprintf(
+      "  \u25BC %d LASfiles in %d tiles (%d multi-temporal)",
+      n_input, n_tiles, n_multitemporal_tiles
+    ))
+    message(sprintf("  \u25BC %d LASfiles retained", n_output))
   }
+
+  return(vpc)
 }

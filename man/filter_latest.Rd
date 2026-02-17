@@ -9,7 +9,7 @@ filter_latest(
   entire_tiles = TRUE,
   tolerance = 1,
   multitemporal_only = FALSE,
-  out_file = NULL
+  verbose = TRUE
 )
 }
 \arguments{
@@ -27,17 +27,11 @@ snapped before processing. Set to 0 to disable snapping.}
 \item{multitemporal_only}{Logical. If \code{TRUE}, only returns tiles with multiple
 acquisitions. If \code{FALSE} (default), includes all tiles.}
 
-\item{out_file}{Optional. Path where the filtered VPC should be saved.
-If NULL (default), returns the VPC as an R object.
-If provided, saves to file and returns the file path.
-Must have \code{.vpc} extension and must not already exist.
-File is only created if filtering returns results.}
+\item{verbose}{Logical. If TRUE (default), prints information about filtering results.}
 }
 \value{
-If \code{out_file} is NULL, returns a VPC object (list) containing only
-the latest acquisition for each tile. If \code{out_file} is provided and results
-exist, returns the path to the saved \code{.vpc} file. Returns NULL invisibly
-if no features match the filter.
+A VPC object (list) containing only the latest acquisition for each tile.
+Returns NULL invisibly if no features match the filter.
 }
 \description{
 Identifies tiles with multiple acquisitions and returns only the latest (newest)
@@ -47,14 +41,16 @@ acquisition for each tile as a filtered VPC.
 The function performs the following steps:
 \enumerate{
 \item Resolves input paths to a VPC object
-\item Checks for multi-temporal coverage using \code{\link{filter_multitemporal}}
+\item Analyzes tiles for multi-temporal coverage
 \item Groups tiles by location and selects the latest acquisition for each
-\item Returns either a VPC object or writes a filtered VPC file
+\item Returns a filtered VPC object
 }
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
-vpc <- filter_latest(f)
+
+# get latest acquisition per tile (entire tiles only, with 10m tolerance)
+vpc <- filter_first(f, tolerance = 10)
 
 }
 \seealso{

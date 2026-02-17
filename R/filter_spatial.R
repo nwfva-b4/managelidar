@@ -11,36 +11,20 @@
 #'   If NULL (default) and extent is numeric, assumes extent is in the same CRS
 #'   as the VPC features. Required for sf objects without CRS.
 #'   Can be EPSG code (e.g., 4326, 25832) or WKT2 string.
-#' @param out_file Optional. Path where the filtered VPC should be saved.
-#'   If NULL (default), returns the VPC as an R object.
-#'   If provided, saves to file and returns the file path.
-#'   Must have `.vpc` extension and must not already exist.
-#'   File is only created if filtering returns results.
+#' @param verbose Logical. If TRUE (default), prints information about filtering results.
 #'
-#' @return If `out_file` is NULL, returns a VPC object (list) containing only
-#'   features that intersect the extent. If `out_file` is provided and results
-#'   exist, returns the path to the saved `.vpc` file. Returns NULL invisibly
-#'   if no features match the filter.
+#' @return A VPC object (list) containing only features that intersect the extent.
+#'   Returns NULL invisibly if no features match the filter.
 #'
 #' @export
 #'
 #' @examples
-#' # Example using the package's extdata folder
-#' f <- system.file("extdata", package = "managelidar")
-#' filter_spatial(f, c(547700, 5724010))
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 #'
-filter_spatial <- function(path, extent, crs = NULL, out_file = NULL) {
-
-  # Validate out_file if provided
-  if (!is.null(out_file)) {
-    if (tolower(fs::path_ext(out_file)) != "vpc") {
-      stop("out_file must have .vpc extension")
-    }
-    if (fs::file_exists(out_file)) {
-      stop("Output file already exists: ", out_file)
-    }
-  }
-
+#' vpc <- las_files |> filter_spatial(c(548700, 5725010))
+#'
+filter_spatial <- function(path, extent, crs = NULL, verbose = TRUE) {
   # Resolve to VPC (always as object, never write to file)
   vpc <- resolve_vpc(path, out_file = NULL)
 
@@ -49,7 +33,9 @@ filter_spatial <- function(path, extent, crs = NULL, out_file = NULL) {
     return(invisible(NULL))
   }
 
-  if (nrow(vpc$features) == 0) {
+  n_input <- nrow(vpc$features)
+
+  if (n_input == 0) {
     warning("No features in VPC to filter")
     return(invisible(NULL))
   }
@@ -121,13 +107,16 @@ filter_spatial <- function(path, extent, crs = NULL, out_file = NULL) {
 
   vpc$features <- vpc$features[keep, , drop = FALSE]
 
-  # Return based on out_file parameter
-  if (is.null(out_file)) {
-    return(vpc)
-  } else {
-    yyjsonr::write_json_file(vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
-    return(out_file)
+  n_output <- nrow(vpc$features)
+
+  # Print information
+  if (verbose) {
+    message("Filter spatial extent")
+    message(sprintf("  \u25BC %d LASfiles", n_input))
+    message(sprintf("  \u25BC %d LASfiles retained", n_output))
   }
+
+  return(vpc)
 }
 
 #' Internal helper to normalize different extent formats to sf

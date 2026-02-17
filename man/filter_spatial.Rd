@@ -4,7 +4,7 @@
 \alias{filter_spatial}
 \title{Filter point cloud files by spatial extent}
 \usage{
-filter_spatial(path, extent, crs = NULL, out_file = NULL)
+filter_spatial(path, extent, crs = NULL, verbose = TRUE)
 }
 \arguments{
 \item{path}{Character vector of input paths, a VPC file path, or a VPC object
@@ -21,24 +21,19 @@ If NULL (default) and extent is numeric, assumes extent is in the same CRS
 as the VPC features. Required for sf objects without CRS.
 Can be EPSG code (e.g., 4326, 25832) or WKT2 string.}
 
-\item{out_file}{Optional. Path where the filtered VPC should be saved.
-If NULL (default), returns the VPC as an R object.
-If provided, saves to file and returns the file path.
-Must have \code{.vpc} extension and must not already exist.
-File is only created if filtering returns results.}
+\item{verbose}{Logical. If TRUE (default), prints information about filtering results.}
 }
 \value{
-If \code{out_file} is NULL, returns a VPC object (list) containing only
-features that intersect the extent. If \code{out_file} is provided and results
-exist, returns the path to the saved \code{.vpc} file. Returns NULL invisibly
-if no features match the filter.
+A VPC object (list) containing only features that intersect the extent.
+Returns NULL invisibly if no features match the filter.
 }
 \description{
 Filter point cloud files by spatial extent
 }
 \examples{
-# Example using the package's extdata folder
-f <- system.file("extdata", package = "managelidar")
-filter_spatial(f, c(547700, 5724010))
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+vpc <- las_files |> filter_spatial(c(548700, 5725010))
 
 }
