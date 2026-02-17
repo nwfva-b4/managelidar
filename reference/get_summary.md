@@ -136,3 +136,36 @@ elevation histograms, which can save time and memory for large datasets.
 Parallel processing is used automatically for large numbers of files
 through
 [`map_las()`](https://wiesehahn.github.io/managelidar/reference/map_las.md).
+
+## Examples
+
+``` r
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_summary()
+#> ERROR processing 3dm_32_547_5724_1_ni_20240327.laz: there is no package called ‘lasR’
+#> ERROR processing 3dm_32_547_5725_1_ni_20240327.laz: there is no package called ‘lasR’
+#> ERROR processing 3dm_32_548_5724_1_ni_20240327.laz: there is no package called ‘lasR’
+#> ERROR processing 3dm_32_548_5725_1_ni_20240327.laz: there is no package called ‘lasR’
+#> $`3dm_32_547_5724_1_ni_20240327.laz`
+#> $`3dm_32_547_5724_1_ni_20240327.laz`$error
+#> [1] "there is no package called ‘lasR’"
+#> 
+#> 
+#> $`3dm_32_547_5725_1_ni_20240327.laz`
+#> $`3dm_32_547_5725_1_ni_20240327.laz`$error
+#> [1] "there is no package called ‘lasR’"
+#> 
+#> 
+#> $`3dm_32_548_5724_1_ni_20240327.laz`
+#> $`3dm_32_548_5724_1_ni_20240327.laz`$error
+#> [1] "there is no package called ‘lasR’"
+#> 
+#> 
+#> $`3dm_32_548_5725_1_ni_20240327.laz`
+#> $`3dm_32_548_5725_1_ni_20240327.laz`$error
+#> [1] "there is no package called ‘lasR’"
+#> 
+#> 
+```

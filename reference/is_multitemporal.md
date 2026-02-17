@@ -88,7 +88,9 @@ are snapped to handle minor inaccuracies.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-is_multitemporal(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+
+las_files |> is_multitemporal(tolerance = 10)
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

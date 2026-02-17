@@ -80,8 +80,10 @@ values should be interpreted as indicative rather than exact.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-get_penetration(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_penetration()
 #>                             filename single    two three  four  five   six
 #>                               <char>  <num>  <num> <num> <num> <num> <num>
 #> 1: 3dm_32_547_5724_1_ni_20240327.laz  0.951  0.000 0.025 0.020 0.004 0.000

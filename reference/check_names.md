@@ -74,7 +74,9 @@ A `data.frame` with one row per file and columns:
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-check_names(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> check_names()
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

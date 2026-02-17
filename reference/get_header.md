@@ -40,8 +40,10 @@ cloud into memory.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-get_header(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_header()
 #> $`3dm_32_547_5724_1_ni_20240327.laz`
 #> File signature:           LASF 
 #> File source ID:           0 
@@ -53,10 +55,10 @@ get_header(f)
 #> Project ID - GUID:        00000000-0000-0000-0000-000000000000 
 #> Version:                  1.4
 #> System identifier:         
-#> Generating software:      TerraScan 
+#> Generating software:      lasr with LASlib 
 #> File creation d/y:        123/2024
 #> header size:              375 
-#> Offset to point data:     2822 
+#> Offset to point data:     3137 
 #> Num. var. length record:  3 
 #> Point data format:        7 
 #> Point data record length: 42 
@@ -72,10 +74,10 @@ get_header(f)
 #>        Tags:
 #>           Key 3072 value 25832 
 #>    Variable Length Record 2 of 3 
-#>        Description:  
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)
 #>    Variable Length Record 3 of 3 
-#>        Description: RIEGL Extra Bytes 
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        Extra Bytes Description:
 #>           Amplitude: Echo signal amplitude [dB]
 #>           Reflectance: Echo signal reflectance [dB]
@@ -93,10 +95,10 @@ get_header(f)
 #> Project ID - GUID:        00000000-0000-0000-0000-000000000000 
 #> Version:                  1.4
 #> System identifier:         
-#> Generating software:      TerraScan 
+#> Generating software:      lasr with LASlib 
 #> File creation d/y:        123/2024
 #> header size:              375 
-#> Offset to point data:     2822 
+#> Offset to point data:     3137 
 #> Num. var. length record:  3 
 #> Point data format:        7 
 #> Point data record length: 42 
@@ -112,10 +114,10 @@ get_header(f)
 #>        Tags:
 #>           Key 3072 value 25832 
 #>    Variable Length Record 2 of 3 
-#>        Description:  
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)
 #>    Variable Length Record 3 of 3 
-#>        Description: RIEGL Extra Bytes 
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        Extra Bytes Description:
 #>           Amplitude: Echo signal amplitude [dB]
 #>           Reflectance: Echo signal reflectance [dB]
@@ -133,10 +135,10 @@ get_header(f)
 #> Project ID - GUID:        00000000-0000-0000-0000-000000000000 
 #> Version:                  1.4
 #> System identifier:         
-#> Generating software:      TerraScan 
+#> Generating software:      lasr with LASlib 
 #> File creation d/y:        123/2024
 #> header size:              375 
-#> Offset to point data:     2822 
+#> Offset to point data:     3137 
 #> Num. var. length record:  3 
 #> Point data format:        7 
 #> Point data record length: 42 
@@ -152,10 +154,10 @@ get_header(f)
 #>        Tags:
 #>           Key 3072 value 25832 
 #>    Variable Length Record 2 of 3 
-#>        Description:  
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)
 #>    Variable Length Record 3 of 3 
-#>        Description: RIEGL Extra Bytes 
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        Extra Bytes Description:
 #>           Amplitude: Echo signal amplitude [dB]
 #>           Reflectance: Echo signal reflectance [dB]
@@ -173,10 +175,10 @@ get_header(f)
 #> Project ID - GUID:        00000000-0000-0000-0000-000000000000 
 #> Version:                  1.4
 #> System identifier:         
-#> Generating software:      TerraScan 
+#> Generating software:      lasr with LASlib 
 #> File creation d/y:        123/2024
 #> header size:              375 
-#> Offset to point data:     2822 
+#> Offset to point data:     3137 
 #> Num. var. length record:  3 
 #> Point data format:        7 
 #> Point data record length: 42 
@@ -192,10 +194,10 @@ get_header(f)
 #>        Tags:
 #>           Key 3072 value 25832 
 #>    Variable Length Record 2 of 3 
-#>        Description:  
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        WKT OGC COORDINATE SYSTEM: PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["Europea [...] (truncated)
 #>    Variable Length Record 3 of 3 
-#>        Description: RIEGL Extra Bytes 
+#>        Description: by LAStools of rapidlasso GmbH 
 #>        Extra Bytes Description:
 #>           Amplitude: Echo signal amplitude [dB]
 #>           Reflectance: Echo signal reflectance [dB]

@@ -63,7 +63,8 @@ might be the best choice.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-file <- list.files(folder, full.names = TRUE)[1]
-get_intersection(folder, file)
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+get_intersection(las_files, las_file)
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

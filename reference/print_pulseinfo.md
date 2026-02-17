@@ -37,8 +37,10 @@ aggregated statistics to the console. It does not return values.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-print_pulseinfo(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> print_pulseinfo()
 #> Density (⌀):
 #> ----------------
 #> Pulse Density : 0 pulses/m²

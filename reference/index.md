@@ -11,7 +11,7 @@
 - [`filter_latest()`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
   : Filter to latest acquisition from multi-temporal tiles
 - [`filter_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)
-  : Filter to multi-temporal tiles
+  : Filter tiles by number of temporal observations
 - [`filter_spatial()`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md)
   : Filter point cloud files by spatial extent
 - [`filter_temporal()`](https://wiesehahn.github.io/managelidar/reference/filter_temporal.md)

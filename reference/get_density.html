@@ -90,8 +90,9 @@ the full point cloud.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">get_density</span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">T</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">get_density</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                             filename npoints npulses     area pointdensity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               &lt;char&gt;   &lt;int&gt;   &lt;int&gt;    &lt;num&gt;        &lt;num&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3dm_32_547_5724_1_ni_20240327.laz    2936    2606 309656.1  0.009481486</span>
@@ -104,6 +105,7 @@ the full point cloud.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2:  0.003860615</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3:  0.003464946</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4:  0.004301005</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

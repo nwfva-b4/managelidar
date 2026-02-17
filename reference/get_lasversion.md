@@ -36,8 +36,10 @@ A `data.frame` with columns:
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-get_lasversion(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_lasversion()
 #>                            filename lasversion
 #> 1 3dm_32_547_5724_1_ni_20240327.laz        1.4
 #> 2 3dm_32_547_5725_1_ni_20240327.laz        1.4

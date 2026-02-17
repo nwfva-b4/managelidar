@@ -24,7 +24,9 @@ An interactive `mapview` map displayed in the viewer.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-plot_extent(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> plot_extent()
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

@@ -2,7 +2,7 @@
 
 `get_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a
 collection of LAS/LAZ/COPC files into Geopackage. VPCs can be read and
-vizualized by QGIS, however individual tiles (features) can not be
+visualized by QGIS, however individual tiles (features) can not be
 queried as is. To do this we convert it to a Geopackage, which can
 easily be explored in any GIS. Each LAS tile becomes a feature with its
 spatial extent and some metadata.
@@ -56,7 +56,8 @@ for details.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-get_gpkg(f, tempfile(fileext = ".gpkg"))
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files |> get_gpkg()
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

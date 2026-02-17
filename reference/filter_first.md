@@ -11,7 +11,7 @@ filter_first(
   entire_tiles = TRUE,
   tolerance = 1,
   multitemporal_only = FALSE,
-  out_file = NULL
+  verbose = TRUE
 )
 ```
 
@@ -41,19 +41,15 @@ filter_first(
   Logical. If `TRUE`, only returns tiles with multiple acquisitions. If
   `FALSE` (default), includes all tiles.
 
-- out_file:
+- verbose:
 
-  Optional. Path where the filtered VPC should be saved. If NULL
-  (default), returns the VPC as an R object. If provided, saves to file
-  and returns the file path. Must have `.vpc` extension and must not
-  already exist. File is only created if filtering returns results.
+  Logical. If TRUE (default), prints information about filtering
+  results.
 
 ## Value
 
-If `out_file` is NULL, returns a VPC object (list) containing only the
-first acquisition for each tile. If `out_file` is provided and results
-exist, returns the path to the saved `.vpc` file. Returns NULL invisibly
-if no features match the filter.
+A VPC object (list) containing only the first acquisition for each tile.
+Returns NULL invisibly if no features match the filter.
 
 ## Details
 
@@ -61,13 +57,12 @@ The function performs the following steps:
 
 1.  Resolves input paths to a VPC object
 
-2.  Checks for multi-temporal coverage using
-    [`filter_multitemporal`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)
+2.  Analyzes tiles for multi-temporal coverage
 
 3.  Groups tiles by location and selects the earliest acquisition for
     each
 
-4.  Returns either a VPC object or writes a filtered VPC file
+4.  Returns a filtered VPC object
 
 ## See also
 
@@ -80,6 +75,8 @@ The function performs the following steps:
 
 ``` r
 f <- system.file("extdata", package = "managelidar")
-vpc <- filter_first(f)
+
+# get first acquisition per tile (entire tiles only, with 10m tolerance)
+vpc <- filter_first(f, tolerance = 10)
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

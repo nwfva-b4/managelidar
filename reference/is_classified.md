@@ -58,9 +58,9 @@ and may not reflect the full contents of the file.
 ## Examples
 
 ``` r
-f <- system.file("extdata", package = "managelidar")
-is_classified(f)
-#> Error in loadNamespace(x): there is no package called ‘lasR’
-is_classified(f, add_classes = TRUE)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> is_classified(add_classes = TRUE)
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```
