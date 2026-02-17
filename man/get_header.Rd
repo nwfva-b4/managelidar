@@ -28,6 +28,9 @@ number of points, number of returns, point format, and coordinate system,
 without loading the point cloud into memory.
 }
 \examples{
-f <- system.file("extdata", package = "managelidar")
-get_header(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_header()
+
 }

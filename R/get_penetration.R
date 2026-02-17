@@ -45,8 +45,11 @@
 #' @export
 #'
 #' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' get_penetration(f)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#'
+#' las_files |> get_penetration()
+#'
 get_penetration <- function(path, full.names = FALSE) {
   get_penetration_per_file <- function(file) {
     fileheader <- lidR::readLASheader(file)

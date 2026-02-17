@@ -21,10 +21,13 @@
 #' coordinates that are genuinely misaligned.
 #'
 #' @export
-#' 
+#'
 #' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' check_tiling(f)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#'
+#' # check tiling scheme with 10m tolerance
+#' las_files |> check_tiling(tolerance = 10)
 #'
 check_tiling <- function(path, tilesize = 1000, full.names = FALSE, tolerance = 1) {
   ext <- get_extent(path, full.names = full.names)

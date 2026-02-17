@@ -44,6 +44,7 @@ in most cases \code{\link{filter_first}} / \code{\link{filter_latest}} might be 
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-file <- list.files(folder, full.names = TRUE)[1]
-get_intersection(folder, file)
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+get_intersection(las_files, las_file)
 }

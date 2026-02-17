@@ -40,9 +40,9 @@
 #' @export
 #'
 #' @examples
-#' # Example using the package's extdata folder
-#' f <- system.file("extdata", package = "managelidar")
-#' get_date(f)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files |> get_date()
 #'
 #' # Using an external CSV for reference dates
 #' csv_path <- system.file("extdata", "acquisition_dates_lgln.csv", package = "managelidar")
@@ -127,8 +127,7 @@ get_date <- function(path, full.names = FALSE, from_csv = NULL, return_reference
       dplyr::ungroup() |>
       dplyr::mutate(from = "csv") |>
       dplyr::select(filename, date = date_from_file, from)
-  }
-  else if (nrow(dates_gpstime_false) > 0) {
+  } else if (nrow(dates_gpstime_false) > 0) {
     dates_gpstime_false <- dates_gpstime_false |>
       dplyr::mutate(from = "header") |>
       dplyr::select(filename, date, from)

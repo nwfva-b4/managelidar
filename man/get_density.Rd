@@ -33,6 +33,8 @@ within the bounding box, so the density is approximate and faster to compute tha
 the full point cloud.
 }
 \examples{
-f <- system.file("extdata", package = "managelidar")
-get_density(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files |> get_density()
+
 }

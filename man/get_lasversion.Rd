@@ -25,6 +25,9 @@ A \code{data.frame} with columns:
 from the file headers of LAS/LAZ/COPC files.
 }
 \examples{
-f <- system.file("extdata", package = "managelidar")
-get_lasversion(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_lasversion()
+
 }

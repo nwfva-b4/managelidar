@@ -73,3 +73,10 @@ which can save time and memory for large datasets.
 
 Parallel processing is used automatically for large numbers of files through \code{map_las()}.
 }
+\examples{
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> get_summary()
+
+}

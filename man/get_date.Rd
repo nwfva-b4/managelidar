@@ -56,9 +56,9 @@ to standardize reference years.
 }
 }
 \examples{
-# Example using the package's extdata folder
-f <- system.file("extdata", package = "managelidar")
-get_date(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files |> get_date()
 
 # Using an external CSV for reference dates
 csv_path <- system.file("extdata", "acquisition_dates_lgln.csv", package = "managelidar")

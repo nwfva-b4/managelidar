@@ -29,8 +29,10 @@
 #' @export
 #'
 #' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' check_names(f)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#'
+#' las_files |> check_names()
 check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = NULL, copc = FALSE, full.names = FALSE) {
   # ------------------------------------------------------------------
   # Resolve all LAS/LAZ/COPC files
@@ -56,13 +58,13 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     on = files
   )
 
-  json <- jsonlite::fromJSON(vpc_file)
+  vpc <- yyjsonr::read_json_file(vpc_file)
 
 
   # ------------------------------------------------------------------
   # Compute tile bounding boxes
   # ------------------------------------------------------------------
-  bbox <- json$features$properties$`proj:bbox`
+  bbox <- vpc$features$properties$`proj:bbox`
 
   # small tile boundary offsets are ignored and extent is snapped to closest km-value
   max_error <- 10
@@ -118,7 +120,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
     # ------------------------------------------------------------------
     # Build tile bounding boxes as sf polygons
     # ------------------------------------------------------------------
-    tile_geoms <- lapply(json$features$bbox, function(b) {
+    tile_geoms <- lapply(vpc$features$bbox, function(b) {
       sf::st_as_sfc(
         sf::st_bbox(
           c(
@@ -168,7 +170,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   # get year via VPC if not provided
   # in VPC it is extracted from first point if possible and from header (likely wrong) otherwise
   if (is.null(year)) {
-    year <- format(as.Date(json$features$properties$datetime), "%Y")
+    year <- format(as.Date(vpc$features$properties$datetime), "%Y")
   } else if (is.numeric(year)) {
     year <- as.character(year)
   } else if (is.character(year) && length(year) == 1 && file.exists(year)) {

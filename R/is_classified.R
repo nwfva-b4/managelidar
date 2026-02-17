@@ -31,9 +31,10 @@
 #' @export
 #'
 #' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' is_classified(f)
-#' is_classified(f, add_classes = TRUE)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#'
+#' las_files |> is_classified(add_classes = TRUE)
 #'
 is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
   is_classified_per_file <- function(file) {

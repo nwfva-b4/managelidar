@@ -28,6 +28,8 @@ A \code{data.frame} or \code{sf} object with columns:
 \code{get_extent()} extracts the spatial extent (xmin, xmax, ymin, ymax) from LASfiles.
 }
 \examples{
-f <- system.file("extdata", package = "managelidar")
-get_extent(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files |> get_extent()
+
 }

@@ -3,7 +3,7 @@
 #' Analyzes tiles for multi-temporal coverage.
 #' Returns a data frame with tile information including whether each tile
 #' has multiple observations and how many.
-#' 
+#'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
 #'   or a Virtual Point Cloud (.vpc) referencing LAS files.
 #' @param entire_tiles Logical. If TRUE, only considers tiles that are exactly 1000x1000 m
@@ -34,11 +34,13 @@
 #' snapped to handle minor inaccuracies.
 #'
 #' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' is_multitemporal(f)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+#'
+#' las_files |> is_multitemporal(tolerance = 10)
 #'
 #' @seealso \code{\link{filter_multitemporal}}
-#' 
+#'
 #' @export
 is_multitemporal <- function(path, entire_tiles = TRUE, tolerance = 1, full.names = FALSE, multitemporal_only = FALSE) {
   # ------------------------------------------------------------------

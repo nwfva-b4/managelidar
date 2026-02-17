@@ -17,8 +17,11 @@
 #' @export
 #'
 #' @examples
-#' f <- system.file("extdata", package = "managelidar")
-#' get_lasversion(f)
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#'
+#' las_files |> get_lasversion()
+#'
 get_lasversion <- function(path, full.names = FALSE) {
   # ------------------------------------------------------------------
   # Read headers (single I/O layer)

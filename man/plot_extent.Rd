@@ -19,6 +19,8 @@ interactive map using bounding boxes derived from file headers or an
 existing Virtual Point Cloud (VPC).
 }
 \examples{
-f <- system.file("extdata", package = "managelidar")
-plot_extent(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> plot_extent()
 }

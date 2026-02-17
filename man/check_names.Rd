@@ -49,6 +49,8 @@ Example: \code{3dm_32_547_5724_1_ni_2024.laz}.
 See the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard} for details.
 }
 \examples{
-f <- system.file("extdata", package = "managelidar")
-check_names(f)
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+
+las_files |> check_names()
 }
