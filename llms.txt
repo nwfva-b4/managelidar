@@ -49,15 +49,14 @@ library(managelidar)
 
 # create various valid input paths
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*.laz")
-las_file <- las_files[1]
-vpc_file <- tempfile(fileext = ".vpc")
-lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
-#> [1] "C:\\Users\\JWIESE~1\\AppData\\Local\\Temp\\RtmpghBJtg\\file16ffcbda271a.vpc"
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+vpc_file <- system.file("extdata/sample.vpc", package = "managelidar")
 vpc_obj <- yyjsonr::read_json_file(vpc_file)
 mixed <- c(folder, las_file)
 
 paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
+
 
 # get the Coordinate Reference System for all types of input
 lapply(paths, get_crs)
@@ -66,7 +65,8 @@ lapply(paths, get_crs)
 #> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
 #> 
 #> [[2]]
 #>                            filename   crs
@@ -77,7 +77,7 @@ lapply(paths, get_crs)
 #> 
 #> [[3]]
 #>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
+#> 1 3dm_32_548_5725_1_ni_20230904.laz 25832
 #> 
 #> [[4]]
 #>                            filename   crs
@@ -98,10 +98,14 @@ lapply(paths, get_crs)
 #> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
 
 # get the extent (bbox) from LASfiles
-get_extent(las_files)
+get_spatial_extent(las_files)
+#> Get spatial extent
+#>   ▼ 4 LASfiles
+#>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725991.98  (xmin, ymin, xmax, ymax; EPSG:25832)
 #>                            filename   xmin    ymin     xmax    ymax
 #> 1 3dm_32_547_5724_1_ni_20240327.laz 547690 5724000 547999.7 5725000
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
@@ -112,13 +116,22 @@ get_extent(las_files)
 las_files |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
+#> Filter spatial extent
+#>   ▼ 4 LASfiles
+#>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 
-# combine with temporal filter
-las_files |>
+# combine with temporal filter on multi-temporal data
+c(las_files, las_file) |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
+#> Filter temporal extent
+#>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
+#>   ▼ 4 LASfiles retained (2024-03-27)
+#> Filter spatial extent
+#>   ▼ 4 LASfiles
+#>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 ```
 
@@ -127,7 +140,7 @@ las_files |>
 ## All functions
 
 - [`check_names()`](https://wiesehahn.github.io/managelidar/reference/check_names.md)
-  : Validate LAS file names according to the ADV standard
+  : Validate LASfile names according to the ADV standard
 - [`check_tiling()`](https://wiesehahn.github.io/managelidar/reference/check_tiling.md)
   : Check if tiles are valid (correct size and aligned to grid)
 - [`filter_first()`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
@@ -141,32 +154,32 @@ las_files |>
 - [`filter_temporal()`](https://wiesehahn.github.io/managelidar/reference/filter_temporal.md)
   : Filter point cloud files by temporal extent
 - [`get_crs()`](https://wiesehahn.github.io/managelidar/reference/get_crs.md)
-  : Get the Coordinate Reference System (CRS) of LAS files
+  : Get the Coordinate Reference System (CRS) of LASfiles
 - [`get_data()`](https://wiesehahn.github.io/managelidar/reference/get_data.md)
   : Get data in a standardized format and structure
-- [`get_date()`](https://wiesehahn.github.io/managelidar/reference/get_date.md)
-  : Get acquisition date from LAS files
 - [`get_density()`](https://wiesehahn.github.io/managelidar/reference/get_density.md)
-  : Get approximate point and pulse density of LAS files
-- [`get_extent()`](https://wiesehahn.github.io/managelidar/reference/get_extent.md)
-  : Get the spatial extent of LAS files
+  : Get approximate point and pulse density of LASfiles
 - [`get_gpkg()`](https://wiesehahn.github.io/managelidar/reference/get_gpkg.md)
-  : Create a Geopackage containing metadata of LAS files
+  : Create a Geopackage containing metadata of LASfiles
 - [`get_header()`](https://wiesehahn.github.io/managelidar/reference/get_header.md)
-  : Retrieve LAS file headers (metadata)
+  : Retrieve LASfile headers (metadata)
 - [`get_intersection()`](https://wiesehahn.github.io/managelidar/reference/get_intersection.md)
-  : Get intersecting LAS files
+  : Get intersecting LASfiles
 - [`get_lasversion()`](https://wiesehahn.github.io/managelidar/reference/get_lasversion.md)
   : Get the LAS version of point cloud files
 - [`get_names()`](https://wiesehahn.github.io/managelidar/reference/get_names.md)
-  : Get LAS file names
+  : Get LASfile names
 - [`get_penetration()`](https://wiesehahn.github.io/managelidar/reference/get_penetration.md)
   : Compute pulse penetration ratios from LAS headers
+- [`get_spatial_extent()`](https://wiesehahn.github.io/managelidar/reference/get_spatial_extent.md)
+  : Get the spatial extent of LASfiles
 - [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
-  : Compute summary metrics for individual LAS files and optionally save
+  : Compute summary metrics for individual LASfiles and optionally save
   as JSON
+- [`get_temporal_extent()`](https://wiesehahn.github.io/managelidar/reference/get_temporal_extent.md)
+  : Get the temporal extent of LASfiles
 - [`is_classified()`](https://wiesehahn.github.io/managelidar/reference/is_classified.md)
-  : Check whether LAS files are classified
+  : Check whether LASfiles are classified
 - [`is_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/is_multitemporal.md)
   : Check for multi-temporal coverage in LAS/LAZ files
 - [`laz_files`](https://wiesehahn.github.io/managelidar/reference/laz_files.md)
@@ -174,11 +187,11 @@ las_files |>
 - [`merge_vpcs()`](https://wiesehahn.github.io/managelidar/reference/merge_vpcs.md)
   : Merge multiple Virtual Point Cloud (VPC) files
 - [`plot_extent()`](https://wiesehahn.github.io/managelidar/reference/plot_extent.md)
-  : Plot the spatial extent of LAS files
+  : Plot the spatial extent of LASfiles
 - [`print_pulseinfo()`](https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.md)
   : Print summary information about pulse density and penetration ratio
 - [`set_names()`](https://wiesehahn.github.io/managelidar/reference/set_names.md)
-  : Set LAS file names according to ADV standard
+  : Set LASfile names according to ADV standard
 
 # Articles
 

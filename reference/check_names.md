@@ -1,4 +1,4 @@
-# Validate LAS file names according to the ADV standard
+# Validate LASfile names according to the ADV standard
 
 `check_names()` verifies whether LAS/LAZ/COPC file names conform to the
 German AdV standard for tiled LiDAR data. File names are expected to

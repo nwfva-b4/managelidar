@@ -1,4 +1,4 @@
-# Set LAS file names according to ADV standard
+# Set LASfile names according to ADV standard
 
 `set_names()` renames LAS/LAZ/COPC files to match the [ADV naming
 standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111).
@@ -21,8 +21,8 @@ set_names(
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file or a directory containing LAS
-  files.
+  Character. Path to a LAS/LAZ/COPC file or a directory containing
+  LASfiles.
 
 - prefix:
 

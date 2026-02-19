@@ -1,7 +1,7 @@
 # Compute pulse penetration ratios from LAS headers
 
 `get_penetration()` computes approximate pulse penetration ratios for
-LAS/LAZ/COPC files using information stored in the LAS file header. Only
+LAS/LAZ/COPC files using information stored in the LASfile header. Only
 header data are read; point data are not loaded.
 
 ## Usage
@@ -20,7 +20,7 @@ get_penetration(path, full.names = FALSE)
 
   - Directories containing LAS/LAZ/COPC files (non-recursive)
 
-  - Virtual Point Cloud files (`.vpc`) referencing LAS files
+  - Virtual Point Cloud files (`.vpc`) referencing LASfiles
 
 - full.names:
 
@@ -33,7 +33,7 @@ A `data.frame` with one row per input file and the following columns:
 
 - filename:
 
-  File name or full path of the LAS file
+  File name or full path of the LASfile
 
 - single:
 

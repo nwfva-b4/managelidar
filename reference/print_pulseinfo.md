@@ -14,9 +14,8 @@ print_pulseinfo(path)
 
 - path:
 
-  The path to a LAS file (.las/.laz/.copc), to a directory which
-  contains LAS files, or to a Virtual Point Cloud (.vpc) referencing LAS
-  files.
+  The path to a LASfile (.las/.laz/.copc), to a directory which contains
+  LASfiles, or to a Virtual Point Cloud (.vpc) referencing LASfiles.
 
 ## Value
 

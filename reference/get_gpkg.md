@@ -1,4 +1,4 @@
-# Create a Geopackage containing metadata of LAS files
+# Create a Geopackage containing metadata of LASfiles
 
 `get_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a
 collection of LAS/LAZ/COPC files into Geopackage. VPCs can be read and
@@ -23,8 +23,8 @@ get_gpkg(
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file, a directory containing LAS
-  files, or a Virtual Point Cloud (.vpc) file.
+  Character. Path to a LAS/LAZ/COPC file, a directory containing
+  LASfiles, or a Virtual Point Cloud (.vpc) file.
 
 - out_file:
 

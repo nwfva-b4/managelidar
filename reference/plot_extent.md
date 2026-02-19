@@ -1,21 +1,34 @@
-# Plot the spatial extent of LAS files
+# Plot the spatial extent of LASfiles
 
-`plot_extent()` visualizes the spatial extent of LAS/LAZ/COPC files on
-an interactive map using bounding boxes derived from file headers or an
-existing Virtual Point Cloud (VPC).
+Visualizes the spatial extent of LAS/LAZ/COPC files on an interactive
+map.
 
 ## Usage
 
 ``` r
-plot_extent(path, full.names = FALSE)
+plot_extent(path, per_file = TRUE, full.names = FALSE, verbose = TRUE)
 ```
 
 ## Arguments
 
 - path:
 
-  Character. Path(s) to LAS/LAZ/COPC files, a directory containing such
-  files, or a Virtual Point Cloud (.vpc).
+  Character. Path(s) to LAS/LAZ/COPC files, a directory, a VPC file, or
+  a VPC object already loaded in R.
+
+- per_file:
+
+  Logical. If `TRUE` (default), plots extent per file. If `FALSE`, plots
+  combined extent as a single polygon.
+
+- full.names:
+
+  Logical. If `TRUE`, shows full file paths in labels; otherwise shows
+  base filenames (default). Only used when `per_file = TRUE`.
+
+- verbose:
+
+  Logical. If `TRUE` (default), prints extent information.
 
 ## Value
 
@@ -27,6 +40,11 @@ An interactive `mapview` map displayed in the viewer.
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
+# Plot extent per file
 las_files |> plot_extent()
+#> Error in loadNamespace(x): there is no package called ‘lasR’
+
+# Plot combined extent
+las_files |> plot_extent(per_file = FALSE)
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

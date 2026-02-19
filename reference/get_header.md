@@ -1,9 +1,9 @@
-# Retrieve LAS file headers (metadata)
+# Retrieve LASfile headers (metadata)
 
 `get_header()` reads the metadata included in the headers of
 LAS/LAZ/COPC files without loading the full point cloud. It works on
 single files, directories, or Virtual Point Cloud (.vpc) files
-referencing LAS files.
+referencing LASfiles.
 
 ## Usage
 
@@ -15,8 +15,8 @@ get_header(path, full.names = FALSE)
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file, a directory containing LAS
-  files, or a Virtual Point Cloud (.vpc) file.
+  Character. Path to a LAS/LAZ/COPC file, a directory containing
+  LASfiles, or a Virtual Point Cloud (.vpc) file.
 
 - full.names:
 

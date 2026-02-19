@@ -42,6 +42,13 @@ filter_spatial(path, extent, crs = NULL, verbose = TRUE)
 A VPC object (list) containing only features that intersect the extent.
 Returns NULL invisibly if no features match the filter.
 
+## See also
+
+[`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md),
+[`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md),
+[`filter_temporal`](https://wiesehahn.github.io/managelidar/reference/filter_temporal.md),
+[`filter_multitemporal`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)
+
 ## Examples
 
 ``` r

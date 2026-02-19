@@ -12,8 +12,8 @@ check_tiling(path, tilesize = 1000, full.names = FALSE, tolerance = 1)
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file, a directory containing LAS
-  files, or a Virtual Point Cloud (.vpc) referencing LAS files.
+  Character. Path to a LAS/LAZ/COPC file, a directory containing
+  LASfiles, or a Virtual Point Cloud (.vpc) referencing LASfiles.
 
 - tilesize:
 

@@ -1,7 +1,7 @@
-# Get approximate point and pulse density of LAS files
+# Get approximate point and pulse density of LASfiles
 
 `get_density()` calculates the approximate average point and pulse
-density of LAS files.
+density of LASfiles.
 
 ## Usage
 
@@ -13,8 +13,8 @@ get_density(path, full.names = FALSE)
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file, a directory containing LAS
-  files, or a Virtual Point Cloud (.vpc) referencing these files.
+  Character. Path to a LAS/LAZ/COPC file, a directory containing
+  LASfiles, or a Virtual Point Cloud (.vpc) referencing these files.
 
 - full.names:
 
@@ -51,9 +51,9 @@ A `data.frame` with columns:
 
 ## Details
 
-Only the LAS file headers are read. Densities are calculated based on
-the bounding box and number of points / first-return pulses. This does
-not account for missing data within the bounding box, so the density is
+Only the LASfile headers are read. Densities are calculated based on the
+bounding box and number of points / first-return pulses. This does not
+account for missing data within the bounding box, so the density is
 approximate and faster to compute than reading the full point cloud.
 
 ## Examples

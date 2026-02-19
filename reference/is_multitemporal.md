@@ -20,8 +20,8 @@ is_multitemporal(
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file, a directory containing LAS
-  files, or a Virtual Point Cloud (.vpc) referencing LAS files.
+  Character. Path to a LAS/LAZ/COPC file, a directory containing
+  LASfiles, or a Virtual Point Cloud (.vpc) referencing LASfiles.
 
 - entire_tiles:
 

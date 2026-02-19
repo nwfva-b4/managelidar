@@ -1,7 +1,7 @@
-# Get the Coordinate Reference System (CRS) of LAS files
+# Get the Coordinate Reference System (CRS) of LASfiles
 
 `get_crs()` efficiently extracts and returns the coordinate reference
-system (EPSG code) of LAS files.
+system (EPSG code) of LASfiles.
 
 ## Usage
 
@@ -13,8 +13,8 @@ get_crs(path, full.names = FALSE)
 
 - path:
 
-  Character. Path to a LAS/LAZ/COPC file, a directory containing LAS
-  files, or a Virtual Point Cloud (.vpc) referencing LAS files.
+  Character. Path to a LAS/LAZ/COPC file, a directory containing
+  LASfiles, or a Virtual Point Cloud (.vpc) referencing LASfiles.
 
 - full.names:
 
@@ -27,7 +27,7 @@ A `data.frame` with two columns:
 
 - filename:
 
-  The filename or full path of each LAS file.
+  The filename or full path of each LASfile.
 
 - crs:
 
@@ -35,8 +35,8 @@ A `data.frame` with two columns:
 
 ## Details
 
-This function efficiently reads the Coordinate Reference System of LAS
-files from VPC. It is suitable for quickly inspecting the CRS of
+This function efficiently reads the Coordinate Reference System of
+LASfiles from VPC. It is suitable for quickly inspecting the CRS of
 multiple LAS/LAZ/COPC files.
 
 ## Examples

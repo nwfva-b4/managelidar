@@ -1,6 +1,6 @@
-# Compute summary metrics for individual LAS files and optionally save as JSON
+# Compute summary metrics for individual LASfiles and optionally save as JSON
 
-`get_summary()` calculates standard summary metrics for LAS files,
+`get_summary()` calculates standard summary metrics for LASfiles,
 including:
 
 ## Usage
@@ -57,7 +57,7 @@ get_summary(
 
 ## Value
 
-If `out_dir` is not set, returns a named list, one element per LAS file.
+If `out_dir` is not set, returns a named list, one element per LASfile.
 Each element is a list containing:
 
 - npoints:
@@ -94,7 +94,7 @@ Each element is a list containing:
 
 - epsg:
 
-  EPSG code of the LAS file CRS
+  EPSG code of the LASfile CRS
 
 - metrics:
 
@@ -121,14 +121,14 @@ JSON files.
 
 - Coordinate system (`epsg`)
 
-Results can optionally be saved as JSON files per LAS file.
+Results can optionally be saved as JSON files per LASfile.
 
 In comparison to `lasR::summarise` this function returns individual
 summaries per file instead of an aggregated summary among all files. If
-`out_dir` is provided, a JSON file is created for each LAS file, with
-the same name but `.json` extension. Existing JSON files are skipped
+`out_dir` is provided, a JSON file is created for each LASfile, with the
+same name but `.json` extension. Existing JSON files are skipped
 automatically. If `out_dir` is not provided, the function returns a
-named list where each element corresponds to a LAS file.
+named list where each element corresponds to a LASfile.
 
 Setting `iwbin = 0` or `zwbin = 0` disables calculation of intensity or
 elevation histograms, which can save time and memory for large datasets.

@@ -27,7 +27,7 @@ A `data.frame` with columns:
 
 - filename:
 
-  Filename of the LAS file.
+  Filename of the LASfile.
 
 - lasversion:
 

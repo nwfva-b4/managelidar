@@ -1,4 +1,4 @@
-# Check whether LAS files are classified
+# Check whether LASfiles are classified
 
 `is_classified()` determines whether LAS point cloud files contain point
 classifications other than class `0` (unclassified).
@@ -32,7 +32,7 @@ A `data.frame` with columns:
 
 - file:
 
-  Filename of the LAS file.
+  Filename of the LASfile.
 
 - classified:
 
