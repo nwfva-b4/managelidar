@@ -2,25 +2,36 @@
 % Please edit documentation in R/plot_extent.R
 \name{plot_extent}
 \alias{plot_extent}
-\title{Plot the spatial extent of LAS files}
+\title{Plot the spatial extent of LASfiles}
 \usage{
-plot_extent(path, full.names = FALSE)
+plot_extent(path, per_file = TRUE, full.names = FALSE, verbose = TRUE)
 }
 \arguments{
-\item{path}{Character. Path(s) to LAS/LAZ/COPC files, a directory containing
-such files, or a Virtual Point Cloud (.vpc).}
+\item{path}{Character. Path(s) to LAS/LAZ/COPC files, a directory, a VPC file,
+or a VPC object already loaded in R.}
+
+\item{per_file}{Logical. If \code{TRUE} (default), plots extent per file.
+If \code{FALSE}, plots combined extent as a single polygon.}
+
+\item{full.names}{Logical. If \code{TRUE}, shows full file paths in labels;
+otherwise shows base filenames (default). Only used when \code{per_file = TRUE}.}
+
+\item{verbose}{Logical. If \code{TRUE} (default), prints extent information.}
 }
 \value{
 An interactive \code{mapview} map displayed in the viewer.
 }
 \description{
-\code{plot_extent()} visualizes the spatial extent of LAS/LAZ/COPC files on an
-interactive map using bounding boxes derived from file headers or an
-existing Virtual Point Cloud (VPC).
+Visualizes the spatial extent of LAS/LAZ/COPC files on an interactive map.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
+# Plot extent per file
 las_files |> plot_extent()
+
+# Plot combined extent
+las_files |> plot_extent(per_file = FALSE)
+
 }
