@@ -39,8 +39,8 @@ get_intersection <- function(path1, path2, mode = "intersects", as_sf = FALSE, f
   # ------------------------------------------------------------------
   # Get extents as sf
   # ------------------------------------------------------------------
-  ext1 <- get_extent(path1, as_sf = TRUE, full.names = full.names)
-  ext2 <- get_extent(path2, as_sf = TRUE, full.names = full.names)
+  ext1 <- get_spatial_extent(path1, as_sf = TRUE, full.names = full.names, verbose = FALSE)
+  ext2 <- get_spatial_extent(path2, as_sf = TRUE, full.names = full.names, verbose = FALSE)
 
   if (nrow(ext1) == 0 || nrow(ext2) == 0) {
     warning("No LAS/LAZ/COPC files found.")

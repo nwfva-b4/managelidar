@@ -30,7 +30,7 @@
 #' las_files |> check_tiling(tolerance = 10)
 #'
 check_tiling <- function(path, tilesize = 1000, full.names = FALSE, tolerance = 1) {
-  ext <- get_extent(path, full.names = full.names)
+  ext <- get_spatial_extent(path, full.names = full.names, verbose = FALSE)
 
   # Snap to grid if tolerance > 0
   if (tolerance > 0) {
