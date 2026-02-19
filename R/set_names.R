@@ -1,11 +1,11 @@
-#' Set LAS file names according to ADV standard
+#' Set LASfile names according to ADV standard
 #'
 #' `set_names()` renames LAS/LAZ/COPC files to match the [ADV naming standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111).
 #'
 #' Files are expected to follow the schema:
 #' `prefix_utmzone_minx_miny_tilesize_region_year.laz`
 #'
-#' @param path Character. Path to a LAS/LAZ/COPC file or a directory containing LAS files.
+#' @param path Character. Path to a LAS/LAZ/COPC file or a directory containing LASfiles.
 #' @param prefix Character. Naming prefix (default `"3dm"`).
 #' @param zone Integer. UTM zone (default `32`).
 #' @param region Character. Federal state abbreviation (optional). Automatically determined if `NULL`.

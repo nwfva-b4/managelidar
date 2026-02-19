@@ -2,13 +2,13 @@
 % Please edit documentation in R/get_crs.R
 \name{get_crs}
 \alias{get_crs}
-\title{Get the Coordinate Reference System (CRS) of LAS files}
+\title{Get the Coordinate Reference System (CRS) of LASfiles}
 \usage{
 get_crs(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
-or a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
+or a Virtual Point Cloud (.vpc) referencing LASfiles.}
 
 \item{full.names}{Logical. If \code{TRUE}, the returned filenames will be full paths;
 if \code{FALSE} (default), only base filenames are used.}
@@ -16,15 +16,15 @@ if \code{FALSE} (default), only base filenames are used.}
 \value{
 A \code{data.frame} with two columns:
 \describe{
-\item{filename}{The filename or full path of each LAS file.}
+\item{filename}{The filename or full path of each LASfile.}
 \item{crs}{The EPSG code of the file's coordinate reference system.}
 }
 }
 \description{
-\code{get_crs()} efficiently extracts and returns the coordinate reference system (EPSG code) of LAS files.
+\code{get_crs()} efficiently extracts and returns the coordinate reference system (EPSG code) of LASfiles.
 }
 \details{
-This function efficiently reads the Coordinate Reference System of LAS files from VPC. It is suitable
+This function efficiently reads the Coordinate Reference System of LASfiles from VPC. It is suitable
 for quickly inspecting the CRS of multiple LAS/LAZ/COPC files.
 }
 \examples{

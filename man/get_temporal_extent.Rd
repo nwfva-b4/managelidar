@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_temporal_extent.R
 \name{get_temporal_extent}
 \alias{get_temporal_extent}
-\title{Get the temporal extent of LAS files}
+\title{Get the temporal extent of LASfiles}
 \usage{
 get_temporal_extent(
   path,
@@ -37,7 +37,7 @@ November or December 2014). Default is \code{FALSE}.}
 \value{
 When \code{per_file = TRUE}: A \code{data.frame} with columns:
 \describe{
-\item{filename}{Filename of the LAS file.}
+\item{filename}{Filename of the LASfile.}
 \item{date}{Acquisition date (Date object) or reference year (numeric)
 if \code{return_referenceyear = TRUE}.}
 \item{from}{Character. One of \code{data} (files with valid GPStime), \code{csv}

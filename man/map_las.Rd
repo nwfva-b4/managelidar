@@ -15,7 +15,7 @@ map_las(files, FUN)
 A list with one element per file.
 }
 \description{
-Internal helper to apply a function to multiple LAS files,
+Internal helper to apply a function to multiple LASfiles,
 using parallel processing (mirai) only when beneficial.
 }
 \keyword{internal}

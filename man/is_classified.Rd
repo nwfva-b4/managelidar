@@ -2,7 +2,7 @@
 % Please edit documentation in R/is_classified.R
 \name{is_classified}
 \alias{is_classified}
-\title{Check whether LAS files are classified}
+\title{Check whether LASfiles are classified}
 \usage{
 is_classified(path, full.names = FALSE, add_classes = FALSE)
 }
@@ -19,7 +19,7 @@ detected classification codes present in the sampled points.}
 \value{
 A \code{data.frame} with columns:
 \describe{
-\item{file}{Filename of the LAS file.}
+\item{file}{Filename of the LASfile.}
 \item{classified}{Logical indicating whether classified points
 (class > 0) are present.}
 \item{classes}{(Optional) List column of detected class codes.}

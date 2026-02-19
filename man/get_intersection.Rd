@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_intersection.R
 \name{get_intersection}
 \alias{get_intersection}
-\title{Get intersecting LAS files}
+\title{Get intersecting LASfiles}
 \usage{
 get_intersection(
   path1,

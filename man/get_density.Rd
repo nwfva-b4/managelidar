@@ -2,12 +2,12 @@
 % Please edit documentation in R/get_density.R
 \name{get_density}
 \alias{get_density}
-\title{Get approximate point and pulse density of LAS files}
+\title{Get approximate point and pulse density of LASfiles}
 \usage{
 get_density(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
 or a Virtual Point Cloud (.vpc) referencing these files.}
 
 \item{full.names}{Logical. If \code{TRUE}, filenames in the output are full paths; otherwise base filenames (default).}
@@ -24,10 +24,10 @@ A \code{data.frame} with columns:
 }
 }
 \description{
-\code{get_density()} calculates the approximate average point and pulse density of LAS files.
+\code{get_density()} calculates the approximate average point and pulse density of LASfiles.
 }
 \details{
-Only the LAS file headers are read. Densities are calculated based on the bounding box
+Only the LASfile headers are read. Densities are calculated based on the bounding box
 and number of points / first-return pulses. This does not account for missing data
 within the bounding box, so the density is approximate and faster to compute than reading
 the full point cloud.

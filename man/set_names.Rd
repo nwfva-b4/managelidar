@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_names.R
 \name{set_names}
 \alias{set_names}
-\title{Set LAS file names according to ADV standard}
+\title{Set LASfile names according to ADV standard}
 \usage{
 set_names(
   path,
@@ -15,7 +15,7 @@ set_names(
 )
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file or a directory containing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file or a directory containing LASfiles.}
 
 \item{prefix}{Character. Naming prefix (default \code{"3dm"}).}
 

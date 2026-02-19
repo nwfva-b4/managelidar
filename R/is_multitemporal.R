@@ -4,8 +4,8 @@
 #' Returns a data frame with tile information including whether each tile
 #' has multiple observations and how many.
 #'
-#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
-#'   or a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
+#'   or a Virtual Point Cloud (.vpc) referencing LASfiles.
 #' @param entire_tiles Logical. If TRUE, only considers tiles that are exactly 1000x1000 m
 #'   and aligned to a 1000m grid (default: TRUE)
 #' @param tolerance Numeric. Tolerance in coordinate units for snapping extents to grid

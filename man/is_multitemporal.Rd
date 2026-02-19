@@ -13,8 +13,8 @@ is_multitemporal(
 )
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
-or a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
+or a Virtual Point Cloud (.vpc) referencing LASfiles.}
 
 \item{entire_tiles}{Logical. If TRUE, only considers tiles that are exactly 1000x1000 m
 and aligned to a 1000m grid (default: TRUE)}

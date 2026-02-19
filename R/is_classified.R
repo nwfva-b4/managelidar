@@ -1,4 +1,4 @@
-#' Check whether LAS files are classified
+#' Check whether LASfiles are classified
 #'
 #' `is_classified()` determines whether LAS point cloud files contain
 #' point classifications other than class `0` (unclassified).
@@ -22,7 +22,7 @@
 #'
 #' @return A `data.frame` with columns:
 #' \describe{
-#'   \item{file}{Filename of the LAS file.}
+#'   \item{file}{Filename of the LASfile.}
 #'   \item{classified}{Logical indicating whether classified points
 #'   (class > 0) are present.}
 #'   \item{classes}{(Optional) List column of detected class codes.}

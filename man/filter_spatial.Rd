@@ -37,3 +37,7 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 vpc <- las_files |> filter_spatial(c(548700, 5725010))
 
 }
+\seealso{
+\code{\link{filter_first}}, \code{\link{filter_latest}}, \code{\link{filter_temporal}},
+\code{\link{filter_multitemporal}}
+}

@@ -1,6 +1,6 @@
-#' Compute summary metrics for individual LAS files and optionally save as JSON
+#' Compute summary metrics for individual LASfiles and optionally save as JSON
 #'
-#' `get_summary()` calculates standard summary metrics for LAS files, including:
+#' `get_summary()` calculates standard summary metrics for LASfiles, including:
 #'
 #' * Temporal metrics (`t_min`, `t_median`, `t_max`)
 #' * Intensity metrics (`i_min`, `i_mean`, `i_median`, `i_max`, `i_p5`, `i_p95`, `i_sd`)
@@ -9,7 +9,7 @@
 #' * Point counts and classifications (`npoints`, `nsingle`, `nwithheld`, `nsynthetic`, `npoints_per_return`, `npoints_per_class`)
 #' * Coordinate system (`epsg`)
 #'
-#' Results can optionally be saved as JSON files per LAS file.
+#' Results can optionally be saved as JSON files per LASfile.
 #'
 #' @param path Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) file.
 #' @param out_dir Optional directory to save JSON summaries. If not set, the function returns a named list instead.
@@ -22,16 +22,16 @@
 #'
 #' @details
 #' In comparison to `lasR::summarise` this function returns individual summaries per file instead of an aggregated summary among all files.
-#' If `out_dir` is provided, a JSON file is created for each LAS file, with the same
+#' If `out_dir` is provided, a JSON file is created for each LASfile, with the same
 #' name but `.json` extension. Existing JSON files are skipped automatically. If `out_dir`
-#' is not provided, the function returns a named list where each element corresponds to a LAS file.
+#' is not provided, the function returns a named list where each element corresponds to a LASfile.
 #'
 #' Setting `iwbin = 0` or `zwbin = 0` disables calculation of intensity or elevation histograms,
 #' which can save time and memory for large datasets.
 #'
 #' Parallel processing is used automatically for large numbers of files through `map_las()`.
 #'
-#' @return If `out_dir` is not set, returns a named list, one element per LAS file. Each element is a list containing:
+#' @return If `out_dir` is not set, returns a named list, one element per LASfile. Each element is a list containing:
 #' \describe{
 #'   \item{npoints}{Total number of points}
 #'   \item{nsingle}{Number of single-return points}
@@ -41,7 +41,7 @@
 #'   \item{npoints_per_class}{Named vector of counts per classification code}
 #'   \item{z_histogram}{Elevation histogram (if `zwbin > 0`)}
 #'   \item{i_histogram}{Intensity histogram (if `iwbin > 0`)}
-#'   \item{epsg}{EPSG code of the LAS file CRS}
+#'   \item{epsg}{EPSG code of the LASfile CRS}
 #'   \item{metrics}{List of calculated summary metrics, e.g., min, median, max for time, intensity, and elevation}
 #' }
 #'
@@ -70,7 +70,7 @@ get_summary <- function(
   )
 ) {
   # -------------------------------
-  # Resolve all LAS files
+  # Resolve all LASfiles
   # -------------------------------
   files <- resolve_las_paths(path)
 

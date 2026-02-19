@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_names.R
 \name{get_names}
 \alias{get_names}
-\title{Get LAS file names}
+\title{Get LASfile names}
 \usage{
 get_names(path, full.names = FALSE)
 }
@@ -21,7 +21,7 @@ A character vector of filenames or file paths.
 (\code{.las}, \code{.laz}, \code{.copc}) found in a given input.
 }
 \details{
-The input may be a single file, a directory containing LAS files, or a
+The input may be a single file, a directory containing LASfiles, or a
 Virtual Point Cloud (\code{.vpc}) referencing LAS/LAZ/COPC files. Internally,
 file paths are resolved using \code{resolve_las_paths()}.
 }

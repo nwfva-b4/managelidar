@@ -11,7 +11,7 @@ get_penetration(path, full.names = FALSE)
 \itemize{
 \item LAS/LAZ/COPC files
 \item Directories containing LAS/LAZ/COPC files (non-recursive)
-\item Virtual Point Cloud files (\code{.vpc}) referencing LAS files
+\item Virtual Point Cloud files (\code{.vpc}) referencing LASfiles
 }}
 
 \item{full.names}{Logical. If \code{TRUE}, return full file paths in the
@@ -21,7 +21,7 @@ are returned.}
 \value{
 A \code{data.frame} with one row per input file and the following columns:
 \describe{
-\item{filename}{File name or full path of the LAS file}
+\item{filename}{File name or full path of the LASfile}
 \item{single}{Proportion of pulses with exactly one return}
 \item{two}{Proportion of pulses with exactly two returns}
 \item{three}{Proportion of pulses with exactly three returns}
@@ -33,7 +33,7 @@ A \code{data.frame} with one row per input file and the following columns:
 }
 \description{
 \code{get_penetration()} computes approximate pulse penetration ratios for
-LAS/LAZ/COPC files using information stored in the LAS file header.
+LAS/LAZ/COPC files using information stored in the LASfile header.
 Only header data are read; point data are not loaded.
 }
 \details{

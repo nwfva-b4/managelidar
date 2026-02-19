@@ -1,6 +1,6 @@
 #' Map a function over LAS/LAZ/COPC files
 #'
-#' Internal helper to apply a function to multiple LAS files,
+#' Internal helper to apply a function to multiple LASfiles,
 #' using parallel processing (mirai) only when beneficial.
 #'
 #' @param files Character vector of LAS/LAZ/COPC file paths.
@@ -22,7 +22,7 @@ map_las <- function(files, FUN) {
     workers <- min(workers, n)
 
     message(
-      "Processing ", n, " LAS files in parallel (",
+      "Processing ", n, " LASfiles in parallel (",
       workers, " workers)"
     )
 

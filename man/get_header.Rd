@@ -2,12 +2,12 @@
 % Please edit documentation in R/get_header.R
 \name{get_header}
 \alias{get_header}
-\title{Retrieve LAS file headers (metadata)}
+\title{Retrieve LASfile headers (metadata)}
 \usage{
 get_header(path, full.names = FALSE)
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
 or a Virtual Point Cloud (.vpc) file.}
 
 \item{full.names}{Logical. If \code{TRUE}, the returned list is named with full file paths;
@@ -20,7 +20,7 @@ Use \code{names()} to see the file names or paths.
 \description{
 \code{get_header()} reads the metadata included in the headers of LAS/LAZ/COPC files
 without loading the full point cloud. It works on single files, directories,
-or Virtual Point Cloud (.vpc) files referencing LAS files.
+or Virtual Point Cloud (.vpc) files referencing LASfiles.
 }
 \details{
 The function wraps \code{lidR::readLASheader()} and allows quick access to metadata such as

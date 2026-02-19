@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_gpkg.R
 \name{get_gpkg}
 \alias{get_gpkg}
-\title{Create a Geopackage containing metadata of LAS files}
+\title{Create a Geopackage containing metadata of LASfiles}
 \usage{
 get_gpkg(
   path,
@@ -13,7 +13,7 @@ get_gpkg(
 )
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
 or a Virtual Point Cloud (.vpc) file.}
 
 \item{out_file}{Path to the output Geopackage (.gpkg) file (default: tempfile).}

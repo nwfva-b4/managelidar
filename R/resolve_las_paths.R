@@ -51,7 +51,7 @@ resolve_las_paths <- function(paths) {
   vpc_objects <- paths[is_vpc_object]
   file_paths <- paths[!is_vpc_object]
 
-  # Extract LAS files from VPC objects
+  # Extract LASfiles from VPC objects
   las_from_objects <- character()
   if (length(vpc_objects) > 0) {
     las_from_objects <- unlist(lapply(vpc_objects, function(vpc) {

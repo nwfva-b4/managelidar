@@ -1,4 +1,4 @@
-#' Create a Geopackage containing metadata of LAS files
+#' Create a Geopackage containing metadata of LASfiles
 #'
 #' `get_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a collection of LAS/LAZ/COPC
 #' files into Geopackage. VPCs can be read and visualized by QGIS, however individual tiles (features) can not be queried as is.
@@ -9,7 +9,7 @@
 #' or providing a character vector of custom metrics. Computing metrics requires reading the actual point data,
 #' und thus can be much slower. See `get_summary()` for details.
 #'
-#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
+#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
 #'   or a Virtual Point Cloud (.vpc) file.
 #' @param out_file Path to the output Geopackage (.gpkg) file (default: tempfile).
 #' @param overwrite Logical. If TRUE, overwrite the output file if it exists (default: FALSE).
@@ -25,7 +25,7 @@
 #'
 get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = FALSE, crs = 25832, metrics = NULL) {
   # ------------------------------------------------------------------
-  # Resolve LAS files and build VPC if not provided
+  # Resolve LASfiles and build VPC if not provided
   # ------------------------------------------------------------------
   vpc_file <- resolve_vpc(path, out_file = tempfile(fileext = ".vpc"))
 

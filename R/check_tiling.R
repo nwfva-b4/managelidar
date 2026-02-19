@@ -1,7 +1,7 @@
 #' Check if tiles are valid (correct size and aligned to grid)
 #'
-#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
-#'   or a Virtual Point Cloud (.vpc) referencing LAS files.
+#' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
+#'   or a Virtual Point Cloud (.vpc) referencing LASfiles.
 #' @param tilesize Numeric. Expected tile size in units (default: 1000)
 #' @param tolerance Numeric. Tolerance in coordinate units for snapping extents to grid
 #'   (default: 1, submeter inaccuaries are ignored). If > 0, coordinates within this distance of a grid line will be

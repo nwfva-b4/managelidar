@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_names.R
 \name{check_names}
 \alias{check_names}
-\title{Validate LAS file names according to the ADV standard}
+\title{Validate LASfile names according to the ADV standard}
 \usage{
 check_names(
   path,

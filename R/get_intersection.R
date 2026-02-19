@@ -1,4 +1,4 @@
-#' Get intersecting LAS files
+#' Get intersecting LASfiles
 #'
 #' `get_intersection()` identifies LAS/LAZ/COPC files whose spatial extents
 #' intersect or are spatially equal between two inputs.

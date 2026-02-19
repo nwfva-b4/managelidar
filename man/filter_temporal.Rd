@@ -57,3 +57,7 @@ vpc <- las_files |> filter_temporal("2024-03-27T00:00:00Z", "2024-03-27T12:00:00
 vpc <- las_files |> filter_temporal(as.Date("2024-03-27"))
 
 }
+\seealso{
+\code{\link{filter_first}}, \code{\link{filter_latest}}, \code{\link{filter_spatial}},
+\code{\link{filter_multitemporal}}
+}

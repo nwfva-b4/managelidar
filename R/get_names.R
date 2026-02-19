@@ -1,9 +1,9 @@
-#' Get LAS file names
+#' Get LASfile names
 #'
 #' `get_names()` returns the filenames of all LAS-related point cloud files
 #' (`.las`, `.laz`, `.copc`) found in a given input.
 #'
-#' The input may be a single file, a directory containing LAS files, or a
+#' The input may be a single file, a directory containing LASfiles, or a
 #' Virtual Point Cloud (`.vpc`) referencing LAS/LAZ/COPC files. Internally,
 #' file paths are resolved using `resolve_las_paths()`.
 #'

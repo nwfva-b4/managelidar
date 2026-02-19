@@ -53,7 +53,7 @@ resolve_vpc <- function(paths, out_file = NULL) {
     non_vpc <- setdiff(file_paths, vpc_files)
   }
 
-  # Resolve LAS files
+  # Resolve LASfiles
   las_files <- if (length(non_vpc) > 0) resolve_las_paths(non_vpc) else character()
 
   # Temporary list to hold all VPC files/objects for merging
@@ -61,7 +61,7 @@ resolve_vpc <- function(paths, out_file = NULL) {
   to_merge_objects <- vpc_objects
 
   # ------------------------------------------------------------
-  # If there are LAS files, create a temporary VPC
+  # If there are LASfiles, create a temporary VPC
   # ------------------------------------------------------------
   if (length(las_files) > 0) {
     las_vpc <- lasR::exec(

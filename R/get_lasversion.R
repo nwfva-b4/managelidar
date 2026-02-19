@@ -10,7 +10,7 @@
 #'
 #' @return A `data.frame` with columns:
 #' \describe{
-#'   \item{filename}{Filename of the LAS file.}
+#'   \item{filename}{Filename of the LASfile.}
 #'   \item{lasversion}{LAS version in `Major.Minor` format.}
 #' }
 #'

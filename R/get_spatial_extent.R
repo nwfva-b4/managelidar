@@ -1,4 +1,4 @@
-#' Get the spatial extent of LAS files
+#' Get the spatial extent of LASfiles
 #'
 #' `get_spatial_extent()` extracts the spatial extent (xmin, xmax, ymin, ymax) from LASfiles.
 #' Can return extent per file or the combined extent of all files.
@@ -12,7 +12,7 @@
 #'
 #' @return When `per_file = TRUE`: A `data.frame` or `sf` object with columns:
 #' \describe{
-#'   \item{filename}{Filename of the LAS file.}
+#'   \item{filename}{Filename of the LASfile.}
 #'   \item{xmin}{Minimum X coordinate.}
 #'   \item{xmax}{Maximum X coordinate.}
 #'   \item{ymin}{Minimum Y coordinate.}
@@ -32,7 +32,7 @@
 #'
 get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf = FALSE, verbose = TRUE) {
   # ------------------------------------------------------------------
-  # Resolve LAS files and build VPC if not provided
+  # Resolve LASfiles and build VPC if not provided
   # ------------------------------------------------------------------
   vpc <- resolve_vpc(path, out_file = NULL)
   

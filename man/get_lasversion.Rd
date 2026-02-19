@@ -16,7 +16,7 @@ otherwise base filenames (default).}
 \value{
 A \code{data.frame} with columns:
 \describe{
-\item{filename}{Filename of the LAS file.}
+\item{filename}{Filename of the LASfile.}
 \item{lasversion}{LAS version in \code{Major.Minor} format.}
 }
 }

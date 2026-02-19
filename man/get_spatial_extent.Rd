@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_spatial_extent.R
 \name{get_spatial_extent}
 \alias{get_spatial_extent}
-\title{Get the spatial extent of LAS files}
+\title{Get the spatial extent of LASfiles}
 \usage{
 get_spatial_extent(
   path,
@@ -27,7 +27,7 @@ Only used when \code{per_file = TRUE}.}
 \value{
 When \code{per_file = TRUE}: A \code{data.frame} or \code{sf} object with columns:
 \describe{
-\item{filename}{Filename of the LAS file.}
+\item{filename}{Filename of the LASfile.}
 \item{xmin}{Minimum X coordinate.}
 \item{xmax}{Maximum X coordinate.}
 \item{ymin}{Minimum Y coordinate.}

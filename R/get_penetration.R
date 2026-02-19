@@ -1,7 +1,7 @@
 #' Compute pulse penetration ratios from LAS headers
 #'
 #' `get_penetration()` computes approximate pulse penetration ratios for
-#' LAS/LAZ/COPC files using information stored in the LAS file header.
+#' LAS/LAZ/COPC files using information stored in the LASfile header.
 #' Only header data are read; point data are not loaded.
 #'
 #' The function estimates the proportion of pulses that resulted in
@@ -12,7 +12,7 @@
 #'   \itemize{
 #'     \item LAS/LAZ/COPC files
 #'     \item Directories containing LAS/LAZ/COPC files (non-recursive)
-#'     \item Virtual Point Cloud files (`.vpc`) referencing LAS files
+#'     \item Virtual Point Cloud files (`.vpc`) referencing LASfiles
 #'   }
 #'
 #' @param full.names Logical. If `TRUE`, return full file paths in the
@@ -22,7 +22,7 @@
 #' @return
 #' A `data.frame` with one row per input file and the following columns:
 #' \describe{
-#'   \item{filename}{File name or full path of the LAS file}
+#'   \item{filename}{File name or full path of the LASfile}
 #'   \item{single}{Proportion of pulses with exactly one return}
 #'   \item{two}{Proportion of pulses with exactly two returns}
 #'   \item{three}{Proportion of pulses with exactly three returns}

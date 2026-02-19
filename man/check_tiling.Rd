@@ -7,8 +7,8 @@
 check_tiling(path, tilesize = 1000, full.names = FALSE, tolerance = 1)
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LAS files,
-or a Virtual Point Cloud (.vpc) referencing LAS files.}
+\item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
+or a Virtual Point Cloud (.vpc) referencing LASfiles.}
 
 \item{tilesize}{Numeric. Expected tile size in units (default: 1000)}
 

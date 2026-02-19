@@ -1,4 +1,4 @@
-#' Get the temporal extent of LAS files
+#' Get the temporal extent of LASfiles
 #'
 #' Extracts the temporal extent (acquisition dates) from LASfiles. Can return 
 #' dates per file or the combined date range of all files.
@@ -20,7 +20,7 @@
 #'
 #' @return When `per_file = TRUE`: A `data.frame` with columns:
 #' \describe{
-#'   \item{filename}{Filename of the LAS file.}
+#'   \item{filename}{Filename of the LASfile.}
 #'   \item{date}{Acquisition date (Date object) or reference year (numeric) 
 #'               if `return_referenceyear = TRUE`.}
 #'   \item{from}{Character. One of `data` (files with valid GPStime), `csv`

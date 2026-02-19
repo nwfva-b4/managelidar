@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_summary.R
 \name{get_summary}
 \alias{get_summary}
-\title{Compute summary metrics for individual LAS files and optionally save as JSON}
+\title{Compute summary metrics for individual LASfiles and optionally save as JSON}
 \usage{
 get_summary(
   path,
@@ -32,7 +32,7 @@ get_summary(
 \code{c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max", "i_p5", "i_p95", "i_sd", "z_min", "z_median", "z_max")}.}
 }
 \value{
-If \code{out_dir} is not set, returns a named list, one element per LAS file. Each element is a list containing:
+If \code{out_dir} is not set, returns a named list, one element per LASfile. Each element is a list containing:
 \describe{
 \item{npoints}{Total number of points}
 \item{nsingle}{Number of single-return points}
@@ -42,14 +42,14 @@ If \code{out_dir} is not set, returns a named list, one element per LAS file. Ea
 \item{npoints_per_class}{Named vector of counts per classification code}
 \item{z_histogram}{Elevation histogram (if \code{zwbin > 0})}
 \item{i_histogram}{Intensity histogram (if \code{iwbin > 0})}
-\item{epsg}{EPSG code of the LAS file CRS}
+\item{epsg}{EPSG code of the LASfile CRS}
 \item{metrics}{List of calculated summary metrics, e.g., min, median, max for time, intensity, and elevation}
 }
 
 If \code{out_dir} is set, the function returns \code{NULL} invisibly after writing JSON files.
 }
 \description{
-\code{get_summary()} calculates standard summary metrics for LAS files, including:
+\code{get_summary()} calculates standard summary metrics for LASfiles, including:
 }
 \details{
 \itemize{
@@ -61,12 +61,12 @@ If \code{out_dir} is set, the function returns \code{NULL} invisibly after writi
 \item Coordinate system (\code{epsg})
 }
 
-Results can optionally be saved as JSON files per LAS file.
+Results can optionally be saved as JSON files per LASfile.
 
 In comparison to \code{lasR::summarise} this function returns individual summaries per file instead of an aggregated summary among all files.
-If \code{out_dir} is provided, a JSON file is created for each LAS file, with the same
+If \code{out_dir} is provided, a JSON file is created for each LASfile, with the same
 name but \code{.json} extension. Existing JSON files are skipped automatically. If \code{out_dir}
-is not provided, the function returns a named list where each element corresponds to a LAS file.
+is not provided, the function returns a named list where each element corresponds to a LASfile.
 
 Setting \code{iwbin = 0} or \code{zwbin = 0} disables calculation of intensity or elevation histograms,
 which can save time and memory for large datasets.
