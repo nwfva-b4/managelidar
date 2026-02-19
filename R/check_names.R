@@ -176,7 +176,7 @@ check_names <- function(path, prefix = "3dm", zone = 32, region = NULL, year = N
   } else if (is.character(year) && length(year) == 1 && file.exists(year)) {
     files_names <- managelidar::get_names(vpc_file, full.names = TRUE)
     year <- vapply(files_names, function(f) {
-      managelidar::get_date(f, from_csv = year, return_referenceyear = TRUE)[["date"]]
+      managelidar::get_temporal_extent(f, from_csv = year, return_referenceyear = TRUE, verbose = FALSE)[["date"]]
     }, character(1))
   } else {
     year <- rep("1900", length(files))
