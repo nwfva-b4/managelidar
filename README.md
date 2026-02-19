@@ -55,15 +55,14 @@ library(managelidar)
 
 # create various valid input paths
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*.laz")
-las_file <- las_files[1]
-vpc_file <- tempfile(fileext = ".vpc")
-lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
-#> [1] "C:\\Users\\JWIESE~1\\AppData\\Local\\Temp\\RtmpghBJtg\\file16ffcbda271a.vpc"
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+vpc_file <- system.file("extdata/sample.vpc", package = "managelidar")
 vpc_obj <- yyjsonr::read_json_file(vpc_file)
 mixed <- c(folder, las_file)
 
 paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
+
 
 # get the Coordinate Reference System for all types of input
 lapply(paths, get_crs)
@@ -72,7 +71,8 @@ lapply(paths, get_crs)
 #> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
 #> 
 #> [[2]]
 #>                            filename   crs
@@ -83,7 +83,7 @@ lapply(paths, get_crs)
 #> 
 #> [[3]]
 #>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
+#> 1 3dm_32_548_5725_1_ni_20230904.laz 25832
 #> 
 #> [[4]]
 #>                            filename   crs
@@ -104,10 +104,14 @@ lapply(paths, get_crs)
 #> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
 
 # get the extent (bbox) from LASfiles
-get_extent(las_files)
+get_spatial_extent(las_files)
+#> Get spatial extent
+#>   ▼ 4 LASfiles
+#>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725991.98  (xmin, ymin, xmax, ymax; EPSG:25832)
 #>                            filename   xmin    ymin     xmax    ymax
 #> 1 3dm_32_547_5724_1_ni_20240327.laz 547690 5724000 547999.7 5725000
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
@@ -118,12 +122,21 @@ get_extent(las_files)
 las_files |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
+#> Filter spatial extent
+#>   ▼ 4 LASfiles
+#>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 
-# combine with temporal filter
-las_files |>
+# combine with temporal filter on multi-temporal data
+c(las_files, las_file) |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
+#> Filter temporal extent
+#>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
+#>   ▼ 4 LASfiles retained (2024-03-27)
+#> Filter spatial extent
+#>   ▼ 4 LASfiles
+#>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 ```

@@ -45,33 +45,33 @@ install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cr
 
 Just some basic examples for package usage.
 
-```{r get_extent}
+```{r examples}
 library(managelidar)
 
 # create various valid input paths
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*.laz")
-las_file <- las_files[1]
-vpc_file <- tempfile(fileext = ".vpc")
-lasR::exec(lasR::write_vpc(vpc_file, absolute_path = TRUE), on = las_files)
+las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+vpc_file <- system.file("extdata/sample.vpc", package = "managelidar")
 vpc_obj <- yyjsonr::read_json_file(vpc_file)
 mixed <- c(folder, las_file)
 
 paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
 
+
 # get the Coordinate Reference System for all types of input
 lapply(paths, get_crs)
 
 # get the extent (bbox) from LASfiles
-get_extent(las_files)
+get_spatial_extent(las_files)
 
 # get names of files intersecting an extent
 las_files |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
 
-# combine with temporal filter
-las_files |>
+# combine with temporal filter on multi-temporal data
+c(las_files, las_file) |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
