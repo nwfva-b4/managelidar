@@ -12,6 +12,7 @@ get_temporal_extent(
   full.names = FALSE,
   from_csv = NULL,
   return_referenceyear = FALSE,
+  fix_false_gpstime = TRUE,
   verbose = TRUE
 )
 ```
@@ -46,6 +47,15 @@ get_temporal_extent(
   Logical. If `TRUE`, returns the reference year instead of the
   acquisition date (e.g., reference year 2015 for data acquired in
   November or December 2014). Default is `FALSE`.
+
+- fix_false_gpstime:
+
+  Logical. If `TRUE` (default), detects files that claim GPS time
+  encoding in their header but contain week-second timestamps instead of
+  standard GPS time. Such files produce spurious dates in the range
+  2011-09-14 to 2011-09-21 when decoded as GPS time. Affected files are
+  silently reclassified as non-GPS and their dates are resolved via CSV
+  or header fallback instead.
 
 - verbose:
 
