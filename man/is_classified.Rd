@@ -33,13 +33,15 @@ point classifications other than class \code{0} (unclassified).
 Unlike header-based functions, this function reads actual point data.
 To reduce I/O overhead, only a \emph{subset} of points is sampled:
 \itemize{
-\item For LAS/LAZ files, points are sampled from a small circular region
+\item For LAS/LAZ files, points are sampled from a small circular region (10m radius)
 around the spatial center of the file.
-\item For COPC files, only the first hierarchy level is read.
+\item For COPC files, only the first two hierarchy levels (0,1) are read.
 }
 
 As a result, classification status is inferred from the sampled points
-and may not reflect the full contents of the file.
+and may not reflect the full contents of the file. To determine if a LASfile is
+classified this is usually sufficient, but to get class abundances consider using
+\code{\link{get_summary}}.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
@@ -47,4 +49,7 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 las_files |> is_classified(add_classes = TRUE)
 
+}
+\seealso{
+\code{\link{get_summary}}
 }

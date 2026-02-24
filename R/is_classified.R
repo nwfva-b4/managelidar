@@ -6,12 +6,14 @@
 #' Unlike header-based functions, this function reads actual point data.
 #' To reduce I/O overhead, only a *subset* of points is sampled:
 #'
-#' * For LAS/LAZ files, points are sampled from a small circular region
+#' * For LAS/LAZ files, points are sampled from a small circular region (10m radius)
 #'   around the spatial center of the file.
-#' * For COPC files, only the first hierarchy level is read.
+#' * For COPC files, only the first two hierarchy levels (0,1) are read.
 #'
 #' As a result, classification status is inferred from the sampled points
-#' and may not reflect the full contents of the file.
+#' and may not reflect the full contents of the file. To determine if a LASfile is
+#' classified this is usually sufficient, but to get class abundances consider using
+#' \code{\link{get_summary}}.
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing
 #'   such files, or a Virtual Point Cloud (`.vpc`).
@@ -28,6 +30,8 @@
 #'   \item{classes}{(Optional) List column of detected class codes.}
 #' }
 #'
+#' @seealso \code{\link{get_summary}}
+#' 
 #' @export
 #'
 #' @examples
