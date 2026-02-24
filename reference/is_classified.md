@@ -48,12 +48,19 @@ Unlike header-based functions, this function reads actual point data. To
 reduce I/O overhead, only a *subset* of points is sampled:
 
 - For LAS/LAZ files, points are sampled from a small circular region
-  around the spatial center of the file.
+  (10m radius) around the spatial center of the file.
 
-- For COPC files, only the first hierarchy level is read.
+- For COPC files, only the first two hierarchy levels (0,1) are read.
 
 As a result, classification status is inferred from the sampled points
-and may not reflect the full contents of the file.
+and may not reflect the full contents of the file. To determine if a
+LASfile is classified this is usually sufficient, but to get class
+abundances consider using
+[`get_summary`](https://wiesehahn.github.io/managelidar/reference/get_summary.md).
+
+## See also
+
+[`get_summary`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
 
 ## Examples
 

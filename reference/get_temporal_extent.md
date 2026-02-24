@@ -74,7 +74,7 @@ When `per_file = TRUE`: A `data.frame` with columns:
   Acquisition date (Date object) or reference year (numeric) if
   `return_referenceyear = TRUE`.
 
-- from:
+- date_source:
 
   Character. One of `data` (files with valid GPStime), `csv` (matched
   from CSV file), or `header` (from file header).
