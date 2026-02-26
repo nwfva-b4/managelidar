@@ -12,7 +12,7 @@
 #' @param full.names Logical. If `TRUE`, return full file paths; otherwise
 #'   return base filenames only (default).
 #'
-#' @return A character vector of filenames or file paths.
+#' @return A character vector of filenames.
 #'
 #' @export
 #'
@@ -33,5 +33,7 @@ get_names <- function(path, full.names = FALSE) {
   # adjust filenames
   if (!full.names) files <- basename(files)
 
-  files
+  filename <- files
+
+  return(filename)
 }

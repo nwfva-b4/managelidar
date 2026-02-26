@@ -14,7 +14,7 @@ such files, or a Virtual Point Cloud (\code{.vpc}).}
 return base filenames only (default).}
 }
 \value{
-A character vector of filenames or file paths.
+A character vector of filenames.
 }
 \description{
 \code{get_names()} returns the filenames of all LAS-related point cloud files
