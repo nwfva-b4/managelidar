@@ -43,6 +43,8 @@
   : Get the temporal extent of LASfiles
 - [`is_classified()`](https://wiesehahn.github.io/managelidar/reference/is_classified.md)
   : Check whether LASfiles are classified
+- [`is_indexed()`](https://wiesehahn.github.io/managelidar/reference/is_indexed.md)
+  : Check whether LASfiles are spatially indexed
 - [`is_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/is_multitemporal.md)
   : Check for multi-temporal coverage in LAS/LAZ files
 - [`laz_files`](https://wiesehahn.github.io/managelidar/reference/laz_files.md)
