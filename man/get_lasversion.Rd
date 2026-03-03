@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_lasversion.R
 \name{get_lasversion}
 \alias{get_lasversion}
-\title{Get the LAS version of point cloud files}
+\title{Get the LAS version of LASfiles}
 \usage{
 get_lasversion(path, full.names = FALSE)
 }

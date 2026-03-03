@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_penetration.R
 \name{get_penetration}
 \alias{get_penetration}
-\title{Compute pulse penetration ratios from LAS headers}
+\title{Compute the pulse penetration ratio for LASfiles}
 \usage{
 get_penetration(path, full.names = FALSE)
 }
@@ -33,7 +33,7 @@ A \code{data.frame} with one row per input file and the following columns:
 }
 \description{
 \code{get_penetration()} computes approximate pulse penetration ratios for
-LAS/LAZ/COPC files using information stored in the LASfile header.
+LASfiles using information stored in the header.
 Only header data are read; point data are not loaded.
 }
 \details{

@@ -1,4 +1,4 @@
-#' Get the spatial extent of LASfiles
+#' Get the spatial extent of LASfiles (individuially or combined)
 #'
 #' `get_spatial_extent()` extracts the spatial extent (xmin, xmax, ymin, ymax) from LASfiles.
 #' Can return extent per file or the combined extent of all files.

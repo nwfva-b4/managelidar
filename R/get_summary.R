@@ -1,4 +1,4 @@
-#' Compute summary metrics for individual LASfiles and optionally save as JSON
+#' Compute summary metrics for individual LASfiles
 #'
 #' `get_summary()` calculates standard summary metrics for LASfiles, including:
 #'

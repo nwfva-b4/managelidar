@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_summary.R
 \name{get_summary}
 \alias{get_summary}
-\title{Compute summary metrics for individual LASfiles and optionally save as JSON}
+\title{Compute summary metrics for individual LASfiles}
 \usage{
 get_summary(
   path,

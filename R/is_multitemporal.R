@@ -1,4 +1,4 @@
-#' Check for multi-temporal coverage in LAS/LAZ files
+#' Check for tiles with multi-temporal coverage in LASfiles
 #'
 #' Analyzes tiles for multi-temporal coverage.
 #' Returns a data frame with tile information including whether each tile

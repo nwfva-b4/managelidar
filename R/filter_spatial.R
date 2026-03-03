@@ -1,4 +1,4 @@
-#' Filter point cloud files by spatial extent
+#' Filter LASfiles by spatial extent
 #'
 #' @param path Character vector of input paths, a VPC file path, or a VPC object
 #'   already loaded in R. Can be a mix of LAS/LAZ/COPC files and `.vpc` files.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_spatial.R
 \name{filter_spatial}
 \alias{filter_spatial}
-\title{Filter point cloud files by spatial extent}
+\title{Filter LASfiles by spatial extent}
 \usage{
 filter_spatial(path, extent, crs = NULL, verbose = TRUE)
 }
@@ -28,7 +28,7 @@ A VPC object (list) containing only features that intersect the extent.
 Returns NULL invisibly if no features match the filter.
 }
 \description{
-Filter point cloud files by spatial extent
+Filter LASfiles by spatial extent
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")

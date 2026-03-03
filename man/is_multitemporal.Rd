@@ -2,7 +2,7 @@
 % Please edit documentation in R/is_multitemporal.R
 \name{is_multitemporal}
 \alias{is_multitemporal}
-\title{Check for multi-temporal coverage in LAS/LAZ files}
+\title{Check for tiles with multi-temporal coverage in LASfiles}
 \usage{
 is_multitemporal(
   path,

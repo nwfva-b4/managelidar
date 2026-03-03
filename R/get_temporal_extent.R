@@ -1,4 +1,4 @@
-#' Get the temporal extent of LASfiles
+#' Get the temporal extent of LASfiles (individually or combined)
 #'
 #' Extracts the temporal extent (acquisition dates) from LASfiles. Can return
 #' dates per file or the combined date range of all files.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_spatial_extent.R
 \name{get_spatial_extent}
 \alias{get_spatial_extent}
-\title{Get the spatial extent of LASfiles}
+\title{Get the spatial extent of LASfiles (individuially or combined)}
 \usage{
 get_spatial_extent(
   path,
