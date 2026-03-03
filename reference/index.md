@@ -13,7 +13,7 @@
 - [`filter_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)
   : Filter tiles by number of temporal observations
 - [`filter_spatial()`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md)
-  : Filter point cloud files by spatial extent
+  : Filter LASfiles by spatial extent
 - [`filter_temporal()`](https://wiesehahn.github.io/managelidar/reference/filter_temporal.md)
   : Filter point cloud files by temporal extent
 - [`get_crs()`](https://wiesehahn.github.io/managelidar/reference/get_crs.md)
@@ -22,6 +22,8 @@
   : Get data in a standardized format and structure
 - [`get_density()`](https://wiesehahn.github.io/managelidar/reference/get_density.md)
   : Get approximate point and pulse density of LASfiles
+- [`get_extrabytes_attributes()`](https://wiesehahn.github.io/managelidar/reference/get_extrabytes_attributes.md)
+  : Get the extrabytes attributes stored in LASfiles
 - [`get_gpkg()`](https://wiesehahn.github.io/managelidar/reference/get_gpkg.md)
   : Create a Geopackage containing metadata of LASfiles
 - [`get_header()`](https://wiesehahn.github.io/managelidar/reference/get_header.md)
@@ -29,16 +31,15 @@
 - [`get_intersection()`](https://wiesehahn.github.io/managelidar/reference/get_intersection.md)
   : Get intersecting LASfiles
 - [`get_lasversion()`](https://wiesehahn.github.io/managelidar/reference/get_lasversion.md)
-  : Get the LAS version of point cloud files
+  : Get the LAS version of LASfiles
 - [`get_names()`](https://wiesehahn.github.io/managelidar/reference/get_names.md)
   : Get LASfile names
 - [`get_penetration()`](https://wiesehahn.github.io/managelidar/reference/get_penetration.md)
-  : Compute pulse penetration ratios from LAS headers
+  : Compute the pulse penetration ratio for LASfiles
 - [`get_spatial_extent()`](https://wiesehahn.github.io/managelidar/reference/get_spatial_extent.md)
-  : Get the spatial extent of LASfiles
+  : Get the spatial extent of LASfiles (individuially or combined)
 - [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
-  : Compute summary metrics for individual LASfiles and optionally save
-  as JSON
+  : Compute summary metrics for individual LASfiles
 - [`get_temporal_extent()`](https://wiesehahn.github.io/managelidar/reference/get_temporal_extent.md)
   : Get the temporal extent of LASfiles
 - [`is_classified()`](https://wiesehahn.github.io/managelidar/reference/is_classified.md)
@@ -46,7 +47,7 @@
 - [`is_indexed()`](https://wiesehahn.github.io/managelidar/reference/is_indexed.md)
   : Check whether LASfiles are spatially indexed
 - [`is_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/is_multitemporal.md)
-  : Check for multi-temporal coverage in LAS/LAZ files
+  : Check for tiles with multi-temporal coverage in LASfiles
 - [`laz_files`](https://wiesehahn.github.io/managelidar/reference/laz_files.md)
   : Laz files
 - [`merge_vpcs()`](https://wiesehahn.github.io/managelidar/reference/merge_vpcs.md)

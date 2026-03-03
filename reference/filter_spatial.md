@@ -1,6 +1,6 @@
-# Filter point cloud files by spatial extent
+# Filter LASfiles by spatial extent
 
-Filter point cloud files by spatial extent
+Filter LASfiles by spatial extent
 
 ## Usage
 

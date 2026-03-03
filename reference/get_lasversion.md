@@ -1,4 +1,4 @@
-# Get the LAS version of point cloud files
+# Get the LAS version of LASfiles
 
 `get_lasversion()` extracts the LAS specification version (Major.Minor)
 from the file headers of LAS/LAZ/COPC files.

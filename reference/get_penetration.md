@@ -1,8 +1,8 @@
-# Compute pulse penetration ratios from LAS headers
+# Compute the pulse penetration ratio for LASfiles
 
 `get_penetration()` computes approximate pulse penetration ratios for
-LAS/LAZ/COPC files using information stored in the LASfile header. Only
-header data are read; point data are not loaded.
+LASfiles using information stored in the header. Only header data are
+read; point data are not loaded.
 
 ## Usage
 
