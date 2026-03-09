@@ -1,57 +1,71 @@
 
-# inspiration: https://github.com/georgewoolsey/cloud2trees/blob/main/R/lasr_pipeline.R
+raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbose = TRUE) {
 
-# TODO: update pipeline
-
-# optimize for parallel processing?
-
-# get list of processed files, unprocessed, reasons
-
-# optimize noise classification
-# which algorithm?
-# Which settings?
-# density based?
-
-# outline as geojson (requires reprojection)?
-
-
-# reclassify data prior to 2021 to new AdV schema
-#   Klasse_bis_2020 = c(2, 7, 8, 11, 12, 13, 15, 20, 22, 23, 25, 26, 27)
-#   Klasse_ab_2021 = c(2, 7, 9, 8, 24, 20, 1, 12, 12, 12, 12, 12, 12)
-
-# rename tiles
-
-# integrate summaries and outline in vpc?
-# add raw_source, script(version), density to vpc.
-
-raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
+  # Initialize processing log
+  processing_start <- Sys.time()
+  log_data <- list(
+    processing = list(
+      function_call = deparse(match.call()),
+      package_version = as.character(packageVersion("managelidar")),
+      timestamp_start = format(processing_start, "%Y-%m-%dT%H:%M:%S%z")
+    ),
+    system = list(
+      r_version = paste(R.version$major, R.version$minor, sep = "."),
+      platform = R.version$platform,
+      os = Sys.info()["sysname"],
+      user = Sys.info()["user"],
+      hostname = Sys.info()["nodename"],
+      dependencies = list(
+        gdalraster = as.character(packageVersion("gdalraster")),
+        fs = as.character(packageVersion("fs")),
+        lasR = as.character(packageVersion("lasR")),
+        mirai = as.character(packageVersion("mirai")),
+        sf = as.character(packageVersion("sf"))
+      )
+    ),
+    parameters = list(
+      out_dir = out_dir,
+      crs_epsg = crs_epsg
+    ),
+    files = list()
+  )
 
   raw_to_processed_per_file <- function(lasfile){
 
+    file_start <- Sys.time()
+
     # get filename (to store related data under same name)
     filename <- fs::path_ext_remove(fs::path_file(lasfile))
-    
+
     # Define output file path
     pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(filename, ".laz"))
-    
+
     # Check if file already processed
     if (fs::file_exists(pointcloud_file)) {
+      file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
+
+      # Log file info
+      log_data$files <<- c(log_data$files, list(list(
+        input = lasfile,
+        output = pointcloud_file,
+        status = "skipped_existing",
+        duration_seconds = round(file_duration, 2)
+      )))
+
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
-        message("  \u25B6 Skipped (already processed)")
+        message("  \u25B6 Already processed (skipped)")
       }
       return(pointcloud_file)
     }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # read pointcloud in memory
-    # used instead of reader() to only read data once for first summarising and following main processing pipeline
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     las_in_memory <- lasR::read_cloud(lasfile, progress = FALSE)
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # calculate summaries on unprocessed data
-    # metrics are used in main processing pipeline
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     summarise_unprocessed <- lasR::summarise(
       zwbin = 50, iwbin = 100,
@@ -64,15 +78,22 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
     )
     summary_unprocessed <- lasR::exec(summarise_unprocessed, on = las_in_memory, with = list(progress = FALSE, ncores = 1))
 
-
-    # TODO
-    # currently processing stops early if pointcloud does not have ground points
-    # once classify_with_ptd() is implemented in lasR, remove this part and modify pipeline below
+    # Check for ground points
     no_groundpoints <- !any(names(summary_unprocessed$npoints_per_class) == "2")
     if (no_groundpoints) {
       # Cleanup memory before early return
       rm(las_in_memory)
       gc()
+
+      file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
+
+      # Log file info
+      log_data$files <<- c(log_data$files, list(list(
+        input = lasfile,
+        output = NULL,
+        status = "skipped_no_ground",
+        duration_seconds = round(file_duration, 2)
+      )))
 
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
@@ -82,8 +103,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
     }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # initialze pipeline with reading stage
-    # this does nothing here as data is already read in memoryits only purpose is to initialize a pipeline we can add other stages to
+    # initialize pipeline with reading stage
+    # this does nothing here as data is already read in memory, its only purpose is to initialize a pipeline we can add other stages to
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     pipeline <-
       lasR::reader()
@@ -94,7 +115,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
     # explicitly set the CRS if it is is not set or cannot properly be read (https://github.com/r-lidar/lasR/issues/265)
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # EGSP 25832 is default for all cadastral data in western federal states of Germany
-    set_crs <- lasR::set_crs(25832)
+    set_crs <- lasR::set_crs(crs_epsg)
 
     # set CRS if missing valid EPSG
     missing_crs <- summary_unprocessed$epsg == 0L
@@ -160,7 +181,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
     #
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # TODO
-    # check good paraemter setting and ivf vs sor (ivf seems faster)
+    # check good parameter setting and ivf vs sor (ivf seems faster)
     # classify_noise <- lasR::classify_with_ivf()
 
     # # coarse-scale filter with 50 neighbors to find points/clusters
@@ -395,14 +416,24 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
     rm(las_in_memory)
     gc()
 
+    file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # Log file info
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    log_data$files <<- c(log_data$files, list(list(
+      input = lasfile,
+      output = pointcloud_file,
+      status = "success",
+      duration_seconds = round(file_duration, 2)
+    )))
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # print information
-    #
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     n_points_in <- summary_unprocessed$npoints
     n_points_out <- summary_processed$npoints
-    
+
     # Count noise points (class 7 and 18) for input - safely handle missing classes
     n_noise_in <- 0
     class_names_in <- names(summary_unprocessed$npoints_per_class)
@@ -412,7 +443,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
     if ("18" %in% class_names_in) {
       n_noise_in <- n_noise_in + summary_unprocessed$npoints_per_class[["18"]]
     }
-    
+
     # Count noise points (class 7 and 18) for output - safely handle missing classes
     n_noise_out <- 0
     class_names_out <- names(summary_processed$npoints_per_class)
@@ -458,7 +489,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
   dir_outlines <- fs::dir_create(out_dir, "outlines")
   dir_overviews <- fs::dir_create(out_dir, "overviews")
   dir_vpc <- fs::dir_create(out_dir, "vpcs")
-  
+
   # Print header
   if (verbose) {
     message(sprintf("Process %d LASfiles", length(files)))
@@ -466,7 +497,33 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
 
   # apply function
   results <- map_las(files, raw_to_processed_per_file)
-  
+
+  # Finalize processing log
+  processing_end <- Sys.time()
+  processing_duration <- as.numeric(difftime(processing_end, processing_start, units = "secs"))
+
+  log_data$processing$timestamp_end <- format(processing_end, "%Y-%m-%dT%H:%M:%S%z")
+  log_data$processing$duration_seconds <- round(processing_duration, 2)
+
+  # Calculate summary statistics
+  statuses <- sapply(log_data$files, function(x) x$status)
+  log_data$summary <- list(
+    files_total = length(files),
+    files_processed = sum(statuses == "success"),
+    files_skipped_existing = sum(statuses == "skipped_existing"),
+    files_skipped_no_ground = sum(statuses == "skipped_no_ground"),
+    files_failed = sum(statuses == "failed")
+  )
+
+  # Write processing log
+  log_filename <- sprintf("processing_log_%s.json", format(processing_start, "%Y-%m-%d_%H-%M-%S"))
+  log_file <- fs::path(out_dir, log_filename)
+  yyjsonr::write_json_file(log_data, log_file, pretty = TRUE, auto_unbox = TRUE)
+
+  if (verbose) {
+    message(sprintf("\nProcessing log written to: %s", log_file))
+  }
+
   # Return vector of output file paths (NULL for failed files)
   return(invisible(results))
 }
