@@ -3,8 +3,6 @@
 
 # TODO: update pipeline
 
-# add verbosity
-
 # optimize for parallel processing?
 
 # get list of processed files, unprocessed, reasons
@@ -32,6 +30,18 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
 
     # get filename (to store related data under same name)
     filename <- fs::path_ext_remove(fs::path_file(lasfile))
+    
+    # Define output file path
+    pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(filename, ".laz"))
+    
+    # Check if file already processed
+    if (fs::file_exists(pointcloud_file)) {
+      if (verbose) {
+        message(sprintf("Process %s", basename(lasfile)))
+        message("  \u25B6 Skipped (already processed)")
+      }
+      return(pointcloud_file)
+    }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # read pointcloud in memory
@@ -56,23 +66,20 @@ raw_to_processed <- function(path, out_dir = tempdir(), verbose = TRUE) {
 
 
     # TODO
-# currently processing stops early if pointcloud does not have ground points
-# once classify_with_ptd() is implemented in lasR, remove this part and modify pipeline below
-no_groundpoints <- !any(names(summary_unprocessed$npoints_per_class) == "2")
-if (no_groundpoints) {
-  # Cleanup memory before early return
-  rm(las_in_memory)
-  gc()
+    # currently processing stops early if pointcloud does not have ground points
+    # once classify_with_ptd() is implemented in lasR, remove this part and modify pipeline below
+    no_groundpoints <- !any(names(summary_unprocessed$npoints_per_class) == "2")
+    if (no_groundpoints) {
+      # Cleanup memory before early return
+      rm(las_in_memory)
+      gc()
 
-  if (verbose) {
-    message("Process LASfile")
-    message(sprintf("  \u25BC %s", basename(lasfile)))
-    message("  \u25BC Skipped (no ground classification)")
-  }
-  return(invisible(NULL))
-}
-
-
+      if (verbose) {
+        message(sprintf("Process %s", basename(lasfile)))
+        message("  \u25B6 Skipped (no ground classification)")
+      }
+      return(invisible(NULL))
+    }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # initialze pipeline with reading stage
@@ -294,7 +301,7 @@ if (no_groundpoints) {
     # write point cloud to disk
     #
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(filename, ".laz"))
+    # pointcloud_file already defined at top of function
     write_pointcloud <- lasR::write_las(ofile = pointcloud_file)
 
     pipeline <- pipeline +
@@ -393,16 +400,35 @@ if (no_groundpoints) {
     # print information
     #
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    n_points_unprocessed <- summary_unprocessed$npoints
-    n_points_processed <- summary_processed$npoints
+    n_points_in <- summary_unprocessed$npoints
+    n_points_out <- summary_processed$npoints
+    
+    # Count noise points (class 7 and 18) for input - safely handle missing classes
+    n_noise_in <- 0
+    class_names_in <- names(summary_unprocessed$npoints_per_class)
+    if ("7" %in% class_names_in) {
+      n_noise_in <- n_noise_in + summary_unprocessed$npoints_per_class[["7"]]
+    }
+    if ("18" %in% class_names_in) {
+      n_noise_in <- n_noise_in + summary_unprocessed$npoints_per_class[["18"]]
+    }
+    
+    # Count noise points (class 7 and 18) for output - safely handle missing classes
+    n_noise_out <- 0
+    class_names_out <- names(summary_processed$npoints_per_class)
+    if ("7" %in% class_names_out) {
+      n_noise_out <- n_noise_out + summary_processed$npoints_per_class[["7"]]
+    }
+    if ("18" %in% class_names_out) {
+      n_noise_out <- n_noise_out + summary_processed$npoints_per_class[["18"]]
+    }
 
     # Print information
     if (verbose) {
-      message("Process LASfile")
-      message(sprintf("  \u25BC %s", basename(lasfile)))
-      message(sprintf("  \u25BC %d points in, %d points out (%d filtered)",
-                      n_points_unprocessed, n_points_processed,
-                      n_points_unprocessed - n_points_processed))
+      message(sprintf("Process %s", basename(lasfile)))
+      message(sprintf("  \u25B6 %s (points/noise: %d/%d \u2192 %d/%d)",
+                      basename(pointcloud_file),
+                      n_points_in, n_noise_in, n_points_out, n_noise_out))
     }
 
     # Return file path
@@ -432,10 +458,15 @@ if (no_groundpoints) {
   dir_outlines <- fs::dir_create(out_dir, "outlines")
   dir_overviews <- fs::dir_create(out_dir, "overviews")
   dir_vpc <- fs::dir_create(out_dir, "vpcs")
+  
+  # Print header
+  if (verbose) {
+    message(sprintf("Process %d LASfiles", length(files)))
+  }
 
   # apply function
   results <- map_las(files, raw_to_processed_per_file)
-
+  
   # Return vector of output file paths (NULL for failed files)
-  return(results)
+  return(invisible(results))
 }
