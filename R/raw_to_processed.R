@@ -3,36 +3,11 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
 
   # Initialize processing log
   processing_start <- Sys.time()
-  log_data <- list(
-    processing = list(
-      function_call = deparse(match.call()),
-      package_version = as.character(packageVersion("managelidar")),
-      timestamp_start = format(processing_start, "%Y-%m-%dT%H:%M:%S%z")
-    ),
-    system = list(
-      r_version = paste(R.version$major, R.version$minor, sep = "."),
-      platform = R.version$platform,
-      os = Sys.info()["sysname"],
-      user = Sys.info()["user"],
-      hostname = Sys.info()["nodename"],
-      dependencies = list(
-        gdalraster = as.character(packageVersion("gdalraster")),
-        fs = as.character(packageVersion("fs")),
-        lasR = as.character(packageVersion("lasR")),
-        mirai = as.character(packageVersion("mirai")),
-        sf = as.character(packageVersion("sf"))
-      )
-    ),
-    parameters = list(
-      out_dir = out_dir,
-      crs_epsg = crs_epsg
-    ),
-    files = list()
-  )
 
   raw_to_processed_per_file <- function(lasfile){
 
     file_start <- Sys.time()
+    file_log <- list()
 
     # get filename (to store related data under same name)
     filename <- fs::path_ext_remove(fs::path_file(lasfile))
@@ -44,19 +19,19 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
     if (fs::file_exists(pointcloud_file)) {
       file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
 
-      # Log file info
-      log_data$files <<- c(log_data$files, list(list(
+      # Create file log entry
+      file_log <- list(
         input = lasfile,
         output = pointcloud_file,
         status = "skipped_existing",
         duration_seconds = round(file_duration, 2)
-      )))
+      )
 
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
         message("  \u25B6 Already processed (skipped)")
       }
-      return(pointcloud_file)
+      return(list(output = pointcloud_file, log = file_log))
     }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -87,19 +62,19 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
 
       file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
 
-      # Log file info
-      log_data$files <<- c(log_data$files, list(list(
+      # Create file log entry
+      file_log <- list(
         input = lasfile,
         output = NULL,
         status = "skipped_no_ground",
         duration_seconds = round(file_duration, 2)
-      )))
+      )
 
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
         message("  \u25B6 Skipped (no ground classification)")
       }
-      return(invisible(NULL))
+      return(list(output = NULL, log = file_log))
     }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -382,9 +357,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # get actual min/max first
     ds <- new(gdalraster::GDALRaster, overview_file)
-    invisible(capture.output(
-      mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
-    ))
+    ds$quiet <- TRUE
+    mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
     ds$close()
 
     # scale Float32 to Byte (0-255) into GDAL virtual memory
@@ -419,14 +393,14 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
     file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # Log file info
+    # Create file log entry
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    log_data$files <<- c(log_data$files, list(list(
+    file_log <- list(
       input = lasfile,
       output = pointcloud_file,
       status = "success",
       duration_seconds = round(file_duration, 2)
-    )))
+    )
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # print information
@@ -462,8 +436,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
                       n_points_in, n_noise_in, n_points_out, n_noise_out))
     }
 
-    # Return file path
-    return(pointcloud_file)
+    # Return both output path and log entry
+    return(list(output = pointcloud_file, log = file_log))
   }
 
   # ------------------------------------------------------------------
@@ -498,15 +472,45 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
   # apply function
   results <- map_las(files, raw_to_processed_per_file)
 
+  # Extract output paths and log entries
+  output_paths <- lapply(results, function(x) if (is.null(x)) NULL else x$output)
+  file_logs <- lapply(results, function(x) if (is.null(x)) NULL else x$log)
+
   # Finalize processing log
   processing_end <- Sys.time()
   processing_duration <- as.numeric(difftime(processing_end, processing_start, units = "secs"))
 
-  log_data$processing$timestamp_end <- format(processing_end, "%Y-%m-%dT%H:%M:%S%z")
-  log_data$processing$duration_seconds <- round(processing_duration, 2)
+  log_data <- list(
+    processing = list(
+      function_call = deparse(match.call()),
+      package_version = as.character(packageVersion("managelidar")),
+      timestamp_start = format(processing_start, "%Y-%m-%dT%H:%M:%S%z"),
+      timestamp_end = format(processing_end, "%Y-%m-%dT%H:%M:%S%z"),
+      duration_seconds = round(processing_duration, 2)
+    ),
+    system = list(
+      r_version = paste(R.version$major, R.version$minor, sep = "."),
+      platform = R.version$platform,
+      os = Sys.info()["sysname"],
+      user = Sys.info()["user"],
+      hostname = Sys.info()["nodename"],
+      dependencies = list(
+        gdalraster = as.character(packageVersion("gdalraster")),
+        fs = as.character(packageVersion("fs")),
+        lasR = as.character(packageVersion("lasR")),
+        mirai = as.character(packageVersion("mirai")),
+        sf = as.character(packageVersion("sf"))
+      )
+    ),
+    parameters = list(
+      out_dir = out_dir,
+      crs_epsg = crs_epsg
+    ),
+    files = file_logs
+  )
 
   # Calculate summary statistics
-  statuses <- sapply(log_data$files, function(x) x$status)
+  statuses <- sapply(file_logs, function(x) if (is.null(x)) "failed" else x$status)
   log_data$summary <- list(
     files_total = length(files),
     files_processed = sum(statuses == "success"),
@@ -525,5 +529,5 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, verbo
   }
 
   # Return vector of output file paths (NULL for failed files)
-  return(invisible(results))
+  return(invisible(output_paths))
 }
