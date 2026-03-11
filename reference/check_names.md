@@ -13,9 +13,8 @@ for details.
 check_names(
   path,
   prefix = "3dm",
-  zone = 32,
   region = NULL,
-  year = NULL,
+  from_csv = NULL,
   copc = FALSE,
   full.names = FALSE
 )
@@ -25,26 +24,22 @@ check_names(
 
 - path:
 
-  Character vector. Paths to LAS/LAZ/COPC files or directories
-  containing such files.
+  Character vector. Paths to LAS/LAZ/COPC files, directories containing
+  such files, or a VPC object already loaded in R.
 
 - prefix:
 
   Character scalar. Naming prefix (default: `"3dm"`).
-
-- zone:
-
-  Integer scalar. UTM zone (default: `32`).
 
 - region:
 
   Optional character vector of two-letter region codes. If `NULL`, the
   region is automatically inferred from file bounding boxes.
 
-- year:
+- from_csv:
 
-  Optional acquisition year (`YYYY`) or path to CSV file. If `NULL`, the
-  year is derived from the LAS header or GPStime metadata.
+  Optional path to CSV file for year determination. If provided, used to
+  match acquisition dates for tiles without GPStime.
 
 - copc:
 
@@ -75,7 +70,7 @@ A `data.frame` with one row per file and columns:
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> check_names()
 #> Error in loadNamespace(x): there is no package called ‘lasR’
