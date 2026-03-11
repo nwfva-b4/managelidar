@@ -7,26 +7,23 @@
 check_names(
   path,
   prefix = "3dm",
-  zone = 32,
   region = NULL,
-  year = NULL,
+  from_csv = NULL,
   copc = FALSE,
   full.names = FALSE
 )
 }
 \arguments{
-\item{path}{Character vector. Paths to LAS/LAZ/COPC files or directories
-containing such files.}
+\item{path}{Character vector. Paths to LAS/LAZ/COPC files, directories
+containing such files, or a VPC object already loaded in R.}
 
 \item{prefix}{Character scalar. Naming prefix (default: \code{"3dm"}).}
-
-\item{zone}{Integer scalar. UTM zone (default: \code{32}).}
 
 \item{region}{Optional character vector of two-letter region codes. If
 \code{NULL}, the region is automatically inferred from file bounding boxes.}
 
-\item{year}{Optional acquisition year (\code{YYYY}) or path to CSV file.
-If \code{NULL}, the year is derived from the LAS header or GPStime metadata.}
+\item{from_csv}{Optional path to CSV file for year determination. If provided,
+used to match acquisition dates for tiles without GPStime.}
 
 \item{copc}{Logical. Whether the files are expected to be COPC (\code{.copc.laz}).}
 
@@ -50,7 +47,7 @@ See the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaett
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> check_names()
 }
