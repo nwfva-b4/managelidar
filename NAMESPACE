@@ -2,6 +2,7 @@
 
 export(check_names)
 export(check_tiling)
+export(create_vpc_enriched)
 export(filter_first)
 export(filter_latest)
 export(filter_multitemporal)
