@@ -1,10 +1,20 @@
 raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, region = NULL, from_csv = NULL, verbose = TRUE) {
-
   # Initialize processing log
   processing_start <- Sys.time()
 
   # Constants
   seconds_per_week <- 604800L
+
+  # Helper function to create consistent file log entries
+  create_file_log <- function(lasfile, pointcloud_file, status, file_start, warnings = character(0)) {
+    list(
+      input = normalizePath(lasfile, winslash = "/", mustWork = FALSE),
+      output = if (status == "skipped_no_ground") NULL else normalizePath(pointcloud_file, winslash = "/", mustWork = FALSE),
+      status = status,
+      duration_seconds = round(as.numeric(difftime(Sys.time(), file_start, units = "secs")), 1),
+      warnings = if (length(warnings) > 0) warnings else NULL
+    )
+  }
 
   # ------------------------------------------------------------------
   # Early filename determination using check_names
@@ -33,10 +43,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     name_check$name_is
   )
 
-  raw_to_processed_per_file <- function(lasfile){
-
+  raw_to_processed_per_file <- function(lasfile) {
     file_start <- Sys.time()
-    file_log <- list()
 
     # Get original filename (for summary_original)
     original_filename <- fs::path_ext_remove(fs::path_file(lasfile))
@@ -49,15 +57,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
 
     # Early existence check
     if (fs::file_exists(pointcloud_file)) {
-      file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
-
-      # Create file log entry
-      file_log <- list(
-        input = lasfile,
-        output = pointcloud_file,
-        status = "skipped_existing",
-        duration_seconds = round(file_duration, 1)
-      )
+      file_log <- create_file_log(lasfile, pointcloud_file, "skipped_existing", file_start)
 
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
@@ -95,7 +95,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
 
     # Try to get year from median GPS time
     if (!is.null(summary_original$metrics$t_median) &&
-        summary_original$metrics$t_median > seconds_per_week) {
+      summary_original$metrics$t_median > seconds_per_week) {
       # GPS time is seconds since 1980-01-06 00:00:00 UTC
       gps_epoch <- as.POSIXct("1980-01-06 00:00:00", tz = "UTC")
       date <- gps_epoch + summary_original$metrics$t_median + 1e9
@@ -103,9 +103,11 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
 
       # Replace year in expected filename
       # Pattern: 3dm_32_547_5724_1_ni_YYYY.laz -> replace YYYY with year_from_median
-      generated_filename <- sub("_([0-9]{4})$",
-                                paste0("_", year_from_median),
-                                expected_filename)
+      generated_filename <- sub(
+        "_([0-9]{4})$",
+        paste0("_", year_from_median),
+        expected_filename
+      )
     }
 
     # Update output file path with final filename
@@ -113,19 +115,11 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
 
     # Check again if file exists with updated filename (edge case where year changed)
     if (generated_filename != expected_filename && fs::file_exists(pointcloud_file)) {
-      file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
-
       # Cleanup memory
       rm(las_in_memory)
       gc()
 
-      # Create file log entry
-      file_log <- list(
-        input = lasfile,
-        output = pointcloud_file,
-        status = "skipped_existing",
-        duration_seconds = round(file_duration, 1)
-      )
+      file_log <- create_file_log(lasfile, pointcloud_file, "skipped_existing", file_start)
 
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
@@ -141,19 +135,11 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
       rm(las_in_memory)
       gc()
 
-      file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
-
-      # Create file log entry
-      file_log <- list(
-        input = lasfile,
-        output = NULL,
-        status = "skipped_no_ground",
-        duration_seconds = round(file_duration, 1)
-      )
+      file_log <- create_file_log(lasfile, pointcloud_file, "skipped_no_ground", file_start)
 
       if (verbose) {
         message(sprintf("Process %s", basename(lasfile)))
-        message("  \u25B6 Skipped (no ground classification)")
+        message("  \u25B6 No ground classification (skipped))")
       }
       return(list(output = NULL, log = file_log))
     }
@@ -184,7 +170,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     filter_erroneous_gpstime <- lasR::delete_points(filter = paste("gpstime <=", seconds_per_week))
 
     erroneous_gpstime <- summary_original$metrics$t_min <= seconds_per_week &&
-                        summary_original$metrics$t_median > seconds_per_week
+      summary_original$metrics$t_median > seconds_per_week
     if (erroneous_gpstime) {
       pipeline <- pipeline + filter_erroneous_gpstime
     }
@@ -204,24 +190,24 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     # keeping all point cloud attributes according to LAS 1.4 point data record format (PDRF) 6
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     select_attributes <- lasR::keep_attributes(c(
-      "X",                  # | 4 bytes | X coordinate (scaled integer)
-      "Y",                  # | 4 bytes | Y coordinate (scaled integer)
-      "Z",                  # | 4 bytes | Z coordinate (scaled integer)
-      "Intensity",          # | 2 bytes | Return signal strength
-      "ReturnNumber",       # | 4 bits  | Which return this point represents (1–15)
-      "NumberOfReturns",    # | 4 bits  | Total returns for this pulse (1–15)
-      "Synthetic",          # | 1 bit   | Point created other than direct LiDAR acquisition
-      "Keypoint",           # | 1 bit   | Significant point, should not be withheld in thinning
-      "Withheld",           # | 1 bit   | Point should be excluded from processing
-      "Overlap",            # | 1 bit   | Point is in overlap region of two or more swaths
-      "ScannerChannel",     # | 2 bits  | Channel of the multi-channel system (0–3)
-      "ScanDirectionFlag",  # | 1 bit   | Direction of scanner mirror (0 = neg, 1 = pos, where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite)
-      "EdgeOfFlightline",   # | 1 bit   | 1 = last point on a scan line
-      "Classification",     # | 1 byte  | Full ASPRS class code (0–255)
-      "UserData",           # | 1 byte  | User-defined field
-      "ScanAngle",          # | 2 bytes | Scaled in 0.006° increments (±30,000 = ±180°)
-      "PointSourceID",      # | 2 bytes | File origin (e.g., flight line ID)
-      "gpstime"             # | 8 bytes | Standard GPS time
+      "X", # | 4 bytes | X coordinate (scaled integer)
+      "Y", # | 4 bytes | Y coordinate (scaled integer)
+      "Z", # | 4 bytes | Z coordinate (scaled integer)
+      "Intensity", # | 2 bytes | Return signal strength
+      "ReturnNumber", # | 4 bits  | Which return this point represents (1–15)
+      "NumberOfReturns", # | 4 bits  | Total returns for this pulse (1–15)
+      "Synthetic", # | 1 bit   | Point created other than direct LiDAR acquisition
+      "Keypoint", # | 1 bit   | Significant point, should not be withheld in thinning
+      "Withheld", # | 1 bit   | Point should be excluded from processing
+      "Overlap", # | 1 bit   | Point is in overlap region of two or more swaths
+      "ScannerChannel", # | 2 bits  | Channel of the multi-channel system (0–3)
+      "ScanDirectionFlag", # | 1 bit   | Direction of scanner mirror (0 = neg, 1 = pos, where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite)
+      "EdgeOfFlightline", # | 1 bit   | 1 = last point on a scan line
+      "Classification", # | 1 byte  | Full ASPRS class code (0–255)
+      "UserData", # | 1 byte  | User-defined field
+      "ScanAngle", # | 2 bytes | Scaled in 0.006° increments (±30,000 = ±180°)
+      "PointSourceID", # | 2 bytes | File origin (e.g., flight line ID)
+      "gpstime" # | 8 bytes | Standard GPS time
     ))
 
     pipeline <- pipeline + select_attributes
@@ -285,7 +271,6 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     #   }
 
 
-
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # add Height Above Ground
     # this might drop points at the edges (https://github.com/r-lidar/lasR/issues/270)
@@ -300,8 +285,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     # intensities are clipped to 0.025-0.975 percentile range and stretched to values of 0-65535
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     normalize_intensity_range <- function(data) {
-      lower_pct = 0.025
-      upper_pct = 0.975
+      lower_pct <- 0.025
+      upper_pct <- 0.975
       min_val <- 0
       max_val <- 2^16 - 1
 
@@ -327,8 +312,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
       metrics = c(
         "t_min", "t_median", "t_max",
         "i_min", "i_mean", "i_median", "i_max", "i_p5", "i_p95", "i_sd",
-        "z_min", "z_median", "z_max",
-        "HAG_min", "HAG_median", "HAG_max"
+        "z_min", "z_median", "z_max"
+        # ,"HAG_min", "HAG_median", "HAG_max"
       )
     )
 
@@ -345,14 +330,14 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     # triangulate ground
     # mesh used for hulls
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    ground_triangulation <- lasR::triangulate(max_edge = 25, filter = lasR::keep_ground_and_water())
+    ground_triangulation <- lasR::triangulate(max_edge = 0, filter = lasR::keep_ground_and_water())
     pipeline <- pipeline + ground_triangulation
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # get point cloud outlines (convex hulls)
-    # (just necessary for data irregular tiles where the entire tile is does not contain data)
+    # (just necessary for data irregular tiles where not the entire tile contains data)
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    outline_file <- fs::path(dir_outlines, fs::path_ext_set(generated_filename, ".gpkg"))
+    outline_file <- fs::path(dir_outlines, fs::path_ext_set(generated_filename, "geojson"))
     get_outlines <- lasR::hulls(ground_triangulation, ofile = outline_file)
     pipeline <- pipeline + get_outlines
 
@@ -382,27 +367,19 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     lasR::exec(lasR::write_lax(embedded = TRUE), on = ans$write_las, with = list(progress = FALSE, ncores = 1))
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # create virtual point cloud
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # TODO
-    # this will create a VPC per file, do we need this?
-    # a VPC per collection will be created later
-    # should we enrich the VPC with further metadata (summary, outline, ...)?
-    # we will create VPC later anyway, and summary here anyway, is there a benefit of creating it here per file?#
-    # we can easily append summary later, but what about refs to overviews, raw data, ...
-    # should we just create summary and append those things there? then later when creating vpc per collection we can append summary
-    # in step below (save summaries) we can add path to processed las, path to original las, path to overview, path to logfile, ...
-    vpc_file <- fs::path(dir_vpc, fs::path_ext_set(generated_filename, ".vpc"))
-    lasR::exec(lasR::write_vpc(ofile = vpc_file, use_gpstime = TRUE), on = ans$write_las, with = list(progress = FALSE, ncores = 1))
-
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # save summaries to disk
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     save_summary <- function(summary_list, out_file) {
       summary <- lapply(summary_list, function(x) {
-        if (is.data.frame(x)) return(x)
-        if (is.atomic(x) && !is.null(names(x))) return(as.list(lapply(x, as.integer)))
-        if (is.numeric(x)) return(as.integer(x))
+        if (is.data.frame(x)) {
+          return(x)
+        }
+        if (is.atomic(x) && !is.null(names(x))) {
+          return(as.list(lapply(x, as.integer)))
+        }
+        if (is.numeric(x)) {
+          return(as.integer(x))
+        }
         x
       })
       yyjsonr::write_json_file(summary, out_file, pretty = TRUE, auto_unbox = TRUE)
@@ -416,6 +393,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     summary_processed <- ans$summary
     summary_processed_json <- fs::path(dir_summary_processed, fs::path_ext_set(generated_filename, ".json"))
     summary_processed |> save_summary(summary_processed_json)
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # convert overview
@@ -449,23 +427,11 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
     rm(las_in_memory)
     gc()
 
-    file_duration <- as.numeric(difftime(Sys.time(), file_start, units = "secs"))
-
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # Create file log entry
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     status <- if (length(warnings) > 0) "success_with_warnings" else "success"
-
-    file_log <- list(
-      input = lasfile,
-      output = pointcloud_file,
-      status = status,
-      duration_seconds = round(file_duration, 1)
-    )
-
-    if (length(warnings) > 0) {
-      file_log$warnings <- warnings
-    }
+    file_log <- create_file_log(lasfile, pointcloud_file, status, file_start, warnings)
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # print information
@@ -475,21 +441,23 @@ raw_to_processed <- function(path, out_dir = tempdir(), crs_epsg = 25832L, regio
 
     # Count noise points (class 7 and 18)
     count_noise <- function(npoints_per_class) {
-  n <- 0
-  if ("7" %in% names(npoints_per_class)) n <- n + npoints_per_class[["7"]]
-  if ("18" %in% names(npoints_per_class)) n <- n + npoints_per_class[["18"]]
-  n
-}
+      n <- 0
+      if ("7" %in% names(npoints_per_class)) n <- n + npoints_per_class[["7"]]
+      if ("18" %in% names(npoints_per_class)) n <- n + npoints_per_class[["18"]]
+      n
+    }
 
-n_noise_in <- count_noise(summary_original$npoints_per_class)
-n_noise_out <- count_noise(summary_processed$npoints_per_class)
+    n_noise_in <- count_noise(summary_original$npoints_per_class)
+    n_noise_out <- count_noise(summary_processed$npoints_per_class)
 
     # Print information
     if (verbose) {
       message(sprintf("Process %s", basename(lasfile)))
-      message(sprintf("  \u25B6 %s (points/noise: %d/%d \u2192 %d/%d)",
-                      basename(pointcloud_file),
-                      n_points_in, n_noise_in, n_points_out, n_noise_out))
+      message(sprintf(
+        "  \u25B6 %s (points/noise: %d/%d \u2192 %d/%d)",
+        basename(pointcloud_file),
+        n_points_in, n_noise_in, n_points_out, n_noise_out
+      ))
     }
 
     # Return both output path and log entry
@@ -522,9 +490,9 @@ n_noise_out <- count_noise(summary_processed$npoints_per_class)
   # apply function
   results <- map_las(files, raw_to_processed_per_file)
 
-  # Extract output paths and log entries
   output_paths <- lapply(results, function(x) if (is.null(x)) NULL else x$output)
   file_logs <- lapply(results, function(x) if (is.null(x)) NULL else x$log)
+
 
   # Finalize processing log
   processing_end <- Sys.time()
@@ -536,7 +504,7 @@ n_noise_out <- count_noise(summary_processed$npoints_per_class)
       package_version = as.character(packageVersion("managelidar")),
       timestamp_start = format(processing_start, "%Y-%m-%dT%H:%M:%S"),
       timestamp_end = format(processing_end, "%Y-%m-%dT%H:%M:%S"),
-      duration_seconds = round(processing_duration)
+      duration_seconds = round(processing_duration, 1)
     ),
     system = list(
       r_version = paste(R.version$major, R.version$minor, sep = "."),
@@ -553,13 +521,16 @@ n_noise_out <- count_noise(summary_processed$npoints_per_class)
       )
     ),
     parameters = list(
-      out_dir = out_dir,
+      out_dir = normalizePath(out_dir, winslash = "/", mustWork = FALSE),
       crs_epsg = crs_epsg,
       region = region,
-      from_csv = from_csv
+      from_csv = if (!is.null(from_csv)) normalizePath(from_csv, winslash = "/", mustWork = FALSE) else NULL
     ),
     files = file_logs
   )
+
+  # Remove NULL values from parameters to avoid empty arrays in JSON
+  log_data$parameters <- Filter(Negate(is.null), log_data$parameters)
 
   # Calculate summary statistics
   statuses <- sapply(file_logs, function(x) if (is.null(x)) "failed" else x$status)
