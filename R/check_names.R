@@ -32,49 +32,48 @@
 #' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' las_files |> check_names()
-check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL, 
-                       copc = FALSE, full.names = FALSE) {
-  
+check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
+                        copc = FALSE, full.names = FALSE) {
   # ------------------------------------------------------------------
   # Build VPC once and reuse it
   # ------------------------------------------------------------------
   vpc <- resolve_vpc(path, out_file = NULL)
-  
+
   if (is.null(vpc)) {
     return(invisible(NULL))
   }
-  
+
   if (nrow(vpc$features) == 0) {
     warning("No features in VPC")
     return(invisible(NULL))
   }
-  
+
   files <- sapply(vpc$features$assets, function(x) x$data$href)
-  
+
   # ------------------------------------------------------------------
   # Get CRS and calculate zone
   # ------------------------------------------------------------------
   crs_data <- get_crs(vpc, full.names = TRUE)
-  
+
   # Calculate zone from EPSG (last 2 digits)
   # Assumes UTM zones like EPSG:25832 → zone 32
   zone <- crs_data$crs[1] %% 100
-  
+
   # ------------------------------------------------------------------
   # Get spatial extent
   # ------------------------------------------------------------------
   ext <- get_spatial_extent(vpc, per_file = TRUE, full.names = TRUE, verbose = FALSE)
-  
+
   # ------------------------------------------------------------------
   # Compute tile coordinates with snapping
   # ------------------------------------------------------------------
-  max_error <- 10  # meters tolerance for snapping
-  
+  max_error <- 10 # meters tolerance for snapping
+
   minx <- floor((ext$xmin + max_error) / 1000)
   miny <- floor((ext$ymin + max_error) / 1000)
   maxx <- ceiling((ext$xmax - max_error) / 1000)
   maxy <- ceiling((ext$ymax - max_error) / 1000)
-  
+
   tilesize_x <- maxx - minx
   tilesize_y <- maxy - miny
   tilesize <- pmax(tilesize_x, tilesize_y)
@@ -131,7 +130,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
 
     # Find which state each tile center falls in
     state_match <- sf::st_join(tile_centers, states_sf, join = sf::st_within)
-    
+
     region <- ifelse(is.na(state_match$code), "de", state_match$code)
   }
 
@@ -140,15 +139,15 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   # ------------------------------------------------------------------
   # Use get_temporal_extent with VPC to get years
   temporal_data <- get_temporal_extent(
-    vpc, 
-    per_file = TRUE, 
+    vpc,
+    per_file = TRUE,
     full.names = TRUE,
     from_csv = from_csv,
     return_referenceyear = TRUE,
     fix_false_gpstime = TRUE,
     verbose = FALSE
   )
-  
+
   # Match years to files
   year <- temporal_data$date[match(files, temporal_data$filename)]
   year <- as.character(year)

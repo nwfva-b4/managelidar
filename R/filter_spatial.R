@@ -17,7 +17,7 @@
 #'   Returns NULL invisibly if no features match the filter.
 #'
 #' @export
-#' 
+#'
 #' @seealso  \code{\link{filter_first}}, \code{\link{filter_latest}}, \code{\link{filter_temporal}},
 #'   \code{\link{filter_multitemporal}}
 #'

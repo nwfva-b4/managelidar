@@ -31,7 +31,7 @@
 #' }
 #'
 #' @seealso \code{\link{get_summary}}
-#' 
+#'
 #' @export
 #'
 #' @examples

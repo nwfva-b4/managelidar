@@ -5,7 +5,7 @@
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) referencing these files.
 #' @param per_file Logical. If `TRUE` (default), returns extent per file. If `FALSE`, returns combined extent of all files.
-#' @param full.names Logical. If `TRUE`, filenames in the output are full paths; otherwise base filenames (default). 
+#' @param full.names Logical. If `TRUE`, filenames in the output are full paths; otherwise base filenames (default).
 #'   Only used when `per_file = TRUE`.
 #' @param as_sf Logical. If `TRUE`, returns an `sf` object with geometry. If `FALSE` (default), returns a data.frame.
 #' @param verbose Logical. If `TRUE` (default), prints extent information.
@@ -24,7 +24,7 @@
 #' @export
 #'
 #' @seealso \code{\link{get_temporal_extent}}, \code{\link{filter_spatial}}
-#' 
+#'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
 #' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
@@ -35,19 +35,19 @@ get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf 
   # Resolve LASfiles and build VPC if not provided
   # ------------------------------------------------------------------
   vpc <- resolve_vpc(path, out_file = NULL)
-  
+
   # Check if resolve_vpc returned NULL
   if (is.null(vpc)) {
     return(invisible(NULL))
   }
-  
+
   n_files <- nrow(vpc$features)
-  
+
   if (n_files == 0) {
     warning("No features in VPC")
     return(invisible(NULL))
   }
-  
+
   # ------------------------------------------------------------------
   # Read bbox info from VPC
   # ------------------------------------------------------------------
@@ -60,29 +60,33 @@ get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf 
     stringsAsFactors = FALSE,
     row.names = NULL
   )
-  
+
   # Get CRS from first feature
   crs_epsg <- vpc$features$properties[[1]]$`proj:epsg`
-  
+
   # Calculate overall extent
   overall_xmin <- min(ext$xmin)
   overall_ymin <- min(ext$ymin)
   overall_xmax <- max(ext$xmax)
   overall_ymax <- max(ext$ymax)
-  
+
   # Print information
   if (verbose) {
     message("Get spatial extent")
     message(sprintf("  \u25BC %d LASfiles", n_files))
     if (!is.null(crs_epsg)) {
-      message(sprintf("  Overall extent: %.2f, %.2f, %.2f, %.2f  (xmin, ymin, xmax, ymax; EPSG:%d)", 
-                      overall_xmin, overall_ymin, overall_xmax, overall_ymax, crs_epsg))
+      message(sprintf(
+        "  Overall extent: %.2f, %.2f, %.2f, %.2f  (xmin, ymin, xmax, ymax; EPSG:%d)",
+        overall_xmin, overall_ymin, overall_xmax, overall_ymax, crs_epsg
+      ))
     } else {
-      message(sprintf("  Overall extent: %.2f, %.2f, %.2f, %.2f  (xmin, ymin, xmax, ymax)", 
-                      overall_xmin, overall_ymin, overall_xmax, overall_ymax))
+      message(sprintf(
+        "  Overall extent: %.2f, %.2f, %.2f, %.2f  (xmin, ymin, xmax, ymax)",
+        overall_xmin, overall_ymin, overall_xmax, overall_ymax
+      ))
     }
   }
-  
+
   # If per_file = FALSE, compute combined extent
   if (!per_file) {
     combined_ext <- data.frame(
@@ -93,7 +97,7 @@ get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf 
       stringsAsFactors = FALSE,
       row.names = NULL
     )
-    
+
     # Optionally return as sf
     if (as_sf) {
       # Create polygon from bbox
@@ -104,14 +108,14 @@ get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf 
         combined_ext$xmin, combined_ext$ymax,
         combined_ext$xmin, combined_ext$ymin
       ), ncol = 2, byrow = TRUE)))
-      
+
       geom_column <- sf::st_sfc(geom, crs = crs_epsg)
       combined_ext <- sf::st_sf(combined_ext, geometry = geom_column)
     }
-    
+
     return(combined_ext)
   }
-  
+
   # Optionally return as sf (per file mode)
   if (as_sf) {
     geometries <- lapply(vpc$features$geometry, function(geom) {
@@ -122,11 +126,11 @@ get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf 
     ext <- sf::st_sf(ext, geometry = geom_column) |>
       sf::st_zm()
   }
-  
+
   # Adjust filenames
   if (!full.names) {
     ext$filename <- basename(ext$filename)
   }
-  
+
   ext
 }

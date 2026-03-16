@@ -110,7 +110,6 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
     }
 
 
-
     if (!gpstime_flag) {
       vpc_path <- lasR::exec(
         lasR::write_vpc(
@@ -161,7 +160,7 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
       }
       # Move suspicious files into the non-GPS bucket for proper date handling
       files_gpstime_false <- c(files_gpstime_false, dates_gpstime_true$filename[is_suspicious])
-      dates_gpstime_true  <- dates_gpstime_true[!is_suspicious, ]
+      dates_gpstime_true <- dates_gpstime_true[!is_suspicious, ]
     }
   }
 
@@ -217,7 +216,7 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
   if (return_referenceyear) {
     dates <- dates |>
       dplyr::mutate(date = lubridate::year(date) +
-                      dplyr::if_else(lubridate::month(date) %in% c(11, 12), 1, 0))
+        dplyr::if_else(lubridate::month(date) %in% c(11, 12), 1, 0))
   }
 
   # Calculate overall temporal extent
@@ -238,9 +237,11 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
       if (start_val == end_val) {
         message(sprintf("  Temporal extent: %s", format(start_val, "%Y-%m-%d")))
       } else {
-        message(sprintf("  Temporal extent: %s to %s",
-                        format(start_val, "%Y-%m-%d"),
-                        format(end_val, "%Y-%m-%d")))
+        message(sprintf(
+          "  Temporal extent: %s to %s",
+          format(start_val, "%Y-%m-%d"),
+          format(end_val, "%Y-%m-%d")
+        ))
       }
     }
   }
