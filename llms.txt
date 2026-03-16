@@ -143,6 +143,9 @@ c(las_files, las_file) |>
   : Validate LASfile names according to the ADV standard
 - [`check_tiling()`](https://wiesehahn.github.io/managelidar/reference/check_tiling.md)
   : Check if tiles are valid (correct size and aligned to grid)
+- [`create_vpc_enriched()`](https://wiesehahn.github.io/managelidar/reference/create_vpc_enriched.md)
+  : Create enriched Virtual Point Cloud with outlines and summary
+  metadata
 - [`filter_first()`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
   : Filter to first acquisition from multi-temporal tiles
 - [`filter_latest()`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
