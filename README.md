@@ -7,64 +7,142 @@
 
 <!-- badges: end -->
 
-The goal of managelidar is to facilitate the handling and management of
-lidar data files (`*.las/laz/copc`). Its’s main purpose is to convert
-new incoming data to data with certain quality standards. Further, it
-provides functions to facilitate the quality check of incoming ALS data.
-`managelidar` builds on top of R-packages
-{[lidR](https://github.com/r-lidar/lidR)} and
-{[lasR](https://github.com/r-lidar/lasR)}. It is designed to work with
-any number and combination of folders, LASfiles and Virtual Point Clouds
-(VPC) and to read as little data as necessary. Most functions read
-metadata from VPCs which are efficiently created by lasR in the
-background if necessary. If this is not possible metadata is read from
-LASheaders via lidR which is a little slower but still pretty fast. Only
-some functions (e.g. `get_summary()`) require actual point cloud data to
-be read, this may take much longer. To enhance processing speed the
-functions run in parallel (via
-{[mirai](https://github.com/r-lib/mirai)}) if they are applied on a
-larger collection of files.
+**managelidar** is a LiDAR catalog processing engine for R that builds
+on top of {[lasR](https://github.com/r-lidar/lasR)}. While lasR
+efficiently handles individual LASfile processing, managelidar adds
+catalog-level capabilities through Virtual Point Cloud (VPC) files,
+enabling fast metadata operations across entire collections without
+reading point cloud data. Although most functions can be used on any
+LASdata it was designed primarily to work with data from Germany
+according to [AdV
+Standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/1593R3%20PQS%203D-Messdaten560c.pdf?imgUid=f663acb8-b78b-6919-fb68-66101ffcef97&uBasVariant=11111111-1111-1111-1111-111111111111).
+
+## Key Features
+
+- **VPC-based catalog management**: Work with collections of
+  LAS/LAZ/COPC files efficiently
+- **Flexible input handling**: Process any combination of folders,
+  individual files, VPC files, or VPC objects
+- **Metadata-first approach**: Most operations read only file headers or
+  VPC metadata, not point data
+- **Parallel processing**: Automatic parallelization via
+  {[mirai](https://github.com/r-lib/mirai)} for large collections
+- **Quality assurance pipeline**: Convert raw ALS data to standardized,
+  quality-controlled outputs
+- **STAC-compliant VPCs**: Create enriched Virtual Point Clouds
+  following STAC specifications
+
+## Main Workflows
+
+### 1. Catalog Exploration
+
+Query and filter LiDAR collections without reading point data:
+
+``` r
+# Get CRS, extents, temporal coverage
+get_crs(path)
+get_spatial_extent(path)
+get_temporal_extent(path)
+
+# Plot extent in viewer
+plot_extent(path)
+
+# Filter by space and time
+path |>
+  filter_spatial(bbox) |>
+  filter_temporal("2024-03") |>
+  get_names()
+```
+
+### 2. Data Processing Pipeline
+
+Convert raw ALS data to standardized format:
+
+``` r
+# Process raw files: classify noise, normalize intensity, create metadata, ...
+raw_to_processed(
+  path = "raw_data/",
+  out_dir = "processed/"
+)
+
+# Create enriched VPC with STAC-compliant metadata
+create_vpc_enriched(
+  path = "processed/pointcloud",
+  out_file = "processed/collection.vpc"
+)
+```
+
+### 3. Quality Control
+
+Validate incoming data:
+
+``` r
+# Check naming conventions (according to AdV standard)
+check_names(path)
+
+# Verify spatial tiling pattern (according to AdV standard)
+check_tiling(path)
+
+# Get detailed summaries (reads point data)
+get_summary(path)
+
+# Check if data is spatially indexed / classified / multitemporal
+is_indexed(path)
+is_classified(path)
+is_multitemporal(path)
+```
 
 ## Installation
 
-You can install the development version of
-{[managelidar](https://github.com/nwfva-b4/managelidar)} from
-[GitHub](https://github.com/) with:
+Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
 pak::pak("nwfva-b4/managelidar")
 ```
 
-Most functions depend on the {[lasR](https://github.com/r-lidar/lasR)}
-package (version \>= 0.14.1) which is hosted at
-<https://r-lidar.r-universe.dev/lasR>. As it is not available via CRAN
-you have to manually install it in advance with:
+**Important:** managelidar requires
+{[lasR](https://github.com/r-lidar/lasR)} (version \>= 0.18.0), which is
+available on r-universe but not on CRAN. Install it first:
 
 ``` r
-# Install lasR in R:
 install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cran.r-project.org"))
 ```
 
-## Example
+## Design Philosophy
 
-Just some basic examples for package usage.
+managelidar is designed around three core principles:
+
+1.  **Read as little as possible**: VPC files provide fast access to
+    metadata without reading point clouds
+2.  **Accept any input format**: Functions work seamlessly with folders,
+    files, VPCs, or mixed inputs. They are internally resolved as VPC
+    (handling duplicates)
+3.  **Scale automatically**: Parallel processing kicks in automatically
+    for large collections by many functions
+4.  **Pipepable**: Output of many functions can be used as input for
+    other functions
+
+Most functions follow this pattern: - Create VPC in background if needed
+(fast) - Read metadata from VPC (very fast) - Only read point data when
+absolutely necessary
+
+## Example Usage
 
 ``` r
 library(managelidar)
 
-# create various valid input paths
+# Create various valid input paths
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
-las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = TRUE, pattern = "*20230904.laz")
 vpc_file <- system.file("extdata/sample.vpc", package = "managelidar")
 vpc_obj <- yyjsonr::read_json_file(vpc_file)
 mixed <- c(folder, las_file)
 
 paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
 
-
-# get the Coordinate Reference System for all types of input
+# Get CRS - works with any input type
 lapply(paths, get_crs)
 #> [[1]]
 #>                            filename   crs
@@ -107,7 +185,7 @@ lapply(paths, get_crs)
 #> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
 #> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
 
-# get the extent (bbox) from LASfiles
+# Get spatial extent from multiple files
 get_spatial_extent(las_files)
 #> Get spatial extent
 #>   ▼ 4 LASfiles
@@ -118,7 +196,7 @@ get_spatial_extent(las_files)
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
 #> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
 
-# get names of files intersecting an extent
+# Filter by spatial extent and get names
 las_files |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
@@ -127,7 +205,7 @@ las_files |>
 #>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 
-# combine with temporal filter on multi-temporal data
+# Combine spatial and temporal filters
 c(las_files, las_file) |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
@@ -140,3 +218,22 @@ c(las_files, las_file) |>
 #>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 ```
+
+## Relationship to lasR and lidR
+
+- **lasR**: Efficient point cloud processing engine for individual files
+- **managelidar**: Catalog-level operations and VPC management built on
+  lasR
+- **lidR**: Used for header reading when VPC metadata is unavailable
+
+Think of it as: lasR handles the processing, managelidar handles the
+catalog.
+
+## License
+
+<!-- Add license info -->
+
+## Acknowledgments
+
+Built on the excellent work of the [r-lidar](https://github.com/r-lidar)
+ecosystem.

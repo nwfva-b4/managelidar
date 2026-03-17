@@ -1,6 +1,6 @@
 Package: managelidar
 Title: Manage Lidar Data Files
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person("Jens", "Wiesehahn", , "wiesehahn.jens@gmail.com", role = c("aut", "cre"))
 Description: The goal of managelidar is to facilitate the handling of
