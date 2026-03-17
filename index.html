@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,38 +56,128 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The goal of managelidar is to facilitate the handling and management of lidar data files (<code>*.las/laz/copc</code>). Its’s main purpose is to convert new incoming data to data with certain quality standards. Further, it provides functions to facilitate the quality check of incoming ALS data. <code>managelidar</code> builds on top of R-packages {<a href="https://github.com/r-lidar/lidR" class="external-link">lidR</a>} and {<a href="https://github.com/r-lidar/lasR" class="external-link">lasR</a>}. It is designed to work with any number and combination of folders, LASfiles and Virtual Point Clouds (VPC) and to read as little data as necessary. Most functions read metadata from VPCs which are efficiently created by lasR in the background if necessary. If this is not possible metadata is read from LASheaders via lidR which is a little slower but still pretty fast. Only some functions (e.g. <code><a href="reference/get_summary.html">get_summary()</a></code>) require actual point cloud data to be read, this may take much longer. To enhance processing speed the functions run in parallel (via {<a href="https://github.com/r-lib/mirai" class="external-link">mirai</a>}) if they are applied on a larger collection of files.</p>
+<p><strong>managelidar</strong> is a LiDAR catalog processing engine for R that builds on top of {<a href="https://github.com/r-lidar/lasR" class="external-link">lasR</a>}. While lasR efficiently handles individual LASfile processing, managelidar adds catalog-level capabilities through Virtual Point Cloud (VPC) files, enabling fast metadata operations across entire collections without reading point cloud data. Although most functions can be used on any LASdata it was designed primarily to work with data from Germany according to <a href="https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/1593R3%20PQS%203D-Messdaten560c.pdf?imgUid=f663acb8-b78b-6919-fb68-66101ffcef97&amp;uBasVariant=11111111-1111-1111-1111-111111111111" class="external-link">AdV Standard</a>.</p>
+<div class="section level2">
+<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+</h2>
+<ul>
+<li>
+<strong>VPC-based catalog management</strong>: Work with collections of LAS/LAZ/COPC files efficiently</li>
+<li>
+<strong>Flexible input handling</strong>: Process any combination of folders, individual files, VPC files, or VPC objects</li>
+<li>
+<strong>Metadata-first approach</strong>: Most operations read only file headers or VPC metadata, not point data</li>
+<li>
+<strong>Parallel processing</strong>: Automatic parallelization via {<a href="https://github.com/r-lib/mirai" class="external-link">mirai</a>} for large collections</li>
+<li>
+<strong>Quality assurance pipeline</strong>: Convert raw ALS data to standardized, quality-controlled outputs</li>
+<li>
+<strong>STAC-compliant VPCs</strong>: Create enriched Virtual Point Clouds following STAC specifications</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="main-workflows">Main Workflows<a class="anchor" aria-label="anchor" href="#main-workflows"></a>
+</h2>
+<div class="section level3">
+<h3 id="id_1-catalog-exploration">1. Catalog Exploration<a class="anchor" aria-label="anchor" href="#id_1-catalog-exploration"></a>
+</h3>
+<p>Query and filter LiDAR collections without reading point data:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Get CRS, extents, temporal coverage</span></span>
+<span><span class="fu"><a href="reference/get_crs.html">get_crs</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_spatial_extent.html">get_spatial_extent</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_temporal_extent.html">get_temporal_extent</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Plot extent in viewer</span></span>
+<span><span class="fu"><a href="reference/plot_extent.html">plot_extent</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Filter by space and time</span></span>
+<span><span class="va">path</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="va">bbox</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/filter_temporal.html">filter_temporal</a></span><span class="op">(</span><span class="st">"2024-03"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/get_names.html">get_names</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_2-data-processing-pipeline">2. Data Processing Pipeline<a class="anchor" aria-label="anchor" href="#id_2-data-processing-pipeline"></a>
+</h3>
+<p>Convert raw ALS data to standardized format:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Process raw files: classify noise, normalize intensity, create metadata, ...</span></span>
+<span><span class="fu">raw_to_processed</span><span class="op">(</span></span>
+<span>  path <span class="op">=</span> <span class="st">"raw_data/"</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="st">"processed/"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create enriched VPC with STAC-compliant metadata</span></span>
+<span><span class="fu"><a href="reference/create_vpc_enriched.html">create_vpc_enriched</a></span><span class="op">(</span></span>
+<span>  path <span class="op">=</span> <span class="st">"processed/pointcloud"</span>,</span>
+<span>  out_file <span class="op">=</span> <span class="st">"processed/collection.vpc"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_3-quality-control">3. Quality Control<a class="anchor" aria-label="anchor" href="#id_3-quality-control"></a>
+</h3>
+<p>Validate incoming data:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check naming conventions (according to AdV standard)</span></span>
+<span><span class="fu"><a href="reference/check_names.html">check_names</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Verify spatial tiling pattern (according to AdV standard)</span></span>
+<span><span class="fu"><a href="reference/check_tiling.html">check_tiling</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get detailed summaries (reads point data)</span></span>
+<span><span class="fu"><a href="reference/get_summary.html">get_summary</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check if data is spatially indexed / classified / multitemporal</span></span>
+<span><span class="fu"><a href="reference/is_indexed.html">is_indexed</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/is_classified.html">is_classified</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/is_multitemporal.html">is_multitemporal</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of {<a href="https://github.com/nwfva-b4/managelidar" class="external-link">managelidar</a>} from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<p>Install the development version from GitHub:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"nwfva-b4/managelidar"</span><span class="op">)</span></span></code></pre></div>
-<p>Most functions depend on the {<a href="https://github.com/r-lidar/lasR" class="external-link">lasR</a>} package (version &gt;= 0.14.1) which is hosted at <a href="https://r-lidar.r-universe.dev/lasR" class="external-link uri">https://r-lidar.r-universe.dev/lasR</a>. As it is not available via CRAN you have to manually install it in advance with:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install lasR in R:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lasR"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://r-lidar.r-universe.dev"</span>, <span class="st">"https://cran.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Important:</strong> managelidar requires {<a href="https://github.com/r-lidar/lasR" class="external-link">lasR</a>} (version &gt;= 0.18.0), which is available on r-universe but not on CRAN. Install it first:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lasR"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://r-lidar.r-universe.dev"</span>, <span class="st">"https://cran.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="design-philosophy">Design Philosophy<a class="anchor" aria-label="anchor" href="#design-philosophy"></a>
 </h2>
-<p>Just some basic examples for package usage.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>managelidar is designed around three core principles:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Read as little as possible</strong>: VPC files provide fast access to metadata without reading point clouds</li>
+<li>
+<strong>Accept any input format</strong>: Functions work seamlessly with folders, files, VPCs, or mixed inputs. They are internally resolved as VPC (handling duplicates)</li>
+<li>
+<strong>Scale automatically</strong>: Parallel processing kicks in automatically for large collections by many functions</li>
+<li>
+<strong>Pipepable</strong>: Output of many functions can be used as input for other functions</li>
+</ol>
+<p>Most functions follow this pattern: - Create VPC in background if needed (fast) - Read metadata from VPC (very fast) - Only read point data when absolutely necessary</p>
+</div>
+<div class="section level2">
+<h2 id="example-usage">Example Usage<a class="anchor" aria-label="anchor" href="#example-usage"></a>
+</h2>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/wiesehahn/managelidar" class="external-link">managelidar</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># create various valid input paths</span></span>
+<span><span class="co"># Create various valid input paths</span></span>
 <span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span>
-<span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">T</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span>
-<span><span class="va">las_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">T</span>, pattern <span class="op">=</span> <span class="st">"*20230904.laz"</span><span class="op">)</span></span>
+<span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span>
+<span><span class="va">las_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"*20230904.laz"</span><span class="op">)</span></span>
 <span><span class="va">vpc_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/sample.vpc"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span>
 <span><span class="va">vpc_obj</span> <span class="op">&lt;-</span> <span class="fu">yyjsonr</span><span class="fu">::</span><span class="fu"><a href="https://coolbutuseless.github.io/package/yyjsonr/reference/read_json_file.html" class="external-link">read_json_file</a></span><span class="op">(</span><span class="va">vpc_file</span><span class="op">)</span></span>
 <span><span class="va">mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">folder</span>, <span class="va">las_file</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">folder</span>, <span class="va">las_files</span>, <span class="va">las_file</span>, <span class="va">vpc_file</span>, <span class="va">vpc_obj</span>, <span class="va">mixed</span><span class="op">)</span></span>
 <span></span>
-<span></span>
-<span><span class="co"># get the Coordinate Reference System for all types of input</span></span>
+<span><span class="co"># Get CRS - works with any input type</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">paths</span>, <span class="va">get_crs</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [[1]]</span></span>
 <span><span class="co">#&gt;                            filename   crs</span></span>
@@ -130,7 +220,7 @@
 <span><span class="co">#&gt; 4 3dm_32_548_5725_1_ni_20230904.laz 25832</span></span>
 <span><span class="co">#&gt; 5 3dm_32_548_5725_1_ni_20240327.laz 25832</span></span>
 <span></span>
-<span><span class="co"># get the extent (bbox) from LASfiles</span></span>
+<span><span class="co"># Get spatial extent from multiple files</span></span>
 <span><span class="fu"><a href="reference/get_spatial_extent.html">get_spatial_extent</a></span><span class="op">(</span><span class="va">las_files</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Get spatial extent</span></span>
 <span><span class="co">#&gt;   ▼ 4 LASfiles</span></span>
@@ -141,7 +231,7 @@
 <span><span class="co">#&gt; 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997</span></span>
 <span><span class="co">#&gt; 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992</span></span>
 <span></span>
-<span><span class="co"># get names of files intersecting an extent</span></span>
+<span><span class="co"># Filter by spatial extent and get names</span></span>
 <span><span class="va">las_files</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">547900</span>, <span class="fl">5724900</span>, <span class="fl">548100</span>, <span class="fl">5724900</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/get_names.html">get_names</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -150,7 +240,7 @@
 <span><span class="co">#&gt;   ▼ 2 LASfiles retained</span></span>
 <span><span class="co">#&gt; [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"</span></span>
 <span></span>
-<span><span class="co"># combine with temporal filter on multi-temporal data</span></span>
+<span><span class="co"># Combine spatial and temporal filters</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">las_files</span>, <span class="va">las_file</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_temporal.html">filter_temporal</a></span><span class="op">(</span><span class="st">"2024-03"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">547900</span>, <span class="fl">5724900</span>, <span class="fl">548100</span>, <span class="fl">5724900</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -162,6 +252,29 @@
 <span><span class="co">#&gt;   ▼ 4 LASfiles</span></span>
 <span><span class="co">#&gt;   ▼ 2 LASfiles retained</span></span>
 <span><span class="co">#&gt; [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="relationship-to-lasr-and-lidr">Relationship to lasR and lidR<a class="anchor" aria-label="anchor" href="#relationship-to-lasr-and-lidr"></a>
+</h2>
+<ul>
+<li>
+<strong>lasR</strong>: Efficient point cloud processing engine for individual files</li>
+<li>
+<strong>managelidar</strong>: Catalog-level operations and VPC management built on lasR</li>
+<li>
+<strong>lidR</strong>: Used for header reading when VPC metadata is unavailable</li>
+</ul>
+<p>Think of it as: lasR handles the processing, managelidar handles the catalog.</p>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<!-- Add license info -->
+</div>
+<div class="section level2">
+<h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
+</h2>
+<p>Built on the excellent work of the <a href="https://github.com/r-lidar" class="external-link">r-lidar</a> ecosystem.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
