@@ -59,5 +59,7 @@
   : Plot the spatial extent of LASfiles
 - [`print_pulseinfo()`](https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.md)
   : Print summary information about pulse density and penetration ratio
+- [`run_pipeline()`](https://wiesehahn.github.io/managelidar/reference/run_pipeline.md)
+  : Execute lasR pipeline on catalog
 - [`set_names()`](https://wiesehahn.github.io/managelidar/reference/set_names.md)
   : Set LASfile names according to ADV standard
