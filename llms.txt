@@ -1,9 +1,12 @@
 # managelidar
 
-**managelidar** is a LiDAR catalog processing engine for R that builds
-on top of {[lasR](https://github.com/r-lidar/lasR)}. While lasR
-efficiently handles individual LASfile processing, managelidar adds
-catalog-level capabilities through Virtual Point Cloud (VPC) files,
+# managelidar
+
+[managelidar](https://github.com/wiesehahn/managelidar) is a LiDAR
+catalog processing engine for R that builds on top of
+{[lasR](https://github.com/r-lidar/lasR)}. While lasR efficiently
+handles individual LASfile processing and basic handling of Virtual
+Point Clouds (VPC), managelidar adds catalog-level capabilities,
 enabling fast metadata operations across entire collections without
 reading point cloud data. Although most functions can be used on any
 LASdata it was designed primarily to work with data from Germany
@@ -37,19 +40,13 @@ get_crs(path)
 get_spatial_extent(path)
 get_temporal_extent(path)
 
-# Plot extent in viewer
+# Plot extent on interactive map
 plot_extent(path)
-
-# Filter by space and time
-path |>
-  filter_spatial(bbox) |>
-  filter_temporal("2024-03") |>
-  get_names()
 ```
 
-### 2. Data Processing Pipeline
+### 2. Data Harmonization
 
-Convert raw ALS data to standardized format:
+Convert incoming ALS data to standardized format:
 
 ``` r
 # Process raw files: classify noise, normalize intensity, create metadata, ...
@@ -83,6 +80,18 @@ get_summary(path)
 is_indexed(path)
 is_classified(path)
 is_multitemporal(path)
+```
+
+### 4. Catalog processing
+
+Process filtered data in pipeline
+
+``` r
+# Filter by space/time and run processing pipeline
+path |>
+  filter_spatial(bbox) |>
+  filter_temporal("2024-03") |>
+  run_pipeline(dtm(10))
 ```
 
 ## Installation
@@ -126,80 +135,27 @@ absolutely necessary
 library(managelidar)
 
 # Create various valid input paths
-folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
-las_file <- list.files(folder, full.names = TRUE, pattern = "*20230904.laz")
-vpc_file <- system.file("extdata/sample.vpc", package = "managelidar")
-vpc_obj <- yyjsonr::read_json_file(vpc_file)
-mixed <- c(folder, las_file)
-
-paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
-
-# Get CRS - works with any input type
-lapply(paths, get_crs)
-#> [[1]]
-#>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
-#> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
-#> 
-#> [[2]]
-#>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
-#> 
-#> [[3]]
-#>                            filename   crs
-#> 1 3dm_32_548_5725_1_ni_20230904.laz 25832
-#> 
-#> [[4]]
-#>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
-#> 
-#> [[5]]
-#>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
-#> 
-#> [[6]]
-#>                            filename   crs
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
-#> 4 3dm_32_548_5725_1_ni_20230904.laz 25832
-#> 5 3dm_32_548_5725_1_ni_20240327.laz 25832
+path <- system.file("extdata", package = "managelidar")
 
 # Get spatial extent from multiple files
-get_spatial_extent(las_files)
+path |> get_spatial_extent(per_file = FALSE)
 #> Get spatial extent
-#>   ▼ 4 LASfiles
-#>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725991.98  (xmin, ymin, xmax, ymax; EPSG:25832)
-#>                            filename   xmin    ymin     xmax    ymax
-#> 1 3dm_32_547_5724_1_ni_20240327.laz 547690 5724000 547999.7 5725000
-#> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
-#> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
-#> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
+#>   ▼ 5 LASfiles
+#>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725999.90  (xmin, ymin, xmax, ymax; EPSG:25832)
+#>     xmin    ymin     xmax    ymax
+#> 1 547648 5724000 548995.4 5726000
 
 # Filter by spatial extent and get names
-las_files |>
+path |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
 #> Filter spatial extent
-#>   ▼ 4 LASfiles
+#>   ▼ 5 LASfiles
 #>   ▼ 2 LASfiles retained
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_548_5724_1_ni_20240327.laz"
 
 # Combine spatial and temporal filters
-c(las_files, las_file) |>
+path |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
@@ -216,11 +172,11 @@ c(las_files, las_file) |>
 
 - **lasR**: Efficient point cloud processing engine for individual files
 - **managelidar**: Catalog-level operations and VPC management built on
-  lasR
+  top of lasR
 - **lidR**: Used for header reading when VPC metadata is unavailable
 
-Think of it as: lasR handles the processing, managelidar handles the
-catalog.
+Think of it as: managelidar handles the catalog-level processing, then
+lasR handles the point cloud processing
 
 ## License
 
@@ -240,6 +196,8 @@ ecosystem.
 - [`create_vpc_enriched()`](https://wiesehahn.github.io/managelidar/reference/create_vpc_enriched.md)
   : Create enriched Virtual Point Cloud with outlines and summary
   metadata
+- [`filter_attribute()`](https://wiesehahn.github.io/managelidar/reference/filter_attribute.md)
+  : Filter VPC features by attribute values
 - [`filter_first()`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
   : Filter to first acquisition from multi-temporal tiles
 - [`filter_latest()`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
@@ -290,6 +248,8 @@ ecosystem.
   : Plot the spatial extent of LASfiles
 - [`print_pulseinfo()`](https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.md)
   : Print summary information about pulse density and penetration ratio
+- [`raw_to_processed()`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)
+  : Process LiDAR data to standardized format
 - [`run_pipeline()`](https://wiesehahn.github.io/managelidar/reference/run_pipeline.md)
   : Execute lasR pipeline on catalog
 - [`set_names()`](https://wiesehahn.github.io/managelidar/reference/set_names.md)

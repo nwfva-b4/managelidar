@@ -9,6 +9,7 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/check_names.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/check_tiling.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/create_vpc_enriched.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/filter_attribute.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/filter_first.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/filter_latest.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.html</loc></url>
@@ -40,6 +41,7 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_temporal_range.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/raw_to_processed.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_las_paths.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_vpc.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/run_pipeline.html</loc></url>

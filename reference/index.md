@@ -9,6 +9,8 @@
 - [`create_vpc_enriched()`](https://wiesehahn.github.io/managelidar/reference/create_vpc_enriched.md)
   : Create enriched Virtual Point Cloud with outlines and summary
   metadata
+- [`filter_attribute()`](https://wiesehahn.github.io/managelidar/reference/filter_attribute.md)
+  : Filter VPC features by attribute values
 - [`filter_first()`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
   : Filter to first acquisition from multi-temporal tiles
 - [`filter_latest()`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
@@ -59,6 +61,8 @@
   : Plot the spatial extent of LASfiles
 - [`print_pulseinfo()`](https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.md)
   : Print summary information about pulse density and penetration ratio
+- [`raw_to_processed()`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)
+  : Process LiDAR data to standardized format
 - [`run_pipeline()`](https://wiesehahn.github.io/managelidar/reference/run_pipeline.md)
   : Execute lasR pipeline on catalog
 - [`set_names()`](https://wiesehahn.github.io/managelidar/reference/set_names.md)

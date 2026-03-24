@@ -5,7 +5,7 @@ Creates an enriched VPC from LAS/LAZ/COPC files with detailed outline geometries
 and summary statistics."><meta property="og:description" content="Creates an enriched VPC from LAS/LAZ/COPC files with detailed outline geometries
 and summary statistics.
 Creates an enriched VPC from LAS/LAZ/COPC files with detailed outline geometries
-and summary statistics."></head><body>
+and summary statistics."><meta property="og:image" content="https://wiesehahn.github.io/managelidar/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -36,8 +36,7 @@ and summary statistics."></head><body>
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>Create enriched Virtual Point Cloud with outlines and summary metadata</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Create enriched Virtual Point Cloud with outlines and summary metadata</h1>
       <small class="dont-index">Source: <a href="https://github.com/wiesehahn/managelidar/blob/main/R/create_vpc_enriched.R" class="external-link"><code>R/create_vpc_enriched.R</code></a></small>
       <div class="d-none name"><code>create_vpc_enriched.Rd</code></div>
     </div>
@@ -126,19 +125,19 @@ must read the complete point cloud for each file to compute outlines and summari
 This is <strong>very slow</strong> for large datasets.</p>
 <p>The enriched VPC follows the STAC pointcloud extension specification with
 additional custom properties for point and pulse density.</p>
-<p>This function is typically used after <code>raw_to_processed</code> to create
+<p>This function is typically used after <code><a href="raw_to_processed.html">raw_to_processed</a></code> to create
 a collection-level VPC with enhanced metadata.</p>
 <p>This function enriches VPC features with:</p><ul><li><p>Detailed outline geometries (WGS84 polygons instead of bounding boxes)</p></li>
 <li><p>Point and pulse density statistics</p></li>
 <li><p>Per-dimension statistics (Z, Intensity, GpsTime)</p></li>
 <li><p>Classification and return number distributions</p></li>
-</ul><p><strong>Typical workflow:</strong></p><ol><li><p>Run <code>raw_to_processed</code> to create processed point clouds with
+</ul><p><strong>Typical workflow:</strong></p><ol><li><p>Run <code><a href="raw_to_processed.html">raw_to_processed</a></code> to create processed point clouds with
 outlines and metadata in standardized directories</p></li>
 <li><p>Run <code>create_vpc_enriched</code> to create a collection VPC with enhanced
 metadata from those directories</p></li>
 </ol><p><strong>Auto-detection:</strong> When <code>outlines</code> or <code>metadata</code> are NULL, the function
 looks for directories named 'outlines' and 'metadata' in the parent directory
-of the input files (as created by <code>raw_to_processed</code>).</p>
+of the input files (as created by <code><a href="raw_to_processed.html">raw_to_processed</a></code>).</p>
 <p><strong>Selective enrichment:</strong> Set <code>outlines = FALSE</code> to skip geometry enrichment,
 or <code>metadata = FALSE</code> to skip metadata enrichment.</p>
 <p>The enriched VPC follows the STAC pointcloud extension specification with
@@ -166,9 +165,9 @@ additional custom properties for point and pulse density.</p>
 <span class="r-in"><span><span class="co"># Typical workflow after raw_to_processed</span></span></span>
 <span class="r-in"><span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">vpc_enriched</span> <span class="op">&lt;-</span> <span class="va">folder</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">raw_to_processed</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">create_vpc_enriched</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in raw_to_processed(folder):</span> could not find function "raw_to_processed"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

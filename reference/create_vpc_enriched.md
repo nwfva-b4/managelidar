@@ -91,8 +91,9 @@ outlines and summaries. This is **very slow** for large datasets.
 The enriched VPC follows the STAC pointcloud extension specification
 with additional custom properties for point and pulse density.
 
-This function is typically used after `raw_to_processed` to create a
-collection-level VPC with enhanced metadata.
+This function is typically used after
+[`raw_to_processed`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)
+to create a collection-level VPC with enhanced metadata.
 
 This function enriches VPC features with:
 
@@ -106,15 +107,18 @@ This function enriches VPC features with:
 
 **Typical workflow:**
 
-1.  Run `raw_to_processed` to create processed point clouds with
-    outlines and metadata in standardized directories
+1.  Run
+    [`raw_to_processed`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)
+    to create processed point clouds with outlines and metadata in
+    standardized directories
 
 2.  Run `create_vpc_enriched` to create a collection VPC with enhanced
     metadata from those directories
 
 **Auto-detection:** When `outlines` or `metadata` are NULL, the function
 looks for directories named 'outlines' and 'metadata' in the parent
-directory of the input files (as created by `raw_to_processed`).
+directory of the input files (as created by
+[`raw_to_processed`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)).
 
 **Selective enrichment:** Set `outlines = FALSE` to skip geometry
 enrichment, or `metadata = FALSE` to skip metadata enrichment.
@@ -146,5 +150,5 @@ folder <- system.file("extdata", package = "managelidar")
 vpc_enriched <- folder |>
   raw_to_processed() |>
   create_vpc_enriched()
-#> Error in raw_to_processed(folder): could not find function "raw_to_processed"
+#> Error in loadNamespace(x): there is no package called ‘lasR’
 ```
