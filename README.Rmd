@@ -1,4 +1,5 @@
 ---
+title: managelidar
 output: github_document
 ---
 
@@ -12,12 +13,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-# managelidar
+# managelidar <img src="man/figures/logo.png" align="right" width = "20%"/>
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-**managelidar** is a LiDAR catalog processing engine for R that builds on top of {[lasR](https://github.com/r-lidar/lasR)}. While lasR efficiently handles individual LASfile processing, managelidar adds catalog-level capabilities through Virtual Point Cloud (VPC) files, enabling fast metadata operations across entire collections without reading point cloud data.
+`{managelidar}` is a LiDAR catalog processing engine for R that builds on top of {[lasR](https://github.com/r-lidar/lasR)}. While lasR efficiently handles individual LASfile processing and basic handling of Virtual Point Clouds (VPC), managelidar adds catalog-level capabilities, enabling fast metadata operations across entire collections without reading point cloud data.
 Although most functions can be used on any LASdata it was designed primarily to work with data from Germany according to [AdV Standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/1593R3%20PQS%203D-Messdaten560c.pdf?imgUid=f663acb8-b78b-6919-fb68-66101ffcef97&uBasVariant=11111111-1111-1111-1111-111111111111). 
 
 ## Key Features
@@ -40,19 +41,13 @@ get_crs(path)
 get_spatial_extent(path)
 get_temporal_extent(path)
 
-# Plot extent in viewer
+# Plot extent on interactive map
 plot_extent(path)
-
-# Filter by space and time
-path |>
-  filter_spatial(bbox) |>
-  filter_temporal("2024-03") |>
-  get_names()
 ```
 
-### 2. Data Processing Pipeline
+### 2. Data Harmonization
 
-Convert raw ALS data to standardized format:
+Convert incoming ALS data to standardized format:
 ```r
 # Process raw files: classify noise, normalize intensity, create metadata, ...
 raw_to_processed(
@@ -86,6 +81,18 @@ is_classified(path)
 is_multitemporal(path)
 ```
 
+### 4. Catalog processing
+
+Process filtered data in pipeline
+```r
+# Filter by space/time and run processing pipeline
+path |>
+  filter_spatial(bbox) |>
+  filter_temporal("2024-03") |>
+  run_pipeline(dtm(10))
+```
+
+
 ## Installation
 
 Install the development version from GitHub:
@@ -118,28 +125,18 @@ Most functions follow this pattern:
 library(managelidar)
 
 # Create various valid input paths
-folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
-las_file <- list.files(folder, full.names = TRUE, pattern = "*20230904.laz")
-vpc_file <- system.file("extdata/sample.vpc", package = "managelidar")
-vpc_obj <- yyjsonr::read_json_file(vpc_file)
-mixed <- c(folder, las_file)
-
-paths <- list(folder, las_files, las_file, vpc_file, vpc_obj, mixed)
-
-# Get CRS - works with any input type
-lapply(paths, get_crs)
+path <- system.file("extdata", package = "managelidar")
 
 # Get spatial extent from multiple files
-get_spatial_extent(las_files)
+path |> get_spatial_extent(per_file = FALSE)
 
 # Filter by spatial extent and get names
-las_files |>
+path |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
 
 # Combine spatial and temporal filters
-c(las_files, las_file) |>
+path |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
@@ -148,10 +145,10 @@ c(las_files, las_file) |>
 ## Relationship to lasR and lidR
 
 - **lasR**: Efficient point cloud processing engine for individual files
-- **managelidar**: Catalog-level operations and VPC management built on lasR
+- **managelidar**: Catalog-level operations and VPC management built on top of lasR
 - **lidR**: Used for header reading when VPC metadata is unavailable
 
-Think of it as: lasR handles the processing, managelidar handles the catalog.
+Think of it as: managelidar handles the catalog-level processing, then lasR handles the point cloud processing
 
 ## License
 
