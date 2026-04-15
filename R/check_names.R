@@ -169,7 +169,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   )
 
   name_is <- if (full.names) files else basename(files)
-  if (full.names) name_should <- file.path(dirname(files), name_should)
+  if (full.names) name_should <- fs::path(fs::path_dir(files), name_should)
 
   # ------------------------------------------------------------------
   # Build result
