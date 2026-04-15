@@ -1,7 +1,6 @@
 #' Compute summary metrics for individual LASfiles
 #'
 #' `get_summary()` calculates standard summary metrics for LASfiles, including:
-#'
 #' * Temporal metrics (`t_min`, `t_median`, `t_max`)
 #' * Intensity metrics (`i_min`, `i_mean`, `i_median`, `i_max`, `i_p5`, `i_p95`, `i_sd`)
 #' * Elevation metrics (`z_min`, `z_median`, `z_max`)

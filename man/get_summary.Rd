@@ -50,8 +50,6 @@ If \code{out_dir} is set, the function returns \code{NULL} invisibly after writi
 }
 \description{
 \code{get_summary()} calculates standard summary metrics for LASfiles, including:
-}
-\details{
 \itemize{
 \item Temporal metrics (\code{t_min}, \code{t_median}, \code{t_max})
 \item Intensity metrics (\code{i_min}, \code{i_mean}, \code{i_median}, \code{i_max}, \code{i_p5}, \code{i_p95}, \code{i_sd})
@@ -60,7 +58,8 @@ If \code{out_dir} is set, the function returns \code{NULL} invisibly after writi
 \item Point counts and classifications (\code{npoints}, \code{nsingle}, \code{nwithheld}, \code{nsynthetic}, \code{npoints_per_return}, \code{npoints_per_class})
 \item Coordinate system (\code{epsg})
 }
-
+}
+\details{
 Results can optionally be saved as JSON files per LASfile.
 
 In comparison to \code{lasR::summarise} this function returns individual summaries per file instead of an aggregated summary among all files.
