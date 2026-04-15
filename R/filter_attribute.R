@@ -87,8 +87,10 @@
 #'
 #' # Filter by multiple IDs
 #' folder |>
-#'   filter_attribute(id %in% c("3dm_32_547_5724_1_ni_20240327",
-#'                              "3dm_32_548_5724_1_ni_20240327"))
+#'   filter_attribute(id %in% c(
+#'     "3dm_32_547_5724_1_ni_20240327",
+#'     "3dm_32_548_5724_1_ni_20240327"
+#'   ))
 #'
 #' # Filter enriched VPC by density
 #' folder |>
@@ -103,84 +105,88 @@
 #'
 #' # Note: For spatial/temporal filtering, prefer dedicated functions:
 #' folder |>
-#'   filter_temporal("2024-03-27")  # Better than filter_attribute(datetime == ...)
+#'   filter_temporal("2024-03-27") # Better than filter_attribute(datetime == ...)
 #'
 #' folder |>
-#'   filter_spatial(bbox)  # Better than filter_attribute with proj:bbox
+#'   filter_spatial(bbox) # Better than filter_attribute with proj:bbox
 filter_attribute <- function(path, ..., verbose = TRUE) {
-  
   # Resolve to VPC (always as object, never write to file)
   vpc <- resolve_vpc(path, out_file = NULL)
-  
+
   # Check if resolve_vpc returned NULL
   if (is.null(vpc)) {
     return(invisible(NULL))
   }
-  
+
   n_input <- nrow(vpc$features)
-  
+
   if (n_input == 0) {
     warning("No features in VPC to filter")
     return(invisible(NULL))
   }
-  
+
   # Capture expressions
   dots <- rlang::enquos(...)
-  
+
   if (length(dots) == 0) {
     warning("No filter conditions provided")
     return(vpc)
   }
-  
+
   # Create a data frame-like environment for each feature to evaluate expressions
   keep <- rep(TRUE, n_input)
-  
+
   for (expr in dots) {
     # Evaluate expression for each feature
     results <- vapply(seq_len(n_input), function(i) {
       # Create environment with feature properties
       props <- vpc$features$properties[[i]]
-      
+
       # Also add id for convenience (not technically in properties)
       if (!is.null(vpc$features$id[i])) {
         props$id <- vpc$features$id[i]
       }
-      
+
       # Evaluate expression in this environment
-      tryCatch({
-        result <- rlang::eval_tidy(expr, data = props)
-        if (is.na(result) || is.null(result)) return(FALSE)
-        return(as.logical(result))
-      }, error = function(e) {
-        # Property doesn't exist or other error
-        return(FALSE)
-      })
+      tryCatch(
+        {
+          result <- rlang::eval_tidy(expr, data = props)
+          if (is.na(result) || is.null(result)) {
+            return(FALSE)
+          }
+          return(as.logical(result))
+        },
+        error = function(e) {
+          # Property doesn't exist or other error
+          return(FALSE)
+        }
+      )
     }, FUN.VALUE = logical(1))
-    
+
     # Combine with AND logic
     keep <- keep & results
   }
-  
+
   # No matches found
   if (sum(keep) == 0) {
     warning("No features match filter criteria")
     return(invisible(NULL))
   }
-  
+
   vpc$features <- vpc$features[keep, , drop = FALSE]
-  
+
   n_output <- nrow(vpc$features)
-  
+
   # Print information
   if (verbose) {
     # Format the filter description
     expr_text <- vapply(dots, function(e) rlang::as_label(e), character(1))
     filter_desc <- paste(expr_text, collapse = " & ")
-    
+
     message("Filter by attribute")
     message(sprintf("  \u25BC %d LASfiles (%s)", n_input, filter_desc))
     message(sprintf("  \u25BC %d LASfiles retained", n_output))
   }
-  
+
   return(vpc)
 }
