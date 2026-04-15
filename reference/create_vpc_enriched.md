@@ -150,5 +150,5 @@ folder <- system.file("extdata", package = "managelidar")
 vpc_enriched <- folder |>
   raw_to_processed() |>
   create_vpc_enriched()
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Error in loadNamespace(x): there is no package called ‘gdalraster’
 ```

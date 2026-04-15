@@ -3,6 +3,21 @@
 `get_summary()` calculates standard summary metrics for LASfiles,
 including:
 
+- Temporal metrics (`t_min`, `t_median`, `t_max`)
+
+- Intensity metrics (`i_min`, `i_mean`, `i_median`, `i_max`, `i_p5`,
+  `i_p95`, `i_sd`)
+
+- Elevation metrics (`z_min`, `z_median`, `z_max`)
+
+- Histograms (`i_histogram`, `z_histogram`) if `iwbin` and `zwbin` are
+  greater than 0
+
+- Point counts and classifications (`npoints`, `nsingle`, `nwithheld`,
+  `nsynthetic`, `npoints_per_return`, `npoints_per_class`)
+
+- Coordinate system (`epsg`)
+
 ## Usage
 
 ``` r
@@ -105,21 +120,6 @@ If `out_dir` is set, the function returns `NULL` invisibly after writing
 JSON files.
 
 ## Details
-
-- Temporal metrics (`t_min`, `t_median`, `t_max`)
-
-- Intensity metrics (`i_min`, `i_mean`, `i_median`, `i_max`, `i_p5`,
-  `i_p95`, `i_sd`)
-
-- Elevation metrics (`z_min`, `z_median`, `z_max`)
-
-- Histograms (`i_histogram`, `z_histogram`) if `iwbin` and `zwbin` are
-  greater than 0
-
-- Point counts and classifications (`npoints`, `nsingle`, `nwithheld`,
-  `nsynthetic`, `npoints_per_return`, `npoints_per_class`)
-
-- Coordinate system (`epsg`)
 
 Results can optionally be saved as JSON files per LASfile.
 

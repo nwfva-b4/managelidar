@@ -132,8 +132,10 @@ folder |>
 
 # Filter by multiple IDs
 folder |>
-  filter_attribute(id %in% c("3dm_32_547_5724_1_ni_20240327",
-                             "3dm_32_548_5724_1_ni_20240327"))
+  filter_attribute(id %in% c(
+    "3dm_32_547_5724_1_ni_20240327",
+    "3dm_32_548_5724_1_ni_20240327"
+  ))
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter enriched VPC by density
@@ -151,10 +153,10 @@ folder |>
 
 # Note: For spatial/temporal filtering, prefer dedicated functions:
 folder |>
-  filter_temporal("2024-03-27")  # Better than filter_attribute(datetime == ...)
+  filter_temporal("2024-03-27") # Better than filter_attribute(datetime == ...)
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 folder |>
-  filter_spatial(bbox)  # Better than filter_attribute with proj:bbox
+  filter_spatial(bbox) # Better than filter_attribute with proj:bbox
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

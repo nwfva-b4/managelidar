@@ -9,7 +9,7 @@ point classifications other than class 0 (unclassified)."><meta property="og:ima
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,12 @@ point classifications other than class <code>0</code> (unclassified).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">is_classified</span><span class="op">(</span><span class="va">path</span>, full.names <span class="op">=</span> <span class="cn">FALSE</span>, add_classes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">is_classified</span><span class="op">(</span></span>
+<span>  <span class="va">path</span>,</span>
+<span>  samplebased <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  full.names <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  add_classes <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -54,6 +59,10 @@ point classifications other than class <code>0</code> (unclassified).</p>
 <dl><dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
 <dd><p>Character. Path to a LAS/LAZ/COPC file, a directory containing
 such files, or a Virtual Point Cloud (<code>.vpc</code>).</p></dd>
+
+
+<dt id="arg-samplebased">samplebased<a class="anchor" aria-label="anchor" href="#arg-samplebased"></a></dt>
+<dd><p>Logical. If <code>TRUE</code> (default), reads only a spatial subsample of each file.</p></dd>
 
 
 <dt id="arg-full-names">full.names<a class="anchor" aria-label="anchor" href="#arg-full-names"></a></dt>
@@ -102,7 +111,17 @@ classified this is usually sufficient, but to get class abundances consider usin
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">T</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">is_classified</span><span class="op">(</span>add_classes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ERROR processing 3dm_32_547_5724_1_ni_20240327.laz: there is no package called ‘lasR’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ERROR processing 3dm_32_547_5725_1_ni_20240327.laz: there is no package called ‘lasR’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ERROR processing 3dm_32_548_5724_1_ni_20240327.laz: there is no package called ‘lasR’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ERROR processing 3dm_32_548_5725_1_ni_20240327.laz: there is no package called ‘lasR’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Column 1 ['3dm_32_547_5725_1_ni_20240327.laz'] of item 2 is missing in item 1. Use fill=TRUE to fill with NA (NULL for list columns), or use.names=FALSE to ignore column names. use.names='check' (default from v1.12.2) emits this message and proceeds as if use.names=FALSE for  backwards compatibility. See news item 5 in v1.12.2 for options to control this message.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3dm_32_547_5724_1_ni_20240327.laz</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               &lt;list&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: there is no package called ‘lasR’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: there is no package called ‘lasR’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: there is no package called ‘lasR’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: there is no package called ‘lasR’</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

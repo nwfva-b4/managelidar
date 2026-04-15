@@ -1,7 +1,7 @@
 # Process LiDAR data to standardized format
 
 Converts incoming ALS data to quality-controlled, standardized point
-clouds with comprehensive metadata, outlines, and overview images.
+clouds with comprehensive metadata and overview images.
 
 ## Usage
 
@@ -27,6 +27,11 @@ raw_to_processed(
   Character. Output directory where processed files and metadata will be
   saved.
 
+- epsg:
+
+  Integer. EPSG code for the coordinate reference system. Default is
+  25832 (ETRS89 / UTM zone 32N).
+
 - region:
 
   Character. Two-letter region code (federal states of Germany) for
@@ -42,11 +47,6 @@ raw_to_processed(
 
   Logical. Print progress messages. Default is TRUE.
 
-- crs_epsg:
-
-  Integer. EPSG code for the coordinate reference system. Default is
-  25832 (ETRS89 / UTM zone 32N).
-
 ## Value
 
 Invisibly returns a list of output file paths (NULL for failed files).
@@ -61,24 +61,34 @@ This function performs a comprehensive quality assurance pipeline:
 
 - Set CRS (if not present)
 
-- Drop unused attributes
+- Reclassify (AdV/LGLN to ASPRS scheme)
 
-- Filter erroneous GPS times and return numbers
+- Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
+
+- Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)
+
+- Drop unused attributes
 
 - Classify noise points
 
+- Classify ground points
+
 - Normalize intensity range
 
-- Create overview image
-
-- Create outline geometry
-
-- Create point cloud summary
+- Sort (optimize) point cloud
 
 - Append spatial index
 
+- Create overview image
+
+- Create VPC file with additional metadata
+
+- Create point cloud summaries
+
+- Create log file
+
 **Output structure:** The function creates the following directory
-structure in `out_dir`:
+structure in `out_dir` if not otherwise defined:
 
 - `pointcloud/`:
 
@@ -86,23 +96,23 @@ structure in `out_dir`:
 
 - `metadata/`:
 
-  JSON summaries with statistics and point counts
-
-- `outlines/`:
-
-  GeoJSON outlines from ground triangulation
+  Individual VPC files with additional metadata
 
 - `overviews/`:
 
   WEBP overview images (max elevation)
 
-- `summary_original/`:
-
-  JSON summaries of original (unprocessed) data
-
 - `logfiles/`:
 
   Processing logs with timing and status information
+
+- `logfiles/summary_in`:
+
+  Data summaries of input LASfiles
+
+- `logfiles/summary_out`:
+
+  Data summaries of output LASfiles
 
 **Filename generation:** Output files follow the German AdV naming
 convention: `3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz`
