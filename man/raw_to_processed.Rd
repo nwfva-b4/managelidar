@@ -19,6 +19,9 @@ raw_to_processed(
 \item{out_dir}{Character. Output directory where processed files and metadata
 will be saved.}
 
+\item{epsg}{Integer. EPSG code for the coordinate reference system.
+Default is 25832 (ETRS89 / UTM zone 32N).}
+
 \item{region}{Character. Two-letter region code (federal states of Germany) for filename generation
 (e.g., "ni"). If NULL (default) region is automatically inferred from file bounding boxes.}
 
@@ -26,16 +29,13 @@ will be saved.}
 year correction in filenames where data does not contain valid GPS time.}
 
 \item{verbose}{Logical. Print progress messages. Default is TRUE.}
-
-\item{crs_epsg}{Integer. EPSG code for the coordinate reference system.
-Default is 25832 (ETRS89 / UTM zone 32N).}
 }
 \value{
 Invisibly returns a list of output file paths (NULL for failed files).
 }
 \description{
 Converts incoming ALS data to quality-controlled, standardized point clouds with
-comprehensive metadata, outlines, and overview images.
+comprehensive metadata and overview images.
 }
 \details{
 This function performs a comprehensive quality assurance pipeline:
@@ -44,25 +44,30 @@ This function performs a comprehensive quality assurance pipeline:
 \itemize{
 \item Generate AdV-compliant filenames
 \item Set CRS (if not present)
+\item Reclassify (AdV/LGLN to ASPRS scheme)
+\item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
+\item Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)
 \item Drop unused attributes
-\item Filter erroneous GPS times and return numbers
 \item Classify noise points
+\item Classify ground points
 \item Normalize intensity range
-\item Create overview image
-\item Create outline geometry
-\item Create point cloud summary
+\item Sort (optimize) point cloud
 \item Append spatial index
+\item Create overview image
+\item Create VPC file with additional metadata
+\item Create point cloud summaries
+\item Create log file
 }
 
 \strong{Output structure:}
-The function creates the following directory structure in \code{out_dir}:
+The function creates the following directory structure in \code{out_dir} if not otherwise defined:
 \describe{
 \item{\verb{pointcloud/}}{Processed LAZ files with embedded spatial index}
-\item{\verb{metadata/}}{JSON summaries with statistics and point counts}
-\item{\verb{outlines/}}{GeoJSON outlines from ground triangulation}
+\item{\verb{metadata/}}{Individual VPC files with additional metadata}
 \item{\verb{overviews/}}{WEBP overview images (max elevation)}
-\item{\verb{summary_original/}}{JSON summaries of original (unprocessed) data}
 \item{\verb{logfiles/}}{Processing logs with timing and status information}
+\item{\code{logfiles/summary_in}}{Data summaries of input LASfiles}
+\item{\code{logfiles/summary_out}}{Data summaries of output LASfiles}
 }
 
 \strong{Filename generation:}

@@ -1,12 +1,12 @@
 #' Process LiDAR data to standardized format
 #'
 #' Converts incoming ALS data to quality-controlled, standardized point clouds with
-#' comprehensive metadata, outlines, and overview images.
+#' comprehensive metadata and overview images.
 #'
 #' @param path Character. Path to LAS/LAZ/COPC file(s), directory, or VPC.
 #' @param out_dir Character. Output directory where processed files and metadata
 #'   will be saved.
-#' @param crs_epsg Integer. EPSG code for the coordinate reference system.
+#' @param epsg Integer. EPSG code for the coordinate reference system.
 #'   Default is 25832 (ETRS89 / UTM zone 32N).
 #' @param region Character. Two-letter region code (federal states of Germany) for filename generation
 #'   (e.g., "ni"). If NULL (default) region is automatically inferred from file bounding boxes.
@@ -23,25 +23,30 @@
 #' \itemize{
 #'   \item Generate AdV-compliant filenames
 #'   \item Set CRS (if not present)
+#'   \item Reclassify (AdV/LGLN to ASPRS scheme)
+#'   \item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
+#'   \item Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)
 #'   \item Drop unused attributes
-#'   \item Filter erroneous GPS times and return numbers
 #'   \item Classify noise points
-#'   \item Normalize intensity range 
-#'   \item Create overview image
-#'   \item Create outline geometry
-#'   \item Create point cloud summary
+#'   \item Classify ground points
+#'   \item Normalize intensity range
+#'   \item Sort (optimize) point cloud
 #'   \item Append spatial index
+#'   \item Create overview image
+#'   \item Create VPC file with additional metadata
+#'   \item Create point cloud summaries
+#'   \item Create log file
 #' }
 #'
 #' **Output structure:**
-#' The function creates the following directory structure in `out_dir`:
+#' The function creates the following directory structure in `out_dir` if not otherwise defined:
 #' \describe{
 #'   \item{`pointcloud/`}{Processed LAZ files with embedded spatial index}
-#'   \item{`metadata/`}{JSON summaries with statistics and point counts}
-#'   \item{`outlines/`}{GeoJSON outlines from ground triangulation}
+#'   \item{`metadata/`}{Individual VPC files with additional metadata}
 #'   \item{`overviews/`}{WEBP overview images (max elevation)}
-#'   \item{`summary_original/`}{JSON summaries of original (unprocessed) data}
 #'   \item{`logfiles/`}{Processing logs with timing and status information}
+#'   \item{`logfiles/summary_in`}{Data summaries of input LASfiles}
+#'   \item{`logfiles/summary_out`}{Data summaries of output LASfiles}
 #' }
 #'
 #' **Filename generation:**
@@ -66,18 +71,20 @@
 #'   out_dir = "processed/"
 #' )
 #' }
-raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = NULL, from_csv = NULL, verbose = TRUE) {
+raw_to_processed <- function(path,
+                             out_dir = tempdir(),
+                             epsg = 25832L,
+                             region = NULL,
+                             from_csv = NULL,
+                             verbose = TRUE) {
   # Initialize processing log
   processing_start <- Sys.time()
-
-  # Constants
-  seconds_per_week <- 604800L
 
   # Helper function to create consistent file log entries
   create_file_log <- function(lasfile, pointcloud_file, status, file_start, warnings = character(0)) {
     list(
       input = normalizePath(lasfile, winslash = "/", mustWork = FALSE),
-      output = if (status == "skipped_no_ground") NULL else normalizePath(pointcloud_file, winslash = "/", mustWork = FALSE),
+      output = normalizePath(pointcloud_file, winslash = "/", mustWork = FALSE),
       status = status,
       duration_seconds = round(as.numeric(difftime(Sys.time(), file_start, units = "secs")), 1),
       warnings = if (length(warnings) > 0) warnings else NULL
@@ -86,7 +93,6 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
 
   # ------------------------------------------------------------------
   # Early filename determination using check_names
-  # Build VPC once for all files and determine expected filenames
   # ------------------------------------------------------------------
   files <- resolve_las_paths(path)
 
@@ -95,21 +101,6 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     return(invisible(NULL))
   }
 
-  # Build VPC once for efficiency
-  vpc <- resolve_vpc(files, out_file = NULL)
-
-  if (is.null(vpc)) {
-    return(invisible(NULL))
-  }
-
-  # Use check_names to get expected filenames (fast - uses VPC)
-  name_check <- check_names(vpc, prefix = "3dm", region = NULL, from_csv = from_csv, full.names = TRUE)
-
-  # Create lookup: original filename -> expected output filename
-  filename_map <- setNames(
-    basename(name_check$name_should),
-    name_check$name_is
-  )
 
   raw_to_processed_per_file <- function(lasfile) {
     file_start <- Sys.time()
@@ -117,13 +108,16 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     # Get original filename (for summary_original)
     original_filename <- fs::path_ext_remove(fs::path_file(lasfile))
 
-    # Get expected filename from early check_names lookup
-    expected_filename <- fs::path_ext_remove(filename_map[lasfile])
+    # Use check_names to get expected filename
+    filenames <- check_names(lasfile, prefix = "3dm", region = NULL, from_csv = from_csv, full.names = TRUE)
+    expected_filename <- fs::path_ext_remove(fs::path_file(filenames$name_should))
 
     # Define output file path
     pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(expected_filename, ".laz"))
 
-    # Early existence check
+    # Ckeck if processed file already exists, skip rest of pipeline in this case
+    # in this early stage we can only check for filename based on date of first point, as this might be erroneous
+    # in rare cases a second ckeck is done later after pointcloud data is read
     if (fs::file_exists(pointcloud_file)) {
       file_log <- create_file_log(lasfile, pointcloud_file, "skipped_existing", file_start)
 
@@ -161,6 +155,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     generated_filename <- expected_filename
     warnings <- character(0)
 
+    seconds_per_week <- 604800L
+
     # Try to get year from median GPS time
     if (!is.null(summary_original$metrics$t_median) &&
       summary_original$metrics$t_median > seconds_per_week) {
@@ -196,21 +192,6 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
       return(list(output = pointcloud_file, log = file_log))
     }
 
-    # Check for ground points
-    no_groundpoints <- !any(names(summary_original$npoints_per_class) == "2")
-    if (no_groundpoints) {
-      # Cleanup memory before early return
-      rm(las_in_memory)
-      gc()
-
-      file_log <- create_file_log(lasfile, pointcloud_file, "skipped_no_ground", file_start)
-
-      if (verbose) {
-        message(sprintf("Process %s", basename(lasfile)))
-        message("  \u25B6 No ground classification (skipped))")
-      }
-      return(list(output = NULL, log = file_log))
-    }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # initialize pipeline with reading stage
@@ -230,6 +211,71 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     if (missing_crs) {
       pipeline <- pipeline + set_crs
     }
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # update classification
+    # federal ALS data in Germany is classified in a different classification scheme than ASPRS
+    # here we convert data to ASPRS standard (https://gist.github.com/wiesehahn/607930c73bb9472bb77e2e019b6a0be2)
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    counts <- summary_original$npoints_per_class
+
+    # check if data is LGLN legacy classification scheme
+    # if class 13 is present in high proportions it represents likely Non-ground points, DSM-relevant (legacy LGLN) rather than Shield wire points (AdV and ASPRS)
+    if (("13" %in% names(counts)) && ((counts["13"] / sum(counts)) > 0.01)) {
+      pipeline <- pipeline +
+        lasR::edit_attribute(filter = "Classification == 11", attribute = "Synthetic", value = TRUE) + # Synthetic water points -> Synthetic_flag
+        lasR::edit_attribute(filter = "Classification == 8", attribute = "Classification", value = 9) + # 	Measured water points -> Water
+        lasR::edit_attribute(filter = "Classification == 11", attribute = "Classification", value = 9) + # Synthetic water points -> Water
+        lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 20) + # Subsurface/basement points -> Ignored Ground
+        lasR::edit_attribute(filter = "Classification == 13", attribute = "Classification", value = 1) + # Non-ground points, DSM-relevant -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 15", attribute = "Classification", value = 22) + # Other/unclassified points -> Temporal Exclusion
+        lasR::edit_attribute(filter = "Classification %in% 20 22 23 25 26 27", attribute = "Classification", value = 12) + # Overlap points -> Overlap points
+        lasR::edit_attribute(filter = "Classification > 27", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+    }
+
+    # check if data is
+    # if class 20 is present in high proportions it represents likely Non-ground points (AdV) rather than Ignored Ground points (ASPRS)
+    else if (("20" %in% names(counts)) && ((counts["20"] / sum(counts)) > 0.1)) {
+      pipeline <- pipeline +
+        lasR::edit_attribute(filter = "Classification == 8", attribute = "Synthetic", value = TRUE) + # Synthetic water points -> Synthetic_flag
+        lasR::edit_attribute(filter = "Classification == 8", attribute = "Classification", value = 9) + # Synthetic water points -> Water
+        lasR::edit_attribute(filter = "Classification == 19", attribute = "Classification", value = 5) + # General vegetation -> High Vegetation (could be correctly assigned with HAG)
+        lasR::edit_attribute(filter = "Classification == 20", attribute = "Classification", value = 1) + # Non-ground points -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 21", attribute = "Classification", value = 2) + # Ground excluding basements -> Ground
+        lasR::edit_attribute(filter = "Classification == 22", attribute = "Classification", value = 2) + # Verified ground points -> Ground
+        lasR::edit_attribute(filter = "Classification == 23", attribute = "Classification", value = 1) + # Power infrastructure points -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 24", attribute = "Classification", value = 20) + # Basement/light well points -> Ignored Groundc
+        lasR::edit_attribute(filter = "Classification == 25", attribute = "Classification", value = 1) + # Hydraulic structure points -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 26", attribute = "Classification", value = 1) + # Bridge foundation points -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 27", attribute = "Classification", value = 6) + # General structure points -> Building
+        lasR::edit_attribute(filter = "Classification == 28", attribute = "Classification", value = 6) + # Building installations -> Building
+        lasR::edit_attribute(filter = "Classification == 29", attribute = "Synthetic", value = TRUE) + # Synthetic points -> Synthetic_flag
+        lasR::edit_attribute(filter = "Classification == 29", attribute = "Classification", value = 1) + # Synthetic points -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 30", attribute = "Synthetic", value = TRUE) + # Synthetic surface points -> Synthetic_flag
+        lasR::edit_attribute(filter = "Classification == 30", attribute = "Classification", value = 1) + # Synthetic surface points -> Unclassified
+        lasR::edit_attribute(filter = "Classification == 31", attribute = "Classification", value = 1) + # Filled points from ALS -> Unclassified
+        lasR::edit_attribute(filter = "Classification > 31", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+    }
+    # if classification scheme seems not AdV or legacy LGLN it is likely unclassified or ASPRS already
+    else {
+      pipeline <- pipeline +
+        # in one campaign (Solling) high noise was classified as 64, cobersion should not affect other data
+        lasR::edit_attribute(filter = "Classification == 64", attribute = "Classification", value = 18) + # high noise: 64 -> 18
+        lasR::edit_attribute(filter = "Classification > 22", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+    }
+
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # fix synthetic data
+    # it often shows no/erroneous information about ReturnNumber, NumberOfReturns, gpstime
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    pipeline <- pipeline +
+      # set ReturnNumber and NumberOfReturns of invalid synthetic data
+      lasR::edit_attribute(filter = c("Synthetic == 1", "NumberOfReturns == 0"), attribute = "NumberOfReturns", value = 1) +
+      lasR::edit_attribute(filter = c("Synthetic == 1", "ReturnNumber == 0"), attribute = "ReturnNumber", value = 1) +
+      # set gpstime of invalid synthetic data
+      lasR::edit_attribute(filter = c("Synthetic == 1", paste("gpstime <=", seconds_per_week)), attribute = "gpstime", value = summary_original$metrics$t_median)
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # filter erroneous data
@@ -284,15 +330,21 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     # classify noise
     #
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # TODO
-    # check good parameter setting and ivf vs sor (ivf seems faster)
-    # classify_noise <- lasR::classify_with_ivf()
+    # cascading classification with ivf and multiple voxel sizes performed best in a small benchmark
+    # https://gist.github.com/wiesehahn/59fd9c7037213cb058187b805912c5d5
+    classify_noise <-
+      lasR::classify_with_ivf(res = 2, n = 2, class = 7) + # catch individual outliers with small voxels
+      lasR::classify_with_ivf(res = 5, n = 10, class = 7) + # catch small groups of outliers
+      lasR::classify_with_ivf(res = 10, n = 40, class = 7) # catch larger groups of outliers
 
-    # option:
+    # optional:
     # Calculate point density from summary
     # point_density <- summary_original$npoints /
-    #            ((summary_original$metrics$x_max - summary_original$metrics$x_min) *
-    #             (summary_original$metrics$y_max - summary_original$metrics$y_min))
+    #   ((summary_original$metrics$x_max - summary_original$metrics$x_min) *
+    #    (summary_original$metrics$y_max - summary_original$metrics$y_min))
+    # filter_res <- 1
+    # classify_noise <- lasR::classify_with_ivf(res = filter_res, n = filter_res * 3 * 3 * point_density * 0.2)
+
     # Adaptive parameters
     # if (point_density < 10) {
     #   classify_noise <- lasR::classify_with_sor(k = 10, m = 2.5)
@@ -320,8 +372,8 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     # classify_noise_sor <- lasR::classify_with_sor(k = 15, m = 3)
     #
     # pipeline <- pipeline + classify_noise_ipf + classify_noise_sor
+    # classify_noise <- lasR::classify_with_sor(k = 15, m = 3)
 
-    classify_noise <- lasR::classify_with_sor(k = 15, m = 3)
     pipeline <- pipeline + classify_noise
 
 
@@ -329,24 +381,13 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     # classify ground
     # if point cloud does not contain any ground points (class 2)
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # no_groundpoints <- !any(names(summary_original$npoints_per_class) == "2")
-    #
-    # if (no_groundpoints) {
-    #   classify_ground <- lasR::classify_with_ptd()
-    #
-    #   pipeline <- pipeline +
-    #     classify_ground
-    #   }
+    classify_ground <- lasR::classify_with_ptd()
 
+    no_groundpoints <- !any(names(summary_original$npoints_per_class) == "2")
+    if (no_groundpoints) {
+      pipeline <- pipeline + classify_ground
+    }
 
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # add Height Above Ground
-    # this might drop points at the edges (https://github.com/r-lidar/lasR/issues/270)
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # TODO
-    # check whether we need HAG in the data. Advantage is we have min/max in summary, disadvantage is we delete edge points.
-    # add_hag <- lasR::hag()
-    # pipeline <- pipeline + add_hag
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # normalize Intensity range
@@ -370,6 +411,17 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
 
     intensity_range_normalization <- lasR::callback(normalize_intensity_range, expose = "i")
     pipeline <- pipeline + intensity_range_normalization
+
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # add Height Above Ground
+    # this might drop points at the edges (https://github.com/r-lidar/lasR/issues/270)
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # TODO
+    # check whether we need HAG in the data. Advantage is we have min/max in summary, disadvantage is we delete edge points.
+    # add_hag <- lasR::hag()
+    # pipeline <- pipeline + add_hag
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # calculate summaries on processed data
@@ -405,8 +457,9 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     # get point cloud outlines (convex hulls)
     # (just necessary for data irregular tiles where not the entire tile contains data)
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    outline_file <- fs::path(dir_outlines, fs::path_ext_set(generated_filename, "geojson"))
-    get_outlines <- lasR::hulls(ground_triangulation, ofile = outline_file)
+    # outline_file <- fs::path(dir_outlines, fs::path_ext_set(generated_filename, "geojson"))
+    # get_outlines <- lasR::hulls(ground_triangulation, ofile = outline_file)
+    get_outlines <- lasR::hulls(ground_triangulation)
     pipeline <- pipeline + get_outlines
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -421,7 +474,7 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # write point cloud to disk
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    write_pointcloud <- lasR::write_las(ofile = pointcloud_file)
+    write_pointcloud <- lasR::write_las(ofile = pointcloud_file, version = 4, pdrf = 6)
     pipeline <- pipeline + write_pointcloud
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -461,6 +514,138 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     summary_processed <- ans$summary
     summary_processed_json <- fs::path(dir_summary_processed, fs::path_ext_set(generated_filename, ".json"))
     summary_processed |> save_summary(summary_processed_json)
+
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # save vpc to disk
+    # add summary metadata and optionally update geometry
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+
+    vpc <- resolve_vpc(pointcloud_file, out_file = NULL)
+
+    # if point cloud covers less than 90% of tile extent
+    # update geometry based on convex hull
+    bbox_vals <- vpc$features$properties[[1]]$`proj:bbox`
+    size_extent <- sf::st_area(
+      sf::st_as_sfc(sf::st_bbox(
+        c(
+          xmin = bbox_vals[1], ymin = bbox_vals[2],
+          xmax = bbox_vals[3], ymax = bbox_vals[4]
+        ),
+        crs = epsg
+      ))
+    )
+
+    size_hull <- sf::st_area(ans$hulls)
+    size_relative <- units::drop_units(size_hull / size_extent)
+
+    if (size_relative < 0.9) {
+      # Transform to WGS84 for geometry
+      outline_wgs84 <- sf::st_transform(ans$hulls, 4326)
+      geom_obj <- sf::st_geometry(outline_wgs84)[[1]]
+
+      # Convert to GeoJSON coordinates
+      if (inherits(geom_obj, "MULTIPOLYGON")) {
+        coords <- lapply(geom_obj, function(poly) {
+          lapply(poly, function(ring) {
+            lapply(seq_len(nrow(ring)), function(j) round(ring[j, 1:2], 7))
+          })
+        })
+        vpc$features$geometry[[1]] <- list(type = "MultiPolygon", coordinates = coords)
+      } else {
+        coords <- lapply(geom_obj, function(ring) {
+          lapply(seq_len(nrow(ring)), function(j) round(ring[j, 1:2], 7))
+        })
+        vpc$features$geometry[[1]] <- list(type = "Polygon", coordinates = coords)
+      }
+    }
+
+    metadata_content <- ans$summary
+    # Add metadata if exists
+    if (!is.null(metadata_content)) {
+      new_props <- list()
+
+      # Point density
+      if (!is.null(size_hull)) {
+        new_props$pointdensity <- round(metadata_content$npoints / size_hull, 2)
+      }
+
+      # Pulse density (first returns per square meter)
+      if (!is.null(size_hull)) {
+        first_returns <- metadata_content$npoints_per_return[["1"]]
+        new_props$pulsedensity <- round(first_returns / size_hull, 2)
+      }
+
+      # Statistics array
+      stats <- list()
+
+      # Handle metrics as data.frame or list
+      if (is.data.frame(metadata_content$metrics)) {
+        metrics <- metadata_content$metrics[1, ]
+      } else {
+        metrics <- metadata_content$metrics[[1]]
+      }
+
+      # Z statistics
+      stats[[length(stats) + 1]] <- list(
+        name = "Z",
+        minimum = round(metrics$z_min, 2),
+        maximum = round(metrics$z_max, 2),
+        mean = round(metrics$z_median, 2)
+      )
+
+      # Intensity statistics
+      stats[[length(stats) + 1]] <- list(
+        name = "Intensity",
+        minimum = as.integer(metrics$i_min),
+        maximum = as.integer(metrics$i_max),
+        mean = round(metrics$i_mean, 2),
+        median = as.integer(metrics$i_median),
+        stddev = round(metrics$i_sd, 2)
+      )
+
+      # GpsTime statistics
+      stats[[length(stats) + 1]] <- list(
+        name = "GpsTime",
+        minimum = as.integer(metrics$t_min),
+        maximum = as.integer(metrics$t_max),
+        median = as.integer(metrics$t_median)
+      )
+
+      # Classification statistics
+      class_counts <- metadata_content$npoints_per_class
+      class_list <- as.list(as.integer(class_counts))
+      names(class_list) <- names(class_counts)
+
+      stats[[length(stats) + 1]] <- list(
+        name = "Classification",
+        minimum = min(as.integer(names(class_counts))),
+        maximum = max(as.integer(names(class_counts))),
+        `class-count` = class_list
+      )
+
+      # ReturnNumber
+      return_counts <- metadata_content$npoints_per_return
+      return_list <- as.list(as.integer(return_counts))
+      names(return_list) <- names(return_counts)
+
+      stats[[length(stats) + 1]] <- list(
+        name = "ReturnNumber",
+        minimum = min(as.integer(names(return_counts))),
+        maximum = max(as.integer(names(return_counts))),
+        `class-count` = return_list
+      )
+
+      new_props$`pc:statistics` <- stats
+
+      # Merge with existing properties
+      current_props <- vpc$features$properties[[1]]
+      vpc$features$properties[[1]] <- c(current_props, new_props)
+    }
+
+    # write VPC to disk
+    vpc_file <- fs::path(dir_vpc, fs::path_ext_set(generated_filename, ".vpc"))
+    yyjsonr::write_json_file(vpc, vpc_file, pretty = TRUE, auto_unbox = TRUE)
 
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -542,13 +727,12 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
   gdalraster::set_config_option("GDAL_PAM_ENABLED", "NO")
 
   # create directories if not existent
-  dir_summary_original <- fs::dir_create(out_dir, "summary_original")
-  dir_summary_processed <- fs::dir_create(out_dir, "metadata")
-  dir_pointcloud <- fs::dir_create(out_dir, "pointcloud")
-  dir_outlines <- fs::dir_create(out_dir, "outlines")
-  dir_overviews <- fs::dir_create(out_dir, "overviews")
-  dir_vpc <- fs::dir_create(out_dir, "vpcs")
   dir_logfiles <- fs::dir_create(out_dir, "logfiles")
+  dir_summary_original <- fs::dir_create(out_dir, "logfiles/summary_in")
+  dir_summary_processed <- fs::dir_create(out_dir, "logfiles/summary_out")
+  dir_pointcloud <- fs::dir_create(out_dir, "pointcloud")
+  dir_overviews <- fs::dir_create(out_dir, "overviews")
+  dir_vpc <- fs::dir_create(out_dir, "metadata")
 
   # Print header
   if (verbose) {
@@ -606,7 +790,6 @@ raw_to_processed <- function(path, out_dir = tempdir(), epsg = 25832L, region = 
     files_total = length(files),
     files_processed = sum(statuses %in% c("success", "success_with_warnings")),
     files_skipped_existing = sum(statuses == "skipped_existing"),
-    files_skipped_no_ground = sum(statuses == "skipped_no_ground"),
     files_failed = sum(statuses == "failed"),
     files_with_warnings = sum(statuses == "success_with_warnings")
   )
