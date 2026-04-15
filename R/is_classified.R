@@ -17,6 +17,7 @@
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing
 #'   such files, or a Virtual Point Cloud (`.vpc`).
+#' @param samplebased Logical. If `TRUE` (default), reads only a spatial subsample of each file.
 #' @param full.names Logical. If `TRUE`, return full file paths; otherwise
 #'   return base filenames only (default).
 #' @param add_classes Logical. If `TRUE`, include a list-column with the
@@ -40,49 +41,10 @@
 #'
 #' las_files |> is_classified(add_classes = TRUE)
 #'
-is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
-  is_classified_per_file <- function(file) {
-    if (endsWith(file, ".copc.laz")) {
-      # read first hierachies if COPC
-      ans <- lasR::exec(
-        lasR::reader(copc_depth = 1) + lasR::summarise(),
-        on = file
-      )
-    } else if (endsWith(file, ".las") || endsWith(file, ".laz")) {
-      # read sample subset in center if las/laz
-      header <- lidR::readLASheader(file)
-      xc <- header$`Min X` + (header$`Max X` - header$`Min X`) / 2
-      yc <- header$`Min Y` + (header$`Max Y` - header$`Min Y`) / 2
-      ans <- lasR::exec(
-        lasR::reader_circles(xc, yc, 10) + lasR::summarise(),
-        on = file
-      )
-    }
-
-    # check if all points are 0
-    classified <- !(all(names(ans$npoints_per_class) == "0") && length(names(ans$npoints_per_class)) == 1)
-
-    # adjust filenames
-    if (!full.names) file <- basename(file)
-
-    if (add_classes) {
-      data.frame(
-        file = file,
-        classified = classified,
-        classes = I(list(as.character(names(ans$npoints_per_class))))
-      )
-    } else {
-      data.frame(
-        file = file,
-        classified = classified
-      )
-    }
-  }
-
-
-  # ------------------------------------------------------------------
-  # apply function
-  # ------------------------------------------------------------------
+is_classified <- function(path, samplebased = TRUE, full.names = FALSE, add_classes = FALSE) {
+  # -------------------------------
+  # Resolve all LASfiles
+  # -------------------------------
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
@@ -90,5 +52,61 @@ is_classified <- function(path, full.names = FALSE, add_classes = FALSE) {
     return(invisible(NULL))
   }
 
+  # -------------------------------
+  # Worker function for a single file
+  # -------------------------------
+  is_classified_per_file <- function(file) {
+    tryCatch(
+      {
+        # ---- Reader selection ----
+        reader <- if (samplebased) {
+          if (endsWith(file, ".copc.laz")) {
+            lasR::reader(copc_depth = 1)
+          } else {
+            header <- lidR::readLASheader(file)
+            xc <- (header$`Min X` + header$`Max X`) / 2
+            yc <- (header$`Min Y` + header$`Max Y`) / 2
+            lasR::reader_circles(xc, yc, 10)
+          }
+        } else {
+          lasR::reader()
+        }
+
+        # ---- lasR pipeline ----
+        pipeline <- reader + lasR::summarise()
+        ans <- lasR::exec(pipeline, on = file, with = list(ncores = 1))
+
+        # check if all points are 0
+        classified <- !(all(names(ans$npoints_per_class) == "0") && length(names(ans$npoints_per_class)) == 1)
+
+        # adjust filenames
+        if (!full.names) file <- basename(file)
+
+        if (add_classes) {
+          data.frame(
+            file = file,
+            classified = classified,
+            classes = I(list(as.integer(names(ans$npoints_per_class))))
+          )
+        } else {
+          data.frame(
+            file = file,
+            classified = classified
+          )
+        }
+      },
+      error = function(e) {
+        filename <- if (full.names) file else basename(file)
+        message("ERROR processing ", filename, ": ", conditionMessage(e))
+        out <- list(list(error = conditionMessage(e)))
+        names(out) <- filename
+        out
+      }
+    )
+  }
+
+  # -------------------------------
+  # Map over files
+  # -------------------------------
   data.table::rbindlist(map_las(files, is_classified_per_file))
 }

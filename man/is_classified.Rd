@@ -4,11 +4,18 @@
 \alias{is_classified}
 \title{Check whether LASfiles are classified}
 \usage{
-is_classified(path, full.names = FALSE, add_classes = FALSE)
+is_classified(
+  path,
+  samplebased = TRUE,
+  full.names = FALSE,
+  add_classes = FALSE
+)
 }
 \arguments{
 \item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing
 such files, or a Virtual Point Cloud (\code{.vpc}).}
+
+\item{samplebased}{Logical. If \code{TRUE} (default), reads only a spatial subsample of each file.}
 
 \item{full.names}{Logical. If \code{TRUE}, return full file paths; otherwise
 return base filenames only (default).}
