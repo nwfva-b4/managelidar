@@ -26,7 +26,6 @@
 #'   filter_temporal("2024") |>
 #'   run_pipeline(lasR::dsm())
 run_pipeline <- function(path, pipeline, ...) {
-
   # Check if path is a single .vpc file on disk
   is_vpc_file <- length(path) == 1 &&
     is.character(path) &&
