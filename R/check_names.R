@@ -17,6 +17,8 @@
 #' @param copc Logical. Whether the files are expected to be COPC (`.copc.laz`).
 #' @param full.names Logical. If `TRUE`, returns full file paths in `name_is`
 #'   and `name_should`; otherwise, only the base file names.
+#' @param epsg Integer. EPSG code used as fallback CRS when a file does not
+#'   contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
 #'
 #' @return A `data.frame` with one row per file and columns:
 #' \describe{
@@ -33,7 +35,7 @@
 #'
 #' las_files |> check_names()
 check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
-                        copc = FALSE, full.names = FALSE) {
+                        copc = FALSE, full.names = FALSE, epsg = 25832L) {
   # ------------------------------------------------------------------
   # Build VPC once and reuse it
   # ------------------------------------------------------------------
@@ -55,9 +57,12 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   # ------------------------------------------------------------------
   crs_data <- get_crs(vpc, full.names = TRUE)
 
+  # Fall back to epsg parameter if CRS is missing or invalid
+  effective_crs <- if (is.na(crs_data$crs[1]) || crs_data$crs[1] == 0) epsg else crs_data$crs[1]
+
   # Calculate zone from EPSG (last 2 digits)
   # Assumes UTM zones like EPSG:25832 → zone 32
-  zone <- crs_data$crs[1] %% 100
+  zone <- effective_crs %% 100
 
   # ------------------------------------------------------------------
   # Get spatial extent
@@ -124,7 +129,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
         y = (ext$ymin + ext$ymax) / 2
       ),
       coords = c("x", "y"),
-      crs = crs_data$crs[1]
+      crs = effective_crs
     ) |>
       sf::st_transform(4326)
 

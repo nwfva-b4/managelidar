@@ -10,7 +10,8 @@ check_names(
   region = NULL,
   from_csv = NULL,
   copc = FALSE,
-  full.names = FALSE
+  full.names = FALSE,
+  epsg = 25832L
 )
 }
 \arguments{
@@ -29,6 +30,9 @@ used to match acquisition dates for tiles without GPStime.}
 
 \item{full.names}{Logical. If \code{TRUE}, returns full file paths in \code{name_is}
 and \code{name_should}; otherwise, only the base file names.}
+
+\item{epsg}{Integer. EPSG code used as fallback CRS when a file does not
+contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).}
 }
 \value{
 A \code{data.frame} with one row per file and columns:
