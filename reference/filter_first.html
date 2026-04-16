@@ -107,6 +107,7 @@ Returns NULL invisibly if no features match the filter.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># get first acquisition per tile (entire tiles only, with 10m tolerance)</span></span></span>
 <span class="r-in"><span><span class="va">vpc</span> <span class="op">&lt;-</span> <span class="fu">filter_first</span><span class="op">(</span><span class="va">f</span>, tolerance <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -62,25 +62,31 @@ las_files <- list.files(folder, full.names = T, pattern = "*.laz")
 
 # Filter by single day (all features from that day)
 vpc <- las_files |> filter_temporal("2024-03-27")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by month (all features from March 2024)
 vpc <- las_files |> filter_temporal("2024-03")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by year (all features from 2024)
 vpc <- las_files |> filter_temporal("2024")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by explicit date range
 vpc <- las_files |> filter_temporal("2024-03-01", "2024-03-31")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by datetime range
 vpc <- las_files |> filter_temporal("2024-03-27T00:00:00Z", "2024-03-27T12:00:00Z")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Using Date objects
 vpc <- las_files |> filter_temporal(as.Date("2024-03-27"))
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

@@ -65,5 +65,6 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 # check tiling scheme with 10m tolerance
 las_files |> check_tiling(tolerance = 10)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

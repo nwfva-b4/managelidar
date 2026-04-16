@@ -7,7 +7,7 @@ location), and returns a VPC object or file path.
 ## Usage
 
 ``` r
-resolve_vpc(paths, out_file = NULL)
+resolve_vpc(paths, epsg = 25832L, out_file = NULL)
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ resolve_vpc(paths, out_file = NULL)
   Character vector of input paths, or a list containing VPC objects. Can
   be a mix of file paths (strings) and VPC objects (lists with
   type="FeatureCollection").
+
+- epsg:
+
+  Integer. EPSG code used as fallback CRS when a file does not contain a
+  valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
 
 - out_file:
 

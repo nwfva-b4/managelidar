@@ -112,14 +112,17 @@ f <- system.file("extdata", package = "managelidar")
 
 # Get all multi-temporal (2+ observations) tiles (entire tiles only, with 10m tolerance)
 vpc_multi <- filter_multitemporal(f, tolerance = 10)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Get only mono-temporal (exactly 1 observation) tiles  (entire tiles only, with 10m tolerance)
 vpc_mono <- filter_multitemporal(f, entire_tiles = FALSE, tolerance = 10, n = 1)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Get tiles with exactly 3 observations (entire tiles only, with 10m tolerance)
 vpc_three <- filter_multitemporal(f, n = 3)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Chain filters for specific workflows:
@@ -127,5 +130,6 @@ vpc <- f |>
   filter_multitemporal(tolerance = 10) |>
   filter_temporal("2024") |>
   filter_latest(tolerance = 10)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

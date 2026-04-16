@@ -108,26 +108,31 @@ folder <- system.file("extdata", package = "managelidar")
 # Filter by point count (use backticks for properties with special chars)
 folder |>
   filter_attribute(`pc:count` > 5000)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by type
 folder |>
   filter_attribute(`pc:type` == "lidar")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Multiple conditions (AND)
 folder |>
   filter_attribute(`pc:count` > 5000, `pc:type` == "lidar")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Using OR
 folder |>
   filter_attribute(`pc:count` > 10000 | `pc:type` == "lidar")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by feature ID (exposed for convenience)
 folder |>
   filter_attribute(id == "3dm_32_547_5724_1_ni_20240327")
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter by multiple IDs
@@ -136,12 +141,14 @@ folder |>
     "3dm_32_547_5724_1_ni_20240327",
     "3dm_32_548_5724_1_ni_20240327"
   ))
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Filter enriched VPC by density
 folder |>
   create_vpc_enriched() |>
   filter_attribute(pointdensity >= 10)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Chain with dedicated filter functions
@@ -149,14 +156,17 @@ folder |>
   filter_temporal("2024-03") |>
   filter_attribute(`pc:count` > 5000) |>
   filter_spatial(c(547900, 5724900, 548100, 5725100))
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Note: For spatial/temporal filtering, prefer dedicated functions:
 folder |>
   filter_temporal("2024-03-27") # Better than filter_attribute(datetime == ...)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 folder |>
   filter_spatial(bbox) # Better than filter_attribute with proj:bbox
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

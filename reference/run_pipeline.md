@@ -47,5 +47,6 @@ folder <- system.file("extdata", package = "managelidar")
 folder |>
   filter_temporal("2024") |>
   run_pipeline(lasR::dsm())
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

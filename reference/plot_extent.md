@@ -42,9 +42,11 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 # Plot extent per file
 las_files |> plot_extent()
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Plot combined extent
 las_files |> plot_extent(per_file = FALSE)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

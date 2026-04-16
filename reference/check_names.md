@@ -16,7 +16,8 @@ check_names(
   region = NULL,
   from_csv = NULL,
   copc = FALSE,
-  full.names = FALSE
+  full.names = FALSE,
+  epsg = 25832L
 )
 ```
 
@@ -50,6 +51,11 @@ check_names(
   Logical. If `TRUE`, returns full file paths in `name_is` and
   `name_should`; otherwise, only the base file names.
 
+- epsg:
+
+  Integer. EPSG code used as fallback CRS when a file does not contain a
+  valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
+
 ## Value
 
 A `data.frame` with one row per file and columns:
@@ -73,5 +79,6 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> check_names()
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

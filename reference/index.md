@@ -46,7 +46,7 @@
 - [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
   : Compute summary metrics for individual LASfiles
 - [`get_temporal_extent()`](https://wiesehahn.github.io/managelidar/reference/get_temporal_extent.md)
-  : Get the temporal extent of LASfiles
+  : Get the temporal extent of LASfiles (individually or combined)
 - [`is_classified()`](https://wiesehahn.github.io/managelidar/reference/is_classified.md)
   : Check whether LASfiles are classified
 - [`is_indexed()`](https://wiesehahn.github.io/managelidar/reference/is_indexed.md)

@@ -1,4 +1,4 @@
-# Get the temporal extent of LASfiles
+# Get the temporal extent of LASfiles (individually or combined)
 
 Extracts the temporal extent (acquisition dates) from LASfiles. Can
 return dates per file or the combined date range of all files.
@@ -13,6 +13,7 @@ get_temporal_extent(
   from_csv = NULL,
   return_referenceyear = FALSE,
   fix_false_gpstime = TRUE,
+  epsg = 25832L,
   verbose = TRUE
 )
 ```
@@ -56,6 +57,11 @@ get_temporal_extent(
   2011-09-14 to 2011-09-21 when decoded as GPS time. Affected files are
   silently reclassified as non-GPS and their dates are resolved via CSV
   or header fallback instead.
+
+- epsg:
+
+  Integer. EPSG code used as fallback CRS when a file does not contain a
+  valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
 
 - verbose:
 
@@ -107,18 +113,22 @@ las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 
 # Get dates per file
 las_files |> get_temporal_extent()
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Get combined date range
 las_files |> get_temporal_extent(per_file = FALSE)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Get reference years
 las_files |> get_temporal_extent(return_referenceyear = TRUE)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 
 # Using CSV for reference dates
 csv_path <- system.file("extdata", "acquisition_dates.csv", package = "managelidar")
 get_temporal_extent(folder, from_csv = csv_path)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error in loadNamespace(x): there is no package called ‘lasR’
 ```
