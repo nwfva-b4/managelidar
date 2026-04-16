@@ -281,7 +281,7 @@ raw_to_processed <- function(path,
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # filter erroneous data
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    
+
     # delete points with erroneous gpstime, if most points have gpstime higher than seconds_per_week, points with lower gpstime can be considered wrong
     filter_erroneous_gpstime <- lasR::delete_points(filter = paste("gpstime <=", seconds_per_week))
 
@@ -304,7 +304,7 @@ raw_to_processed <- function(path,
     #   lasR::delete_points(filter = "ScanAngle > 30")
 
     # pipeline <- pipeline + filter_erroneous_scanangles
-  
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # select attributes (drop unnecessary)
@@ -340,9 +340,9 @@ raw_to_processed <- function(path,
     # cascading classification with ivf and multiple voxel sizes performed best in a small benchmark
     # https://gist.github.com/wiesehahn/59fd9c7037213cb058187b805912c5d5
     classify_noise <-
-      lasR::classify_with_ivf(res = 2, n = 2, class = 7) + # catch individual outliers with small voxels
-      lasR::classify_with_ivf(res = 5, n = 10, class = 7) + # catch small groups of outliers
-      lasR::classify_with_ivf(res = 10, n = 40, class = 7) # catch larger groups of outliers
+      lasR::classify_with_ivf(res = 2, n = 2, class = 7, filter = lasR::drop_noise()) + # catch individual outliers with small voxels
+      lasR::classify_with_ivf(res = 5, n = 10, class = 7, filter = lasR::drop_noise()) + # catch small groups of outliers
+      lasR::classify_with_ivf(res = 10, n = 40, class = 7, filter = lasR::drop_noise()) # catch larger groups of outliers
 
     # optional:
     # Calculate point density from summary

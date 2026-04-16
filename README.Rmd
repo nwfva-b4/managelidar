@@ -101,7 +101,7 @@ Install the development version from GitHub:
 pak::pak("nwfva-b4/managelidar")
 ```
 
-**Important:** managelidar requires {[lasR](https://github.com/r-lidar/lasR)} (version >= 0.18.0), which is available on r-universe but not on CRAN. Install it first:
+**Important:** managelidar requires {[lasR](https://github.com/r-lidar/lasR)} (version >= 0.21.0), which is available on r-universe but not on CRAN. Install it first:
 ```r
 install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cran.r-project.org"))
 ```
