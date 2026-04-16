@@ -280,8 +280,9 @@ raw_to_processed <- function(path,
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # filter erroneous data
-    # delete points with erroneous gpstime, if most points have gpstime higher than seconds_per_week, points with lower gpstime can be considered wrong
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    
+    # delete points with erroneous gpstime, if most points have gpstime higher than seconds_per_week, points with lower gpstime can be considered wrong
     filter_erroneous_gpstime <- lasR::delete_points(filter = paste("gpstime <=", seconds_per_week))
 
     erroneous_gpstime <- summary_original$metrics$t_min <= seconds_per_week &&
@@ -290,15 +291,20 @@ raw_to_processed <- function(path,
       pipeline <- pipeline + filter_erroneous_gpstime
     }
 
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # filter erroneous data
     # points with ReturnNumber or NumberOfReturns smaller 1 are erroneous
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
     filter_erroneous_returns <-
       lasR::delete_points(filter = "ReturnNumber < 1") +
       lasR::delete_points(filter = "NumberOfReturns < 1")
 
     pipeline <- pipeline + filter_erroneous_returns
+
+    # pulses with high ScanAngles are sensitive to errors
+    # filter_erroneous_scanangles <-
+    #   lasR::delete_points(filter = "ScanAngle < -30") +
+    #   lasR::delete_points(filter = "ScanAngle > 30")
+
+    # pipeline <- pipeline + filter_erroneous_scanangles
+  
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # select attributes (drop unnecessary)
@@ -469,7 +475,7 @@ raw_to_processed <- function(path,
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # get CHM with 1 m resolution to use as overview images (1000x1000 px)
     overview_file <- fs::path(dir_overviews, fs::path_ext_set(generated_filename, ".tif"))
-    get_overview <- lasR::rasterize(res = 1, operators = c("z_max"), ofile = overview_file)
+    get_overview <- lasR::rasterize(res = 1, operators = c("z_max"), filter = lasR::drop_noise(), ofile = overview_file)
     pipeline <- pipeline + get_overview
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
