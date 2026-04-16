@@ -154,7 +154,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"nwfva-b4/managelidar"</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Important:</strong> managelidar requires {<a href="https://github.com/r-lidar/lasR" class="external-link">lasR</a>} (version &gt;= 0.18.0), which is available on r-universe but not on CRAN. Install it first:</p>
+<p><strong>Important:</strong> managelidar requires {<a href="https://github.com/r-lidar/lasR" class="external-link">lasR</a>} (version &gt;= 0.21.0), which is available on r-universe but not on CRAN. Install it first:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lasR"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://r-lidar.r-universe.dev"</span>, <span class="st">"https://cran.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -185,6 +185,8 @@
 <span></span>
 <span><span class="co"># Get spatial extent from multiple files</span></span>
 <span><span class="va">path</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/get_spatial_extent.html">get_spatial_extent</a></span><span class="op">(</span>per_file <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: This LAS object stores the CRS as WKT. CRS field might not be</span></span>
+<span><span class="co">#&gt; correctly populated, yielding uncertain results; use 'wkt()' instead.</span></span>
 <span><span class="co">#&gt; Get spatial extent</span></span>
 <span><span class="co">#&gt;   ▼ 5 LASfiles</span></span>
 <span><span class="co">#&gt;   Overall extent: 547647.97, 5724000.00, 548995.44, 5725999.90  (xmin, ymin, xmax, ymax; EPSG:25832)</span></span>
@@ -195,6 +197,8 @@
 <span><span class="va">path</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">547900</span>, <span class="fl">5724900</span>, <span class="fl">548100</span>, <span class="fl">5724900</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/get_names.html">get_names</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: This LAS object stores the CRS as WKT. CRS field might not be</span></span>
+<span><span class="co">#&gt; correctly populated, yielding uncertain results; use 'wkt()' instead.</span></span>
 <span><span class="co">#&gt; Filter spatial extent</span></span>
 <span><span class="co">#&gt;   ▼ 5 LASfiles</span></span>
 <span><span class="co">#&gt;   ▼ 2 LASfiles retained</span></span>
@@ -205,6 +209,8 @@
 <span>  <span class="fu"><a href="reference/filter_temporal.html">filter_temporal</a></span><span class="op">(</span><span class="st">"2024-03"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">547900</span>, <span class="fl">5724900</span>, <span class="fl">548100</span>, <span class="fl">5724900</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/get_names.html">get_names</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: This LAS object stores the CRS as WKT. CRS field might not be</span></span>
+<span><span class="co">#&gt; correctly populated, yielding uncertain results; use 'wkt()' instead.</span></span>
 <span><span class="co">#&gt; Filter temporal extent</span></span>
 <span><span class="co">#&gt;   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)</span></span>
 <span><span class="co">#&gt;   ▼ 4 LASfiles retained (2024-03-27)</span></span>

@@ -104,7 +104,7 @@ pak::pak("nwfva-b4/managelidar")
 ```
 
 **Important:** managelidar requires
-{[lasR](https://github.com/r-lidar/lasR)} (version \>= 0.18.0), which is
+{[lasR](https://github.com/r-lidar/lasR)} (version \>= 0.21.0), which is
 available on r-universe but not on CRAN. Install it first:
 
 ``` r
@@ -139,6 +139,8 @@ path <- system.file("extdata", package = "managelidar")
 
 # Get spatial extent from multiple files
 path |> get_spatial_extent(per_file = FALSE)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be
+#> correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Get spatial extent
 #>   ▼ 5 LASfiles
 #>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725999.90  (xmin, ymin, xmax, ymax; EPSG:25832)
@@ -149,6 +151,8 @@ path |> get_spatial_extent(per_file = FALSE)
 path |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be
+#> correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter spatial extent
 #>   ▼ 5 LASfiles
 #>   ▼ 2 LASfiles retained
@@ -159,6 +163,8 @@ path |>
   filter_temporal("2024-03") |>
   filter_spatial(c(547900, 5724900, 548100, 5724900)) |>
   get_names()
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be
+#> correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter temporal extent
 #>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
 #>   ▼ 4 LASfiles retained (2024-03-27)
