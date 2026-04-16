@@ -150,6 +150,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
     from_csv = from_csv,
     return_referenceyear = TRUE,
     fix_false_gpstime = TRUE,
+    epsg = epsg,
     verbose = FALSE
   )
 

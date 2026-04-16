@@ -109,7 +109,7 @@ raw_to_processed <- function(path,
     original_filename <- fs::path_ext_remove(fs::path_file(lasfile))
 
     # Use check_names to get expected filename
-    filenames <- check_names(lasfile, prefix = "3dm", region = NULL, from_csv = from_csv, full.names = TRUE)
+    filenames <- check_names(lasfile, prefix = "3dm", region = NULL, from_csv = from_csv, epsg = epsg, full.names = TRUE)
     expected_filename <- fs::path_ext_remove(fs::path_file(filenames$name_should))
 
     # Define output file path
@@ -208,6 +208,7 @@ raw_to_processed <- function(path,
 
     # set CRS if missing valid EPSG
     missing_crs <- summary_original$epsg == 0L
+
     if (missing_crs) {
       pipeline <- pipeline + set_crs
     }
@@ -521,7 +522,7 @@ raw_to_processed <- function(path,
     # add summary metadata and optionally update geometry
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
 
-    vpc <- resolve_vpc(pointcloud_file, out_file = NULL)
+    vpc <- resolve_vpc(pointcloud_file, epsg = epsg, out_file = NULL)
 
     # if point cloud covers less than 90% of tile extent
     # update geometry based on convex hull

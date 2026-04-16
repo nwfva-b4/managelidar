@@ -4,11 +4,14 @@
 \alias{resolve_vpc}
 \title{Resolve input paths to a single deduplicated VPC}
 \usage{
-resolve_vpc(paths, out_file = NULL)
+resolve_vpc(paths, epsg = 25832L, out_file = NULL)
 }
 \arguments{
 \item{paths}{Character vector of input paths, or a list containing VPC objects.
 Can be a mix of file paths (strings) and VPC objects (lists with type="FeatureCollection").}
+
+\item{epsg}{Integer. EPSG code used as fallback CRS when a file does not
+contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).}
 
 \item{out_file}{Optional. Path where the VPC should be saved. If NULL (default),
 returns the VPC as an R object. If provided, saves to file and returns the file path.}

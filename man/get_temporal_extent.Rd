@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_temporal_extent.R
 \name{get_temporal_extent}
 \alias{get_temporal_extent}
-\title{Get the temporal extent of LASfiles}
+\title{Get the temporal extent of LASfiles (individually or combined)}
 \usage{
 get_temporal_extent(
   path,
@@ -11,6 +11,7 @@ get_temporal_extent(
   from_csv = NULL,
   return_referenceyear = FALSE,
   fix_false_gpstime = TRUE,
+  epsg = 25832L,
   verbose = TRUE
 )
 }
@@ -39,6 +40,9 @@ of standard GPS time. Such files produce spurious dates in the range
 2011-09-14 to 2011-09-21 when decoded as GPS time. Affected files are
 silently reclassified as non-GPS and their dates are resolved via CSV or
 header fallback instead.}
+
+\item{epsg}{Integer. EPSG code used as fallback CRS when a file does not
+contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).}
 
 \item{verbose}{Logical. If \code{TRUE} (default), prints temporal extent information.}
 }

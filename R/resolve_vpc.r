@@ -6,6 +6,8 @@
 #'
 #' @param paths Character vector of input paths, or a list containing VPC objects.
 #'   Can be a mix of file paths (strings) and VPC objects (lists with type="FeatureCollection").
+#' @param epsg Integer. EPSG code used as fallback CRS when a file does not
+#'   contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
 #' @param out_file Optional. Path where the VPC should be saved. If NULL (default),
 #'   returns the VPC as an R object. If provided, saves to file and returns the file path.
 #'
@@ -13,7 +15,7 @@
 #'   If `out_file` is provided, returns the path to the saved `.vpc` file.
 #'
 #' @keywords internal
-resolve_vpc <- function(paths, out_file = NULL) {
+resolve_vpc <- function(paths, epsg = 25832L, out_file = NULL) {
   # If paths is itself a VPC object, wrap it in a list
   if (is.list(paths) && !is.null(paths$type) && paths$type == "FeatureCollection") {
     paths <- list(paths)
@@ -64,14 +66,7 @@ resolve_vpc <- function(paths, out_file = NULL) {
   # If there are LASfiles, create a temporary VPC
   # ------------------------------------------------------------
   if (length(las_files) > 0) {
-    las_vpc <- lasR::exec(
-      lasR::write_vpc(
-        tempfile(fileext = ".vpc"),
-        absolute_path = TRUE,
-        use_gpstime = TRUE
-      ),
-      on = las_files
-    )
+    las_vpc <- exec_write_vpc(las_files, epsg = epsg)
     to_merge_files <- c(to_merge_files, las_vpc)
   }
 

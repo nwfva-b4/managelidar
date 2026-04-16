@@ -22,6 +22,8 @@
 #' @param return_referenceyear Logical. If `TRUE`, returns the reference year instead
 #'   of the acquisition date (e.g., reference year 2015 for data acquired in
 #'   November or December 2014). Default is `FALSE`.
+#' @param epsg Integer. EPSG code used as fallback CRS when a file does not
+#'   contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
 #' @param verbose Logical. If `TRUE` (default), prints temporal extent information.
 #'
 #' @return When `per_file = TRUE`: A `data.frame` with columns:
@@ -68,7 +70,7 @@
 #'
 get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
                                 from_csv = NULL, return_referenceyear = FALSE,
-                                fix_false_gpstime = TRUE, verbose = TRUE) {
+                                fix_false_gpstime = TRUE, epsg = 25832L, verbose = TRUE) {
   # Read LAS headers (always full paths internally)
   headers <- get_header(path, full.names = TRUE)
 
@@ -90,14 +92,8 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
     }
 
     if (gpstime_flag) {
-      vpc_path <- lasR::exec(
-        lasR::write_vpc(
-          ofile = tempfile(fileext = ".vpc"),
-          absolute_path = TRUE,
-          use_gpstime = TRUE
-        ),
-        on = files
-      )
+      vpc_path <- exec_write_vpc(files, epsg = epsg, use_gpstime = gpstime_flag)
+
       vpc <- yyjsonr::read_json_file(vpc_path)
 
       df <- data.frame(
@@ -111,14 +107,8 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
 
 
     if (!gpstime_flag) {
-      vpc_path <- lasR::exec(
-        lasR::write_vpc(
-          ofile = tempfile(fileext = ".vpc"),
-          absolute_path = TRUE,
-          use_gpstime = FALSE # force to get date from header
-        ),
-        on = files
-      )
+      vpc_path <- exec_write_vpc(files, epsg = epsg, use_gpstime = gpstime_flag) # force to get date from header
+
       vpc <- yyjsonr::read_json_file(vpc_path)
 
       df <- data.frame(
