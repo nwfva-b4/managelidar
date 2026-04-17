@@ -58,7 +58,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   crs_data <- get_crs(vpc, full.names = TRUE)
 
   # Fall back to epsg parameter if CRS is missing or invalid
-  effective_crs <- if (is.na(crs_data$crs[1]) || crs_data$crs[1] == 0) epsg else crs_data$crs[1]
+  effective_crs <- if (is_valid_crs(crs_data$crs[1])) crs_data$crs[1] else epsg
 
   # Calculate zone from EPSG (last 2 digits)
   # Assumes UTM zones like EPSG:25832 → zone 32

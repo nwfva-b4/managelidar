@@ -14,15 +14,21 @@ exec_write_vpc(
 \arguments{
 \item{las_files}{Character vector of LAS/LAZ/COPC file paths.}
 
-\item{epsg}{Integer. Fallback EPSG code when CRS is missing. Default is 25832.}
+\item{epsg}{Integer. Fallback EPSG code applied when the file CRS is missing
+or unrecognised. Default is 25832.}
 
-\item{use_gpstime}{Logical. Passed to \code{lasR::write_vpc}. Default is TRUE.}
+\item{use_gpstime}{Logical. Passed to \code{\link[lasR:write_vpc]{lasR::write_vpc()}}. Default is \code{TRUE}.}
+
+\item{absolute_path}{Logical. Passed to \code{\link[lasR:write_vpc]{lasR::write_vpc()}}. Default is
+\code{TRUE}.}
 }
 \value{
-Path to the temporary VPC file.
+Path to the temporary VPC file (invisibly, as returned by
+\code{\link[lasR:exec]{lasR::exec()}}).
 }
 \description{
-Internal wrapper around \code{lasR::write_vpc} that checks whether the first
-file has a valid CRS and prepends \code{lasR::set_crs} to the pipeline if not.
+Internal wrapper around \code{\link[lasR:write_vpc]{lasR::write_vpc()}} that checks whether the first
+file has a valid CRS via \code{\link[=is_valid_crs]{is_valid_crs()}} and prepends \code{\link[lasR:set_crs]{lasR::set_crs()}} to
+the pipeline if not.
 }
 \keyword{internal}

@@ -26,22 +26,22 @@
 #' las_files |> get_crs()
 #'
 get_crs <- function(path, full.names = FALSE) {
-  vpc <- resolve_vpc(path)
-
-  # Check if resolve_vpc returned NULL
-  if (is.null(vpc)) {
+  files <- resolve_las_paths(path)
+  if (length(files) == 0) {
     return(invisible(NULL))
   }
 
   res <- data.frame(
-    filename = sapply(vpc$features$assets, function(x) x$data$href),
-    crs = sapply(vpc$features$properties, function(x) x$`proj:epsg`)
+    filename = files,
+    crs = sapply(files, function(f) {
+      hdr <- lidR::readLASheader(f)
+      epsg <- lidR::epsg(hdr)
+      if (is_valid_crs(epsg)) epsg else NA_integer_
+    }),
+    stringsAsFactors = FALSE,
+    row.names = NULL
   )
 
-  # Adjust filenames
-  if (!full.names) {
-    res$filename <- basename(res$filename)
-  }
-
+  if (!full.names) res$filename <- basename(res$filename)
   res
 }
