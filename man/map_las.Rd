@@ -16,6 +16,6 @@ A list with one element per file.
 }
 \description{
 Internal helper to apply a function to multiple LASfiles,
-using parallel processing (mirai) only when beneficial.
+using parallel processing (mirai) if applied on at least 20 files.
 }
 \keyword{internal}

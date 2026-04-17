@@ -203,13 +203,21 @@ raw_to_processed <- function(path,
     # set CRS
     # explicitly set the CRS if it is is not set or cannot properly be read (https://github.com/r-lidar/lasR/issues/265)
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # EGSP 25832 is default for all cadastral data in western federal states of Germany
+    # Fall back to epsg parameter if CRS is missing or invalid
     set_crs <- lasR::set_crs(epsg)
 
-    # set CRS if missing valid EPSG
-    missing_crs <- summary_original$epsg == 0L
+    # inline so parallel workers can find it
+    is_valid_crs <- function(epsg_code) {
+      if (is.na(epsg_code) || epsg_code == 0L) return(FALSE)
+      tryCatch(
+        !is.na(suppressWarnings(sf::st_crs(epsg_code))$epsg),
+        error = function(e) FALSE
+      )
+    }
 
-    if (missing_crs) {
+    invalid_crs <- is_valid_crs(summary_original$epsg)
+
+    if (invalid_crs) {
       pipeline <- pipeline + set_crs
     }
 
@@ -749,8 +757,12 @@ raw_to_processed <- function(path,
   # apply function
   results <- map_las(files, raw_to_processed_per_file)
 
-  output_paths <- lapply(results, function(x) if (is.null(x)) NULL else x$output)
-  file_logs <- lapply(results, function(x) if (is.null(x)) NULL else x$log)
+  output_paths <- lapply(results, function(x) {
+    if (is.list(x) && !is.null(x$output)) x$output else NULL
+  })
+  file_logs <- lapply(results, function(x) {
+    if (is.list(x) && !is.null(x$log)) x$log else NULL
+  })
 
 
   # Finalize processing log
