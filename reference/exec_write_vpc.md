@@ -1,8 +1,9 @@
 # Write a temporary VPC from LAS files, setting CRS if missing
 
-Internal wrapper around `lasR::write_vpc` that checks whether the first
-file has a valid CRS and prepends `lasR::set_crs` to the pipeline if
-not.
+Internal wrapper around `lasR::write_vpc()` that checks whether the
+first file has a valid CRS via
+[`is_valid_crs()`](https://wiesehahn.github.io/managelidar/reference/is_valid_crs.md)
+and prepends `lasR::set_crs()` to the pipeline if not.
 
 ## Usage
 
@@ -23,12 +24,18 @@ exec_write_vpc(
 
 - epsg:
 
-  Integer. Fallback EPSG code when CRS is missing. Default is 25832.
+  Integer. Fallback EPSG code applied when the file CRS is missing or
+  unrecognised. Default is 25832.
 
 - use_gpstime:
 
-  Logical. Passed to `lasR::write_vpc`. Default is TRUE.
+  Logical. Passed to `lasR::write_vpc()`. Default is `TRUE`.
+
+- absolute_path:
+
+  Logical. Passed to `lasR::write_vpc()`. Default is `TRUE`.
 
 ## Value
 
-Path to the temporary VPC file.
+Path to the temporary VPC file (invisibly, as returned by
+`lasR::exec()`).

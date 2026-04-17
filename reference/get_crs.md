@@ -47,5 +47,12 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 las_files |> get_crs()
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
+#>                            filename   crs
+#> 1 3dm_32_547_5724_1_ni_20240327.laz 25832
+#> 2 3dm_32_547_5725_1_ni_20240327.laz 25832
+#> 3 3dm_32_548_5724_1_ni_20240327.laz 25832
+#> 4 3dm_32_548_5725_1_ni_20240327.laz 25832
 ```

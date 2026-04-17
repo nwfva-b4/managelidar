@@ -1,7 +1,7 @@
 # Map a function over LAS/LAZ/COPC files
 
 Internal helper to apply a function to multiple LASfiles, using parallel
-processing (mirai) only when beneficial.
+processing (mirai) if applied on at least 20 files.
 
 ## Usage
 
