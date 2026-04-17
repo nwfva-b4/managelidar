@@ -38,7 +38,6 @@ map_las <- function(files, FUN) {
     message("Processing ", n, " LASfiles in parallel (", workers, " workers)")
     mirai::daemons(
       workers,
-      dispatcher = "process",
       ..args = list(.expr = quote(library(managelidar)))
     )
     on.exit(mirai::daemons(0), add = TRUE)
