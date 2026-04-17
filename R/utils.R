@@ -11,10 +11,15 @@
 #'
 #' @keywords internal
 is_valid_crs <- function(epsg_code) {
-  if (is.na(epsg_code) || epsg_code == 0L) return(FALSE)
-  tryCatch({
-    !is.na(suppressWarnings(sf::st_crs(epsg_code))$epsg)
-  }, error = function(e) FALSE)
+  if (is.na(epsg_code) || epsg_code == 0L) {
+    return(FALSE)
+  }
+  tryCatch(
+    {
+      !is.na(suppressWarnings(sf::st_crs(epsg_code))$epsg)
+    },
+    error = function(e) FALSE
+  )
 }
 
 #' Write a temporary VPC from LAS files, setting CRS if missing

@@ -206,15 +206,6 @@ raw_to_processed <- function(path,
     # Fall back to epsg parameter if CRS is missing or invalid
     set_crs <- lasR::set_crs(epsg)
 
-    # inline so parallel workers can find it
-    is_valid_crs <- function(epsg_code) {
-      if (is.na(epsg_code) || epsg_code == 0L) return(FALSE)
-      tryCatch(
-        !is.na(suppressWarnings(sf::st_crs(epsg_code))$epsg),
-        error = function(e) FALSE
-      )
-    }
-
     invalid_crs <- is_valid_crs(summary_original$epsg)
 
     if (invalid_crs) {
