@@ -244,7 +244,7 @@ raw_to_processed <- function(path,
         lasR::edit_attribute(filter = "Classification == 21", attribute = "Classification", value = 2) + # Ground excluding basements -> Ground
         lasR::edit_attribute(filter = "Classification == 22", attribute = "Classification", value = 2) + # Verified ground points -> Ground
         lasR::edit_attribute(filter = "Classification == 23", attribute = "Classification", value = 1) + # Power infrastructure points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 24", attribute = "Classification", value = 20) + # Basement/light well points -> Ignored Groundc
+        lasR::edit_attribute(filter = "Classification == 24", attribute = "Classification", value = 20) + # Basement/light well points -> Ignored Ground
         lasR::edit_attribute(filter = "Classification == 25", attribute = "Classification", value = 1) + # Hydraulic structure points -> Unclassified
         lasR::edit_attribute(filter = "Classification == 26", attribute = "Classification", value = 1) + # Bridge foundation points -> Unclassified
         lasR::edit_attribute(filter = "Classification == 27", attribute = "Classification", value = 6) + # General structure points -> Building
@@ -542,10 +542,15 @@ raw_to_processed <- function(path,
       ))
     )
 
-    size_hull <- sf::st_area(ans$hulls)
+
+    has_valid_hulls <- !is.null(ans$hulls) &&
+      length(ans$hulls) > 0 &&
+      !is.na(sf::st_crs(ans$hulls))
+
+    size_hull <- if (has_valid_hulls) sf::st_area(ans$hulls) else size_extent
     size_relative <- units::drop_units(size_hull / size_extent)
 
-    if (size_relative < 0.9) {
+    if (size_relative < 0.9 && has_valid_hulls) {
       # Transform to WGS84 for geometry
       outline_wgs84 <- sf::st_transform(ans$hulls, 4326)
       geom_obj <- sf::st_geometry(outline_wgs84)[[1]]
@@ -571,13 +576,10 @@ raw_to_processed <- function(path,
     if (!is.null(metadata_content)) {
       new_props <- list()
 
-      # Point density
-      if (!is.null(size_hull)) {
+      if (!is.null(size_hull) && size_hull > 0) {
+        # Point density
         new_props$pointdensity <- round(metadata_content$npoints / size_hull, 2)
-      }
-
-      # Pulse density (first returns per square meter)
-      if (!is.null(size_hull)) {
+        # Pulse density (first returns per square meter)
         first_returns <- metadata_content$npoints_per_return[["1"]]
         new_props$pulsedensity <- round(first_returns / size_hull, 2)
       }
