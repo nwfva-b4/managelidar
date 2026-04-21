@@ -452,21 +452,6 @@ raw_to_processed <- function(path,
     sort_points <- lasR::sort_points()
     pipeline <- pipeline + sort_points
 
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # triangulate ground
-    # mesh used for hulls
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    ground_triangulation <- lasR::triangulate(max_edge = 0, filter = lasR::keep_ground_and_water())
-    pipeline <- pipeline + ground_triangulation
-
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # get point cloud outlines (convex hulls)
-    # (just necessary for data irregular tiles where not the entire tile contains data)
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # outline_file <- fs::path(dir_outlines, fs::path_ext_set(generated_filename, "geojson"))
-    # get_outlines <- lasR::hulls(ground_triangulation, ofile = outline_file)
-    get_outlines <- lasR::hulls(ground_triangulation)
-    pipeline <- pipeline + get_outlines
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # create overview
@@ -553,46 +538,17 @@ raw_to_processed <- function(path,
       ))
     )
 
-
-    has_valid_hulls <- !is.null(ans$hulls) &&
-      length(ans$hulls) > 0 &&
-      !is.na(sf::st_crs(ans$hulls))
-
-    size_hull <- if (has_valid_hulls) sf::st_area(ans$hulls) else size_extent
-    size_relative <- units::drop_units(size_hull / size_extent)
-
-    if (size_relative < 0.9 && has_valid_hulls) {
-      # Transform to WGS84 for geometry
-      outline_wgs84 <- sf::st_transform(ans$hulls, 4326)
-      geom_obj <- sf::st_geometry(outline_wgs84)[[1]]
-
-      # Convert to GeoJSON coordinates
-      if (inherits(geom_obj, "MULTIPOLYGON")) {
-        coords <- lapply(geom_obj, function(poly) {
-          lapply(poly, function(ring) {
-            lapply(seq_len(nrow(ring)), function(j) round(ring[j, 1:2], 7))
-          })
-        })
-        vpc$features$geometry[[1]] <- list(type = "MultiPolygon", coordinates = coords)
-      } else {
-        coords <- lapply(geom_obj, function(ring) {
-          lapply(seq_len(nrow(ring)), function(j) round(ring[j, 1:2], 7))
-        })
-        vpc$features$geometry[[1]] <- list(type = "Polygon", coordinates = coords)
-      }
-    }
-
     metadata_content <- ans$summary
     # Add metadata if exists
     if (!is.null(metadata_content)) {
       new_props <- list()
 
-      if (!is.null(size_hull) && size_hull > 0) {
+      if (!is.null(size_extent) && size_extent > 0) {
         # Point density
-        new_props$pointdensity <- round(metadata_content$npoints / size_hull, 2)
+        new_props$pointdensity <- round(metadata_content$npoints / size_extent, 2)
         # Pulse density (first returns per square meter)
         first_returns <- metadata_content$npoints_per_return[["1"]]
-        new_props$pulsedensity <- round(first_returns / size_hull, 2)
+        new_props$pulsedensity <- round(first_returns / size_extent, 2)
       }
 
       # Statistics array
