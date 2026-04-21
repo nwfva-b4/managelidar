@@ -528,7 +528,7 @@ raw_to_processed <- function(path,
     # if point cloud covers less than 90% of tile extent
     # update geometry based on convex hull
     bbox_vals <- vpc$features$properties[[1]]$`proj:bbox`
-    size_extent <- sf::st_area(
+    size_extent_m2 <- as.numeric(sf::st_area(
       sf::st_as_sfc(sf::st_bbox(
         c(
           xmin = bbox_vals[1], ymin = bbox_vals[2],
@@ -536,19 +536,18 @@ raw_to_processed <- function(path,
         ),
         crs = epsg
       ))
-    )
+    ))
 
     metadata_content <- ans$summary
     # Add metadata if exists
     if (!is.null(metadata_content)) {
       new_props <- list()
 
-      if (!is.null(size_extent) && size_extent > 0) {
-        # Point density
-        new_props$pointdensity <- round(metadata_content$npoints / size_extent, 2)
-        # Pulse density (first returns per square meter)
+      # Point and pulse density
+      if (!is.null(size_extent_m2) && size_extent_m2 > 0) {
+        new_props$pointdensity <- round(metadata_content$npoints / size_extent_m2, 2)
         first_returns <- metadata_content$npoints_per_return[["1"]]
-        new_props$pulsedensity <- round(first_returns / size_extent, 2)
+        new_props$pulsedensity <- round(first_returns / size_extent_m2, 2)
       }
 
       # Statistics array
