@@ -477,6 +477,17 @@ raw_to_processed <- function(path,
     get_overview <- lasR::rasterize(res = 1, operators = c("z_max"), filter = lasR::drop_noise(), ofile = overview_file)
     pipeline <- pipeline + get_overview
 
+    # TIFFs are converted to webp later, this ensures TIFF is cleaned up even if pipeline crashes later
+    on.exit(
+      {
+        if (fs::file_exists(overview_file)) fs::file_delete(overview_file)
+        aux_file <- paste0(overview_file, ".aux.xml")
+        if (fs::file_exists(aux_file)) fs::file_delete(aux_file)
+      },
+      add = TRUE
+    )
+
+
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # write point cloud to disk
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
