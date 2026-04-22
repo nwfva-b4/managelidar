@@ -1,7 +1,7 @@
 #' Resolve input paths to a single deduplicated VPC
 #'
 #' Takes a mix of LAS/LAZ/COPC files, `.vpc` files, and VPC objects already loaded in R,
-#' merges them if needed, deduplicates tiles (based on storage location), and returns a
+#' merges them if needed, deduplicates tiles (based on storage location), ensures absolute paths and returns a
 #' VPC object or file path.
 #'
 #' @param paths Character vector of input paths, or a list containing VPC objects.
@@ -73,10 +73,26 @@ resolve_vpc <- function(paths, epsg = 25832L, out_file = NULL) {
   # ------------------------------------------------------------
   # Read all VPC files into objects
   # ------------------------------------------------------------
+
+  # Ensure all href paths in a VPC object are absolute
+  absolutize_hrefs <- function(vpc, vpc_file_path) {
+    vpc_dir <- fs::path_dir(fs::path_abs(vpc_file_path))
+    vpc$features$assets <- lapply(vpc$features$assets, function(asset) {
+      href <- asset$data$href
+      if (!is.null(href) && !fs::is_absolute_path(href)) {
+        asset$data$href <- as.character(fs::path_norm(fs::path(vpc_dir, href)))
+      }
+      asset
+    })
+    vpc
+  }
   if (length(to_merge_files) > 0) {
     vpc_objs_from_files <- lapply(to_merge_files, function(file) {
       tryCatch(
-        yyjsonr::read_json_file(file),
+        {
+          vpc <- yyjsonr::read_json_file(file)
+          absolutize_hrefs(vpc, file) # <- resolve relative hrefs on read
+        },
         error = function(e) {
           warning("Could not read VPC file: ", file)
           return(NULL)

@@ -22,7 +22,7 @@ If \code{out_file} is provided, returns the path to the saved \code{.vpc} file.
 }
 \description{
 Takes a mix of LAS/LAZ/COPC files, \code{.vpc} files, and VPC objects already loaded in R,
-merges them if needed, deduplicates tiles (based on storage location), and returns a
+merges them if needed, deduplicates tiles (based on storage location), ensures absolute paths and returns a
 VPC object or file path.
 }
 \keyword{internal}
