@@ -2,7 +2,7 @@
 
 Takes a mix of LAS/LAZ/COPC files, `.vpc` files, and VPC objects already
 loaded in R, merges them if needed, deduplicates tiles (based on storage
-location), and returns a VPC object or file path.
+location), ensures absolute paths and returns a VPC object or file path.
 
 ## Usage
 
