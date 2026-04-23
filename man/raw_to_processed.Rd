@@ -10,6 +10,7 @@ raw_to_processed(
   epsg = 25832L,
   region = NULL,
   from_csv = NULL,
+  workers = NULL,
   verbose = TRUE
 )
 }
@@ -27,6 +28,12 @@ Default is 25832 (ETRS89 / UTM zone 32N).}
 
 \item{from_csv}{Character. Path to CSV file containing acquisition dates used for
 year correction in filenames where data does not contain valid GPS time.}
+
+\item{workers}{Integer or \code{NULL}. Number of parallel workers.
+If \code{NULL} (default), workers are set to half of available logical cores
+when 20 or more files are detected, and sequential processing is used
+otherwise. Set to \code{1} to force sequential processing regardless of file
+count. Set to a positive integer to force that number of workers.}
 
 \item{verbose}{Logical. Print progress messages. Default is TRUE.}
 }

@@ -12,6 +12,11 @@
 #'   (e.g., "ni"). If NULL (default) region is automatically inferred from file bounding boxes.
 #' @param from_csv Character. Path to CSV file containing acquisition dates used for
 #'   year correction in filenames where data does not contain valid GPS time.
+#' @param workers Integer or `NULL`. Number of parallel workers.
+#'   If `NULL` (default), workers are set to half of available logical cores
+#'   when 20 or more files are detected, and sequential processing is used
+#'   otherwise. Set to `1` to force sequential processing regardless of file
+#'   count. Set to a positive integer to force that number of workers.
 #' @param verbose Logical. Print progress messages. Default is TRUE.
 #'
 #' @return Invisibly returns a list of output file paths (NULL for failed files).
@@ -76,6 +81,7 @@ raw_to_processed <- function(path,
                              epsg = 25832L,
                              region = NULL,
                              from_csv = NULL,
+                             workers = NULL,
                              verbose = TRUE) {
   # Initialize processing log
   processing_start <- Sys.time()
@@ -714,7 +720,7 @@ raw_to_processed <- function(path,
   }
 
   # apply function
-  results <- map_las(files, raw_to_processed_per_file)
+  results <- map_las(files, raw_to_processed_per_file, workers = workers)
 
   output_paths <- lapply(results, function(x) {
     if (is.list(x) && !is.null(x$output)) x$output else NULL
