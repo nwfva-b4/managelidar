@@ -12,6 +12,7 @@ raw_to_processed(
   epsg = 25832L,
   region = NULL,
   from_csv = NULL,
+  workers = NULL,
   verbose = TRUE
 )
 ```
@@ -42,6 +43,14 @@ raw_to_processed(
 
   Character. Path to CSV file containing acquisition dates used for year
   correction in filenames where data does not contain valid GPS time.
+
+- workers:
+
+  Integer or `NULL`. Number of parallel workers. If `NULL` (default),
+  workers are set to half of available logical cores when 20 or more
+  files are detected, and sequential processing is used otherwise. Set
+  to `1` to force sequential processing regardless of file count. Set to
+  a positive integer to force that number of workers.
 
 - verbose:
 

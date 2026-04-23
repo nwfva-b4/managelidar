@@ -50,6 +50,7 @@ comprehensive metadata and overview images.</p>
 <span>  epsg <span class="op">=</span> <span class="fl">25832L</span>,</span>
 <span>  region <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  from_csv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  workers <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -80,6 +81,14 @@ Default is 25832 (ETRS89 / UTM zone 32N).</p></dd>
 <dt id="arg-from-csv">from_csv<a class="anchor" aria-label="anchor" href="#arg-from-csv"></a></dt>
 <dd><p>Character. Path to CSV file containing acquisition dates used for
 year correction in filenames where data does not contain valid GPS time.</p></dd>
+
+
+<dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
+<dd><p>Integer or <code>NULL</code>. Number of parallel workers.
+If <code>NULL</code> (default), workers are set to half of available logical cores
+when 20 or more files are detected, and sequential processing is used
+otherwise. Set to <code>1</code> to force sequential processing regardless of file
+count. Set to a positive integer to force that number of workers.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
