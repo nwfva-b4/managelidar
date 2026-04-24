@@ -107,9 +107,49 @@ raw_to_processed <- function(path,
     return(invisible(NULL))
   }
 
+  # skip files that were successfully processed in a previous run
+  dir_logfiles <- fs::path(out_dir, "logfiles")
+  if (fs::dir_exists(dir_logfiles)) {
+    already_processed <- processed_inputs_from_logs(dir_logfiles)
+    pending <- files[!fs::path_norm(files) %in% already_processed]
 
+    n_skip <- length(files) - length(pending)
+    if (n_skip > 0L && verbose) {
+      message(sprintf("Skipping %d already processed file(s) (from log)", n_skip))
+    }
+    files <- pending
+  }
+
+  if (length(files) == 0L) {
+    if (verbose) message("All files already processed.")
+    return(invisible(list()))
+  }
+
+
+  # ------------------------------------------------------------------
+  # function to process LASfiles
+  # ------------------------------------------------------------------
   raw_to_processed_per_file <- function(lasfile) {
     file_start <- Sys.time()
+
+    # will be populated as outputs are created
+    created_outputs <- character(0)
+
+    # this ensures that either all or no outputs are generated
+    on.exit(
+      {
+        # only roll back if not all outputs were validated successfully
+        if (!isTRUE(outputs_validated)) {
+          purrr::walk(
+            created_outputs[fs::file_exists(created_outputs)],
+            function(f) try(fs::file_delete(f), silent = TRUE)
+          )
+        }
+      },
+      add = TRUE
+    )
+
+    outputs_validated <- FALSE
 
     # Get original filename (for summary_original)
     original_filename <- fs::path_ext_remove(fs::path_file(lasfile))
@@ -120,6 +160,18 @@ raw_to_processed <- function(path,
 
     # Define output file path
     pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(expected_filename, ".laz"))
+
+    # Guard against writing to a path that another parallel worker is currently writing to
+    lock_file <- fs::path_ext_set(pointcloud_file, ".lock")
+
+    if (fs::file_exists(lock_file)) {
+      file_log <- create_file_log(lasfile, pointcloud_file, "skipped_locked", file_start)
+      return(list(output = NULL, log = file_log))
+    }
+
+    # create lock, remove on exit regardless of success/failure
+    fs::file_touch(lock_file)
+    on.exit(try(fs::file_delete(lock_file), silent = TRUE), add = TRUE)
 
     # Ckeck if processed file already exists, skip rest of pipeline in this case
     # in this early stage we can only check for filename based on date of first point, as this might be erroneous
@@ -482,18 +534,27 @@ raw_to_processed <- function(path,
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # write point cloud to disk
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    write_pointcloud <- lasR::write_las(ofile = pointcloud_file, version = 4, pdrf = 6)
+    pointcloud_tmp <- fs::path_ext_set(pointcloud_file, ".tmp.laz")
+    on.exit(try(fs::file_delete(pointcloud_tmp), silent = TRUE), add = TRUE)
+    write_pointcloud <- lasR::write_las(ofile = pointcloud_tmp, version = 4, pdrf = 6)
     pipeline <- pipeline + write_pointcloud
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # apply processing pipeline
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     ans <- lasR::exec(pipeline, on = las_in_memory, with = list(progress = FALSE, ncores = 1))
 
+
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # create spatial index
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     lasR::exec(lasR::write_lax(embedded = TRUE), on = ans$write_las, with = list(progress = FALSE, ncores = 1))
+
+    # move to final location now that lax is embedded
+    fs::file_move(pointcloud_tmp, pointcloud_file)
+    created_outputs <- c(created_outputs, pointcloud_file)
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # save summaries to disk
@@ -518,10 +579,14 @@ raw_to_processed <- function(path,
     summary_original_json <- fs::path(dir_summary_original, fs::path_ext_set(original_filename, ".json"))
     summary_original |> save_summary(summary_original_json)
 
+    created_outputs <- c(created_outputs, summary_original_json)
+
     # Use GENERATED filename for processed summary
     summary_processed <- ans$summary
     summary_processed_json <- fs::path(dir_summary_processed, fs::path_ext_set(generated_filename, ".json"))
     summary_processed |> save_summary(summary_processed_json)
+
+    created_outputs <- c(created_outputs, summary_processed_json)
 
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -627,6 +692,8 @@ raw_to_processed <- function(path,
     vpc_file <- fs::path(dir_vpc, fs::path_ext_set(generated_filename, ".vpc"))
     yyjsonr::write_json_file(vpc, vpc_file, pretty = TRUE, auto_unbox = TRUE)
 
+    created_outputs <- c(created_outputs, vpc_file)
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # convert overview
@@ -661,11 +728,43 @@ raw_to_processed <- function(path,
     gdalraster::vsi_unlink(tmp_byte)
     fs::file_delete(overview_file)
 
+    created_outputs <- c(created_outputs, overview_img)
+
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # cleanup memory
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     rm(las_in_memory)
     gc()
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # validate outputs and rollback on failure
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    expected_outputs <- list(
+      pointcloud = pointcloud_file,
+      overview = overview_img,
+      vpc = vpc_file,
+      summary_in = summary_original_json,
+      summary_out = summary_processed_json
+    )
+
+    missing_or_empty <- Filter(function(f) {
+      !fs::file_exists(f) || fs::file_size(f) == 0
+    }, expected_outputs)
+
+    if (length(missing_or_empty) > 0) {
+      # rollback: delete any outputs that were created
+      created <- Filter(fs::file_exists, expected_outputs)
+      purrr::walk(created, function(f) try(fs::file_delete(f), silent = TRUE))
+
+      missing_names <- paste(names(missing_or_empty), collapse = ", ")
+      stop(sprintf(
+        "Output validation failed for %s — missing or empty: %s. All outputs rolled back.",
+        basename(lasfile), missing_names
+      ))
+    }
+
+    # signal on.exit to skip rollback
+    outputs_validated <- TRUE
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # Create file log entry
