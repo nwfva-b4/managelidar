@@ -157,6 +157,7 @@ raw_to_processed <- function(path,
     # Use check_names to get expected filename
     filenames <- check_names(lasfile, prefix = "3dm", region = NULL, from_csv = from_csv, epsg = epsg, full.names = TRUE)
     expected_filename <- fs::path_ext_remove(fs::path_file(filenames$name_should))
+    date_source <- filenames$date_source %||% NA_character_
 
     # Define output file path
     pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(expected_filename, ".laz"))
@@ -211,6 +212,7 @@ raw_to_processed <- function(path,
     # to overcome problems where gpstime of first point (used for date in VPC) is erroneous
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     generated_filename <- expected_filename
+
     warnings <- character(0)
 
     seconds_per_week <- 604800L
@@ -225,11 +227,12 @@ raw_to_processed <- function(path,
 
       # Replace year in expected filename
       # Pattern: 3dm_32_547_5724_1_ni_YYYY.laz -> replace YYYY with year_from_median
-      generated_filename <- sub(
-        "_([0-9]{4})$",
-        paste0("_", year_from_median),
-        expected_filename
-      )
+      new_filename <- sub("_([0-9]{4})$", paste0("_", year_from_median), expected_filename)
+
+      if (new_filename != expected_filename) {
+        generated_filename <- new_filename
+        date_source <- "gpstime_median"
+      }
     }
 
     # Update output file path with final filename
@@ -620,6 +623,8 @@ raw_to_processed <- function(path,
         first_returns <- metadata_content$npoints_per_return[["1"]]
         new_props$pulsedensity <- round(first_returns / size_extent_m2, 2)
       }
+
+      new_props$date_source <- date_source
 
       # Statistics array
       stats <- list()

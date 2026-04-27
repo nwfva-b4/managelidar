@@ -31,8 +31,8 @@
 #'   \item{filename}{Filename of the LASfile.}
 #'   \item{date}{Acquisition date (Date object) or reference year (numeric)
 #'               if `return_referenceyear = TRUE`.}
-#'   \item{date_source}{Character. One of `data` (files with valid GPStime), `csv`
-#'                (matched from CSV file), or `header` (from file header).}
+#'   \item{date_source}{Character. One of `gpstime_first_point` (files with valid GPStime), `csv`
+#'                (matched from CSV file), or `header_creation_year` (from file header).}
 #' }
 #' When `per_file = FALSE`: A single-row data.frame with `start` and `end`
 #' (Date objects or numeric years depending on `return_referenceyear`).
@@ -155,7 +155,7 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
   }
 
   dates_gpstime_true <- dates_gpstime_true |>
-    dplyr::mutate(date_source = "data")
+    dplyr::mutate(date_source = "gpstime_first_point")
 
   dates_gpstime_false <- extract_dates_vpc(files_gpstime_false, FALSE)
 
@@ -176,13 +176,13 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
       dplyr::slice_max(order_by = date_from_file, n = 1, with_ties = FALSE) |>
       dplyr::ungroup() |>
       dplyr::mutate(
-        date_source = dplyr::if_else(is.na(date_from_file), "header", "csv"),
+        date_source = dplyr::if_else(is.na(date_from_file), "header_creation_year", "csv"),
         date = dplyr::if_else(is.na(date_from_file), date, date_from_file)
       ) |>
       dplyr::select(filename, gpstime, date, date_source)
   } else if (nrow(dates_gpstime_false) > 0) {
     dates_gpstime_false <- dates_gpstime_false |>
-      dplyr::mutate(date_source = "header") |>
+      dplyr::mutate(date_source = "header_creation_year") |>
       dplyr::select(filename, gpstime, date, date_source)
   }
   # Combine GPS and non-GPS results

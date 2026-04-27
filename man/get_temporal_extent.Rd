@@ -52,8 +52,8 @@ When \code{per_file = TRUE}: A \code{data.frame} with columns:
 \item{filename}{Filename of the LASfile.}
 \item{date}{Acquisition date (Date object) or reference year (numeric)
 if \code{return_referenceyear = TRUE}.}
-\item{date_source}{Character. One of \code{data} (files with valid GPStime), \code{csv}
-(matched from CSV file), or \code{header} (from file header).}
+\item{date_source}{Character. One of \code{gpstime_first_point} (files with valid GPStime), \code{csv}
+(matched from CSV file), or \code{header_creation_year} (from file header).}
 }
 When \code{per_file = FALSE}: A single-row data.frame with \code{start} and \code{end}
 (Date objects or numeric years depending on \code{return_referenceyear}).

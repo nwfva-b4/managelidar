@@ -25,6 +25,7 @@
 #'   \item{name_is}{Existing file name or path}
 #'   \item{name_should}{Expected file name according to AdV standard}
 #'   \item{correct}{Logical indicating whether the existing name matches the standard}
+#'   \item{date_source}{How the date (year) was extracted}
 #' }
 #'
 #' @export
@@ -157,6 +158,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   # Match years to files
   year <- temporal_data$date[match(files, temporal_data$filename)]
   year <- as.character(year)
+  date_source <- temporal_data$date_source[match(files, temporal_data$filename)]
 
   # ------------------------------------------------------------------
   # Optional COPC suffix
@@ -184,6 +186,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
     name_is = name_is,
     name_should = name_should,
     correct = name_is == name_should,
+    date_source = date_source,
     stringsAsFactors = FALSE
   )
 }

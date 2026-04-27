@@ -40,6 +40,7 @@ A \code{data.frame} with one row per file and columns:
 \item{name_is}{Existing file name or path}
 \item{name_should}{Expected file name according to AdV standard}
 \item{correct}{Logical indicating whether the existing name matches the standard}
+\item{date_source}{How the date (year) was extracted}
 }
 }
 \description{
