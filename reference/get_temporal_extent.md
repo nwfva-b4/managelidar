@@ -82,8 +82,9 @@ When `per_file = TRUE`: A `data.frame` with columns:
 
 - date_source:
 
-  Character. One of `data` (files with valid GPStime), `csv` (matched
-  from CSV file), or `header` (from file header).
+  Character. One of `gpstime_first_point` (files with valid GPStime),
+  `csv` (matched from CSV file), or `header_creation_year` (from file
+  header).
 
 When `per_file = FALSE`: A single-row data.frame with `start` and `end`
 (Date objects or numeric years depending on `return_referenceyear`).

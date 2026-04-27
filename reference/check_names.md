@@ -72,6 +72,10 @@ A `data.frame` with one row per file and columns:
 
   Logical indicating whether the existing name matches the standard
 
+- date_source:
+
+  How the date (year) was extracted
+
 ## Examples
 
 ``` r
