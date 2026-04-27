@@ -259,14 +259,14 @@ raw_to_processed <- function(path,
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # set CRS
-    # explicitly set the CRS if it is is not set or cannot properly be read (https://github.com/r-lidar/lasR/issues/265)
+    # explicitly set the CRS if it is not set or cannot properly be read (https://github.com/r-lidar/lasR/issues/265)
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # Fall back to epsg parameter if CRS is missing or invalid
     set_crs <- lasR::set_crs(epsg)
 
-    invalid_crs <- is_valid_crs(summary_original$epsg)
+    valid_crs <- is_valid_crs(summary_original$epsg)
 
-    if (invalid_crs) {
+    if (!valid_crs) {
       pipeline <- pipeline + set_crs
     }
 
