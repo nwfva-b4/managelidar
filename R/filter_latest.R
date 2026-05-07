@@ -31,9 +31,9 @@
 #' f <- system.file("extdata", package = "managelidar")
 #'
 #' # get latest acquisition per tile (entire tiles only, with 10m tolerance)
-#' vpc <- filter_first(f, tolerance = 10)
+#' vpc <- filter_earliest(f, tolerance = 10)
 #'
-#' @seealso \code{\link{filter_first}}, \code{\link{filter_spatial}},
+#' @seealso \code{\link{filter_earliest}}, \code{\link{filter_spatial}},
 #'   \code{\link{filter_multitemporal}}, \code{\link{resolve_vpc}}
 #'
 #' @export

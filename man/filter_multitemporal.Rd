@@ -59,7 +59,7 @@ not suitable for direct processing in most workflows in lasR, as data will be pr
 E.g. creating a Canopy Height Model based on multi-temporal VPCs will result in a single CHM raster based on
 lidar data from all acquisitions instead of a separate CHM raster for each acquisition time.
 
-Usually you want to use \code{\link{filter_first}} or \code{\link{filter_latest}} instead.
+Usually you want to use \code{\link{filter_earliest}} or \code{\link{filter_latest}} instead.
 
 This intermediate filtering step might be useful when you need to:
 \itemize{
@@ -89,6 +89,6 @@ vpc <- f |>
 
 }
 \seealso{
-\code{\link{filter_first}}, \code{\link{filter_latest}},
+\code{\link{filter_earliest}}, \code{\link{filter_latest}},
 \code{\link{filter_spatial}}, \code{\link{resolve_vpc}}, \code{\link{is_multitemporal}}
 }

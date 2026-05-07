@@ -1,4 +1,4 @@
-#' Filter to first acquisition from multi-temporal tiles
+#' Filter to first/earliest acquisition from multi-temporal tiles
 #'
 #' Identifies tiles with multiple acquisitions and returns only the first (earliest)
 #' acquisition for each tile as a filtered VPC.
@@ -31,14 +31,14 @@
 #' f <- system.file("extdata", package = "managelidar")
 #'
 #' # get first acquisition per tile (entire tiles only, with 10m tolerance)
-#' vpc <- filter_first(f, tolerance = 10)
+#' vpc <- filter_earliest(f, tolerance = 10)
 #'
 #' @seealso \code{\link{filter_latest}}, \code{\link{filter_spatial}},
 #'   \code{\link{filter_multitemporal}}, \code{\link{resolve_vpc}}
 #'
 #' @export
 #'
-filter_first <- function(path, entire_tiles = TRUE, tolerance = 1, multitemporal_only = FALSE, verbose = TRUE) {
+filter_earliest <- function(path, entire_tiles = TRUE, tolerance = 1, multitemporal_only = FALSE, verbose = TRUE) {
   # Resolve to VPC (always as object, never write to file)
   vpc <- resolve_vpc(path, out_file = NULL)
 

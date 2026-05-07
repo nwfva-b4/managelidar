@@ -18,7 +18,7 @@
 #'
 #' @export
 #'
-#' @seealso  \code{\link{filter_first}}, \code{\link{filter_latest}}, \code{\link{filter_temporal}},
+#' @seealso  \code{\link{filter_earliest}}, \code{\link{filter_latest}}, \code{\link{filter_temporal}},
 #'   \code{\link{filter_multitemporal}}
 #'
 #' @examples

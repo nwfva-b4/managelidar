@@ -21,7 +21,7 @@
 #' @details
 #' This function simply checks for intersection between two inputs. \code{\link{is_multitemporal}}
 #' in contrast is a newer addition and works with a single input (which can be a vector of multiple files/folders),
-#' in most cases \code{\link{filter_first}} / \code{\link{filter_latest}} might be the best choice.
+#' in most cases \code{\link{filter_earliest}} / \code{\link{filter_latest}} might be the best choice.
 #'
 #' @export
 #'

@@ -38,6 +38,6 @@ vpc <- las_files |> filter_spatial(c(548700, 5725010))
 
 }
 \seealso{
-\code{\link{filter_first}}, \code{\link{filter_latest}}, \code{\link{filter_temporal}},
+\code{\link{filter_earliest}}, \code{\link{filter_latest}}, \code{\link{filter_temporal}},
 \code{\link{filter_multitemporal}}
 }
