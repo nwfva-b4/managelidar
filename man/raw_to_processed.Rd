@@ -55,6 +55,7 @@ This function performs a comprehensive quality assurance pipeline:
 \item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
 \item Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)
 \item Drop unused attributes
+\item Correct overlap points
 \item Classify noise points
 \item Classify ground points
 \item Normalize intensity range
