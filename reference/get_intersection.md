@@ -54,7 +54,7 @@ This function simply checks for intersection between two inputs.
 [`is_multitemporal`](https://wiesehahn.github.io/managelidar/reference/is_multitemporal.md)
 in contrast is a newer addition and works with a single input (which can
 be a vector of multiple files/folders), in most cases
-[`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
+[`filter_earliest`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md)
 /
 [`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
 might be the best choice.

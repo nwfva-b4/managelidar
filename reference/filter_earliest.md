@@ -1,12 +1,12 @@
-# Filter to latest acquisition from multi-temporal tiles
+# Filter to first/earliest acquisition from multi-temporal tiles
 
-Identifies tiles with multiple acquisitions and returns only the latest
-(newest) acquisition for each tile as a filtered VPC.
+Identifies tiles with multiple acquisitions and returns only the first
+(earliest) acquisition for each tile as a filtered VPC.
 
 ## Usage
 
 ``` r
-filter_latest(
+filter_earliest(
   path,
   entire_tiles = TRUE,
   tolerance = 1,
@@ -48,8 +48,8 @@ filter_latest(
 
 ## Value
 
-A VPC object (list) containing only the latest acquisition for each
-tile. Returns NULL invisibly if no features match the filter.
+A VPC object (list) containing only the first acquisition for each tile.
+Returns NULL invisibly if no features match the filter.
 
 ## Details
 
@@ -59,13 +59,14 @@ The function performs the following steps:
 
 2.  Analyzes tiles for multi-temporal coverage
 
-3.  Groups tiles by location and selects the latest acquisition for each
+3.  Groups tiles by location and selects the earliest acquisition for
+    each
 
 4.  Returns a filtered VPC object
 
 ## See also
 
-`filter_first`,
+[`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md),
 [`filter_spatial`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md),
 [`filter_multitemporal`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md),
 [`resolve_vpc`](https://wiesehahn.github.io/managelidar/reference/resolve_vpc.md)
@@ -75,7 +76,8 @@ The function performs the following steps:
 ``` r
 f <- system.file("extdata", package = "managelidar")
 
-# get latest acquisition per tile (entire tiles only, with 10m tolerance)
-vpc <- filter_first(f, tolerance = 10)
-#> Error in filter_first(f, tolerance = 10): could not find function "filter_first"
+# get first acquisition per tile (entire tiles only, with 10m tolerance)
+vpc <- filter_earliest(f, tolerance = 10)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
+#> Error in loadNamespace(x): there is no package called ‘lasR’
 ```

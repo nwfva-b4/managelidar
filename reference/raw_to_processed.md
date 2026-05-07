@@ -78,6 +78,8 @@ This function performs a comprehensive quality assurance pipeline:
 
 - Drop unused attributes
 
+- Correct overlap points
+
 - Classify noise points
 
 - Classify ground points

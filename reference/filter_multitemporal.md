@@ -81,7 +81,7 @@ lidar data from all acquisitions instead of a separate CHM raster for
 each acquisition time.
 
 Usually you want to use
-[`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
+[`filter_earliest`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md)
 or
 [`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
 instead.
@@ -99,7 +99,7 @@ This intermediate filtering step might be useful when you need to:
 
 ## See also
 
-[`filter_first`](https://wiesehahn.github.io/managelidar/reference/filter_first.md),
+[`filter_earliest`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md),
 [`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md),
 [`filter_spatial`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md),
 [`resolve_vpc`](https://wiesehahn.github.io/managelidar/reference/resolve_vpc.md),

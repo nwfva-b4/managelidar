@@ -35,6 +35,7 @@ Standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/S
 Query and filter LiDAR collections without reading point data:
 
 ``` r
+
 # Get CRS, extents, temporal coverage
 get_crs(path)
 get_spatial_extent(path)
@@ -49,6 +50,7 @@ plot_extent(path)
 Convert incoming ALS data to standardized format:
 
 ``` r
+
 # Process raw files: classify noise, normalize intensity, create metadata, ...
 raw_to_processed(
   path = "raw_data/",
@@ -67,6 +69,7 @@ create_vpc_enriched(
 Validate incoming data:
 
 ``` r
+
 # Check naming conventions (according to AdV standard)
 check_names(path)
 
@@ -87,6 +90,7 @@ is_multitemporal(path)
 Process filtered data in pipeline
 
 ``` r
+
 # Filter by space/time and run processing pipeline
 path |>
   filter_spatial(bbox) |>
@@ -99,6 +103,7 @@ path |>
 Install the development version from GitHub:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("nwfva-b4/managelidar")
 ```
@@ -108,6 +113,7 @@ pak::pak("nwfva-b4/managelidar")
 available on r-universe but not on CRAN. Install it first:
 
 ``` r
+
 install.packages("lasR", repos = c("https://r-lidar.r-universe.dev", "https://cran.r-project.org"))
 ```
 
@@ -132,6 +138,7 @@ absolutely necessary
 ## Example Usage
 
 ``` r
+
 library(managelidar)
 
 # Create various valid input paths
@@ -204,8 +211,8 @@ ecosystem.
   metadata
 - [`filter_attribute()`](https://wiesehahn.github.io/managelidar/reference/filter_attribute.md)
   : Filter VPC features by attribute values
-- [`filter_first()`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
-  : Filter to first acquisition from multi-temporal tiles
+- [`filter_earliest()`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md)
+  : Filter to first/earliest acquisition from multi-temporal tiles
 - [`filter_latest()`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
   : Filter to latest acquisition from multi-temporal tiles
 - [`filter_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)

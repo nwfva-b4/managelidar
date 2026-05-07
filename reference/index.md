@@ -11,8 +11,8 @@
   metadata
 - [`filter_attribute()`](https://wiesehahn.github.io/managelidar/reference/filter_attribute.md)
   : Filter VPC features by attribute values
-- [`filter_first()`](https://wiesehahn.github.io/managelidar/reference/filter_first.md)
-  : Filter to first acquisition from multi-temporal tiles
+- [`filter_earliest()`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md)
+  : Filter to first/earliest acquisition from multi-temporal tiles
 - [`filter_latest()`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md)
   : Filter to latest acquisition from multi-temporal tiles
 - [`filter_multitemporal()`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)

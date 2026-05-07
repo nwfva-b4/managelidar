@@ -7,6 +7,7 @@ extract metadata from laz files. It makes use of the `lidR` and `lasR`
 packages.
 
 ``` r
+
 library(managelidar)
 ```
 
@@ -18,6 +19,7 @@ to plot the bounding boxes of all laz files in the folder on top of an
 interactive map (using the `mapview` package).
 
 ``` r
+
 f <- system.file("extdata", package="managelidar")
 plot_extent(f)
 ```
@@ -36,6 +38,7 @@ faster because it does not read the entire file and density should be
 approximately the same if the entire bounding box has point data.
 
 ``` r
+
 f <- system.file("extdata", package="managelidar")
 get_density(f)
 #>                             filename npoints npulses     area pointdensity

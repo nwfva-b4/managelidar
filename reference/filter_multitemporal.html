@@ -9,7 +9,7 @@ tiles that have a specific number of files or multiple observations."><meta prop
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,7 +104,7 @@ tiles, meaning multiple files may reference the same spatial tile. This is typic
 not suitable for direct processing in most workflows in lasR, as data will be processed together.
 E.g. creating a Canopy Height Model based on multi-temporal VPCs will result in a single CHM raster based on
 lidar data from all acquisitions instead of a separate CHM raster for each acquisition time.</p>
-<p>Usually you want to use <code><a href="filter_first.html">filter_first</a></code> or <code><a href="filter_latest.html">filter_latest</a></code> instead.</p>
+<p>Usually you want to use <code><a href="filter_earliest.html">filter_earliest</a></code> or <code><a href="filter_latest.html">filter_latest</a></code> instead.</p>
 <p>This intermediate filtering step might be useful when you need to:</p><ul><li><p>Identify which tiles have multi-temporal data before selecting a time period</p></li>
 <li><p>Filter to tiles with exactly n observations for quality control</p></li>
 <li><p>Explicitly want to work with combined multi-temporal data</p></li>
@@ -112,7 +112,7 @@ lidar data from all acquisitions instead of a separate CHM raster for each acqui
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="filter_first.html">filter_first</a></code>, <code><a href="filter_latest.html">filter_latest</a></code>,
+    <div class="dont-index"><p><code><a href="filter_earliest.html">filter_earliest</a></code>, <code><a href="filter_latest.html">filter_latest</a></code>,
 <code><a href="filter_spatial.html">filter_spatial</a></code>, <code><a href="resolve_vpc.html">resolve_vpc</a></code>, <code><a href="is_multitemporal.html">is_multitemporal</a></code></p></div>
     </div>
 
