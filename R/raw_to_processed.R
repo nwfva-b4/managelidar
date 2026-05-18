@@ -589,13 +589,11 @@ raw_to_processed <- function(path,
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # save vpc to disk
-    # add summary metadata and optionally update geometry
+    # add summary metadata
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
 
     vpc <- resolve_vpc(pointcloud_file, epsg = epsg, out_file = NULL)
 
-    # if point cloud covers less than 90% of tile extent
-    # update geometry based on convex hull
     bbox_vals <- vpc$features$properties[[1]]$`proj:bbox`
     size_extent_m2 <- as.numeric(sf::st_area(
       sf::st_as_sfc(sf::st_bbox(
