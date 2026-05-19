@@ -7,6 +7,7 @@
 raw_to_processed(
   path,
   out_dir = tempdir(),
+  log_dir = tempdir(),
   epsg = 25832L,
   region = NULL,
   from_csv = NULL,
@@ -18,6 +19,9 @@ raw_to_processed(
 \item{path}{Character. Path to LAS/LAZ/COPC file(s), directory, or VPC.}
 
 \item{out_dir}{Character. Output directory where processed files and metadata
+will be saved.}
+
+\item{log_dir}{Character. Output directory where logfiles and data summaries
 will be saved.}
 
 \item{epsg}{Integer. EPSG code for the coordinate reference system.
@@ -74,8 +78,8 @@ The function creates the following directory structure in \code{out_dir} if not 
 \item{\verb{metadata/}}{Individual VPC files with additional metadata}
 \item{\verb{overviews/}}{WEBP overview images (max elevation)}
 \item{\verb{logfiles/}}{Processing logs with timing and status information}
-\item{\code{logfiles/summary_in}}{Data summaries of input LASfiles}
-\item{\code{logfiles/summary_out}}{Data summaries of output LASfiles}
+\item{\verb{logfiles/summaries_\%Y-\%m-\%d_\%H-\%M-\%S/files_in}}{Data summaries of input LASfiles}
+\item{\verb{logfiles/summaries_\%Y-\%m-\%d_\%H-\%M-\%S/files_out}}{Data summaries of output LASfiles}
 }
 
 \strong{Filename generation:}

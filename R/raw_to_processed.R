@@ -6,6 +6,8 @@
 #' @param path Character. Path to LAS/LAZ/COPC file(s), directory, or VPC.
 #' @param out_dir Character. Output directory where processed files and metadata
 #'   will be saved.
+#' @param log_dir Character. Output directory where logfiles and data summaries
+#'   will be saved.
 #' @param epsg Integer. EPSG code for the coordinate reference system.
 #'   Default is 25832 (ETRS89 / UTM zone 32N).
 #' @param region Character. Two-letter region code (federal states of Germany) for filename generation
@@ -51,8 +53,8 @@
 #'   \item{`metadata/`}{Individual VPC files with additional metadata}
 #'   \item{`overviews/`}{WEBP overview images (max elevation)}
 #'   \item{`logfiles/`}{Processing logs with timing and status information}
-#'   \item{`logfiles/summary_in`}{Data summaries of input LASfiles}
-#'   \item{`logfiles/summary_out`}{Data summaries of output LASfiles}
+#'   \item{`logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_in`}{Data summaries of input LASfiles}
+#'   \item{`logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_out`}{Data summaries of output LASfiles}
 #' }
 #'
 #' **Filename generation:**
@@ -79,6 +81,7 @@
 #' }
 raw_to_processed <- function(path,
                              out_dir = tempdir(),
+                             log_dir = tempdir(),
                              epsg = 25832L,
                              region = NULL,
                              from_csv = NULL,
@@ -93,13 +96,25 @@ raw_to_processed <- function(path,
       input = normalizePath(lasfile, winslash = "/", mustWork = FALSE),
       output = normalizePath(pointcloud_file, winslash = "/", mustWork = FALSE),
       status = status,
+      size_in = as.integer(file.info(lasfile)$size),
+      size_out = if (fs::file_exists(pointcloud_file)) as.integer(file.info(pointcloud_file)$size) else NULL,
       duration_seconds = round(as.numeric(difftime(Sys.time(), file_start, units = "secs")), 1),
       warnings = if (length(warnings) > 0) warnings else NULL
     )
   }
+  # ------------------------------------------------------------------
+  # create directories if not existent
+  # ------------------------------------------------------------------
+  dir_logfiles <- fs::dir_create(log_dir, "logfiles")
+  dir_summaries <- fs::dir_create(dir_logfiles, paste0("summaries_", format(processing_start, "%Y-%m-%d_%H-%M-%S")))
+  dir_summary_original <- fs::dir_create(dir_summaries, "files_in")
+  dir_summary_processed <- fs::dir_create(dir_summaries, "files_out")
+  dir_pointcloud <- fs::dir_create(out_dir, "pointcloud")
+  dir_overviews <- fs::dir_create(out_dir, "overviews")
+  dir_vpc <- fs::dir_create(out_dir, "metadata")
 
   # ------------------------------------------------------------------
-  # Early filename determination using check_names
+  # Resolve input files
   # ------------------------------------------------------------------
   files <- resolve_las_paths(path)
 
@@ -108,18 +123,22 @@ raw_to_processed <- function(path,
     return(invisible(NULL))
   }
 
-  # skip files that were successfully processed in a previous run
-  dir_logfiles <- fs::path(out_dir, "logfiles")
-  if (fs::dir_exists(dir_logfiles)) {
-    already_processed <- processed_inputs_from_logs(dir_logfiles)
-    pending <- files[!fs::path_norm(files) %in% already_processed]
 
-    n_skip <- length(files) - length(pending)
-    if (n_skip > 0L && verbose) {
-      message(sprintf("Skipping %d already processed file(s) (from log)", n_skip))
-    }
-    files <- pending
+  # ------------------------------------------------------------------
+  # Skip already processed files
+  # ------------------------------------------------------------------
+  # skip files that were successfully processed in a previous run
+  # this is a first check which scans all logfiles for input files with the same path (same file processed from other directory is not skipped)
+  log_entries <- read_log_entries(dir_logfiles)
+
+  already_processed <- processed_inputs_from_logs(log_entries)
+  pending <- files[!fs::path_norm(files) %in% already_processed]
+
+  n_skip <- length(files) - length(pending)
+  if (n_skip > 0L && verbose) {
+    message(sprintf("Skipping %d already processed file(s) (from log)", n_skip))
   }
+  files <- pending
 
   if (length(files) == 0L) {
     if (verbose) message("All files already processed.")
@@ -176,16 +195,22 @@ raw_to_processed <- function(path,
     on.exit(try(fs::file_delete(lock_file), silent = TRUE), add = TRUE)
 
     # Ckeck if processed file already exists, skip rest of pipeline in this case
-    # in this early stage we can only check for filename based on date of first point, as this might be erroneous
-    # in rare cases a second ckeck is done later after pointcloud data is read
+    # in this early stage we can only check for filename based on date of first point
+    # another check is done later in the pipelin after pointcloud data is read and final filename is known
     if (fs::file_exists(pointcloud_file)) {
-      file_log <- create_file_log(lasfile, pointcloud_file, "skipped_existing", file_start)
-
-      if (verbose) {
-        message(sprintf("Process %s", basename(lasfile)))
-        message("  \u25B6 Already processed (skipped)")
+      logged_size_in <- if (!is.null(log_entries)) {
+        matched <- normalizePath(log_entries$output, winslash = "/", mustWork = FALSE) == normalizePath(pointcloud_file, winslash = "/", mustWork = FALSE)
+        log_entries$size_in[matched][1]
       }
-      return(list(output = pointcloud_file, log = file_log))
+
+      if (!is.null(logged_size_in) && file.info(lasfile)$size == logged_size_in) {
+        file_log <- create_file_log(lasfile, pointcloud_file, "skipped_existing", file_start)
+        if (verbose) {
+          message(sprintf("Process %s", basename(lasfile)))
+          message("  \u25B6 Already processed (skipped)")
+        }
+        return(list(output = pointcloud_file, log = file_log))
+      }
     }
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -821,14 +846,6 @@ raw_to_processed <- function(path,
 
   # do not create .aux.xml files
   gdalraster::set_config_option("GDAL_PAM_ENABLED", "NO")
-
-  # create directories if not existent
-  dir_logfiles <- fs::dir_create(out_dir, "logfiles")
-  dir_summary_original <- fs::dir_create(out_dir, "logfiles/summary_in")
-  dir_summary_processed <- fs::dir_create(out_dir, "logfiles/summary_out")
-  dir_pointcloud <- fs::dir_create(out_dir, "pointcloud")
-  dir_overviews <- fs::dir_create(out_dir, "overviews")
-  dir_vpc <- fs::dir_create(out_dir, "metadata")
 
   # Print header
   if (verbose) {
