@@ -223,8 +223,6 @@ ecosystem.
   : Filter point cloud files by temporal extent
 - [`get_crs()`](https://wiesehahn.github.io/managelidar/reference/get_crs.md)
   : Get the Coordinate Reference System (CRS) of LASfiles
-- [`get_data()`](https://wiesehahn.github.io/managelidar/reference/get_data.md)
-  : Get data in a standardized format and structure
 - [`get_density()`](https://wiesehahn.github.io/managelidar/reference/get_density.md)
   : Get approximate point and pulse density of LASfiles
 - [`get_extrabytes_attributes()`](https://wiesehahn.github.io/managelidar/reference/get_extrabytes_attributes.md)

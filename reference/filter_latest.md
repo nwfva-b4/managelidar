@@ -65,7 +65,7 @@ The function performs the following steps:
 
 ## See also
 
-`filter_first`,
+[`filter_earliest`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md),
 [`filter_spatial`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md),
 [`filter_multitemporal`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md),
 [`resolve_vpc`](https://wiesehahn.github.io/managelidar/reference/resolve_vpc.md)
@@ -76,6 +76,7 @@ The function performs the following steps:
 f <- system.file("extdata", package = "managelidar")
 
 # get latest acquisition per tile (entire tiles only, with 10m tolerance)
-vpc <- filter_first(f, tolerance = 10)
-#> Error in filter_first(f, tolerance = 10): could not find function "filter_first"
+vpc <- filter_earliest(f, tolerance = 10)
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
+#> Error in loadNamespace(x): there is no package called ‘lasR’
 ```
