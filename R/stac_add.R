@@ -9,7 +9,10 @@
 #' added directly to catalogs or nested under other collections.
 #'
 #' @param vpc Path to VPC file or VPC object (list with type="FeatureCollection")
-#' @param parent Path to parent STAC JSON file (catalog.json or collection.json)
+#' @param parent Path to parent STAC JSON file (catalog.json or collection.json).
+#'   Required when creating a new collection with `collection_info`. Optional
+#'   when adding to an existing collection with `collection_path` (parent info
+#'   is read from the existing collection).
 #' @param collection_info List with collection metadata for creating a new collection.
 #'   Must include `id` field. Optional fields include: `title`, `description`,
 #'   `license`, `keywords`, `providers`, `summaries`, `assets`, `stac_extensions`.
@@ -52,7 +55,7 @@
 #'   id = "lidar_ni_2023",
 #'   title = "Lidar Daten Solling 2023",
 #'   description = "ALS data collection in Solling 2023",
-#'   license = "proprietary",
+#'   license = "other",
 #'   keywords = c("ALS", "Lidar", "Niedersachsen"),
 #'   summaries = list(
 #'     platform = "Airplane",
@@ -66,10 +69,9 @@
 #'   collection_info = coll_info
 #' )
 #'
-#' # Add items to existing collection
+#' # Add items to existing collection (parent not needed)
 #' stac_add(
 #'   vpc = "path/to/new_data.vpc",
-#'   parent = "path/to/catalog.json",
 #'   collection_path = "path/to/catalog/collections/lidar_ni_2023/collection.json"
 #' )
 #'
@@ -78,7 +80,7 @@
 #'   id = "2023_q3",
 #'   title = "Q3 2023 Data",
 #'   description = "Data collected in Q3 2023",
-#'   license = "proprietary"
+#'   license = "other"
 #' )
 #'
 #' stac_add(
@@ -90,13 +92,12 @@
 #'
 #' @export
 stac_add <- function(
-    vpc,
-    parent,
-    collection_info = NULL,
-    collection_path = NULL,
-    overwrite_items = FALSE
+  vpc,
+  parent = NULL,
+  collection_info = NULL,
+  collection_path = NULL,
+  overwrite_items = FALSE
 ) {
-
   # Validate inputs ------------------------------------------------------------
 
   # Exactly one of collection_info or collection_path must be provided
@@ -108,8 +109,13 @@ stac_add <- function(
     stop("Only one of collection_info or collection_path can be provided")
   }
 
-  # Validate parent exists
-  if (!fs::file_exists(parent)) {
+  # parent is required when creating new collection
+  if (!is.null(collection_info) && is.null(parent)) {
+    stop("parent is required when creating a new collection with collection_info")
+  }
+
+  # Validate parent exists if provided
+  if (!is.null(parent) && !fs::file_exists(parent)) {
     stop("Parent STAC file does not exist: ", parent)
   }
 
@@ -129,15 +135,12 @@ stac_add <- function(
   vpc_obj <- resolve_vpc(vpc)
 
 
-  # Read parent ----------------------------------------------------------------
-
-  parent_obj <- read_stac(parent)
-
-
   # Determine collection directory and paths ----------------------------------
 
   if (!is.null(collection_info)) {
-    # Creating new collection
+    # Creating new collection - parent is required
+    parent_obj <- read_stac(parent)
+
     collection_id <- collection_info$id
     collection_dir <- resolve_collection_dir(parent, collection_id)
     collection_file <- fs::path(collection_dir, "collection.json")
@@ -148,11 +151,24 @@ stac_add <- function(
       message("To add items to this collection, use collection_path instead of collection_info")
       return(invisible(collection_file))
     }
-
   } else {
     # Adding to existing collection
     collection_file <- collection_path
     collection_dir <- fs::path_dir(collection_file)
+
+    # Read collection to get parent if not provided
+    if (is.null(parent)) {
+      collection_obj_temp <- read_stac(collection_file)
+      parent_rows <- which(collection_obj_temp$links$rel == "parent")
+      if (length(parent_rows) > 0) {
+        parent_href <- collection_obj_temp$links$href[parent_rows[1]]
+        parent <- fs::path_abs(parent_href, start = collection_dir)
+      } else {
+        stop("Cannot determine parent from collection - please provide parent parameter")
+      }
+    }
+
+    parent_obj <- read_stac(parent)
   }
 
   items_dir <- get_items_dir(collection_dir)
@@ -190,14 +206,13 @@ stac_add <- function(
       title = collection_info$title %||% collection_info$id,
       description = collection_info$description %||% "",
       extent = extent,
-      license = collection_info$license %||% "proprietary",
+      license = collection_info$license %||% "other",
       stac_extensions = collection_info$stac_extensions,
       keywords = collection_info$keywords,
       providers = collection_info$providers,
       summaries = summaries,
       assets = collection_info$assets
     )
-
   } else {
     # Update existing collection
 
@@ -277,11 +292,4 @@ stac_add <- function(
   }
 
   invisible(collection_file)
-}
-
-
-#' Null coalescing operator
-#' @keywords internal
-`%||%` <- function(x, y) {
-  if (is.null(x)) y else x
 }

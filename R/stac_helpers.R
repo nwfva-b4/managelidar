@@ -24,7 +24,7 @@ read_stac <- function(path) {
 #' @return Invisible NULL
 #' @keywords internal
 write_stac <- function(obj, path) {
-  jsonlite::write_json(
+  yyjsonr::write_json_file(
     x = obj,
     path = path,
     pretty = TRUE,
@@ -83,12 +83,12 @@ extract_spatial_extent <- function(vpc_obj) {
   list(
     bbox = list(
       c(
-        min(sapply(bboxes, `[[`, 1)),  # xmin
-        min(sapply(bboxes, `[[`, 2)),  # ymin
-        min(sapply(bboxes, `[[`, 3)),  # zmin
-        max(sapply(bboxes, `[[`, 4)),  # xmax
-        max(sapply(bboxes, `[[`, 5)),  # ymax
-        max(sapply(bboxes, `[[`, 6))   # zmax
+        min(sapply(bboxes, `[[`, 1)), # xmin
+        min(sapply(bboxes, `[[`, 2)), # ymin
+        min(sapply(bboxes, `[[`, 3)), # zmin
+        max(sapply(bboxes, `[[`, 4)), # xmax
+        max(sapply(bboxes, `[[`, 5)), # ymax
+        max(sapply(bboxes, `[[`, 6)) # zmax
       )
     )
   )
@@ -140,18 +140,18 @@ extract_crs <- function(vpc_obj) {
 #' @keywords internal
 merge_spatial_extents <- function(extent1, extent2) {
   # extent1 from yyjsonr has bbox as matrix, extent2 from our function has it as list
-  bbox1 <- extent1$bbox[1, ]  # First row of matrix
-  bbox2 <- extent2$bbox[[1]]  # First element of list
+  bbox1 <- extent1$bbox[1, ] # First row of matrix
+  bbox2 <- extent2$bbox[[1]] # First element of list
 
   list(
     bbox = list(
       c(
-        min(bbox1[1], bbox2[1]),  # xmin
-        min(bbox1[2], bbox2[2]),  # ymin
-        min(bbox1[3], bbox2[3]),  # zmin
-        max(bbox1[4], bbox2[4]),  # xmax
-        max(bbox1[5], bbox2[5]),  # ymax
-        max(bbox1[6], bbox2[6])   # zmax
+        min(bbox1[1], bbox2[1]), # xmin
+        min(bbox1[2], bbox2[2]), # ymin
+        min(bbox1[3], bbox2[3]), # zmin
+        max(bbox1[4], bbox2[4]), # xmax
+        max(bbox1[5], bbox2[5]), # ymax
+        max(bbox1[6], bbox2[6]) # zmax
       )
     )
   )
@@ -164,8 +164,8 @@ merge_spatial_extents <- function(extent1, extent2) {
 #' @keywords internal
 merge_temporal_extents <- function(extent1, extent2) {
   # extent1 from yyjsonr has interval as matrix, extent2 from our function has it as list
-  interval1 <- extent1$interval[1, ]  # First row of matrix
-  interval2 <- extent2$interval[[1]]  # First element of list
+  interval1 <- extent1$interval[1, ] # First row of matrix
+  interval2 <- extent2$interval[[1]] # First element of list
 
   # Convert all to character for consistent comparison
   # Handle NA values
@@ -224,20 +224,20 @@ build_catalog <- function(id, title, description) {
 #' @return List with collection structure (no links)
 #' @keywords internal
 build_collection <- function(
-    id,
-    title,
-    description,
-    extent,
-    license,
-    stac_extensions = c(
-      "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
-      "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
-    ),
-    keywords = NULL,
-    providers = NULL,
-    summaries = NULL,
-    assets = NULL,
-    ...
+  id,
+  title,
+  description,
+  extent,
+  license,
+  stac_extensions = c(
+    "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+  ),
+  keywords = NULL,
+  providers = NULL,
+  summaries = NULL,
+  assets = NULL,
+  ...
 ) {
   collection_obj <- list(
     id = id,
@@ -296,7 +296,7 @@ add_child_link <- function(parent_obj, child_rel_path, child_title = NULL) {
   # Check if link already exists
   existing_hrefs <- sapply(links_list, function(link) link$href)
   if (child_rel_path %in% existing_hrefs) {
-    return(parent_obj)  # Link already exists, skip
+    return(parent_obj) # Link already exists, skip
   }
 
   # Create new link
@@ -395,7 +395,7 @@ resolve_collection_dir <- function(parent_path, collection_id) {
 
   if (get_stac_type(parent_obj) == "Catalog") {
     collection_dir <- fs::path(parent_dir, "collections", collection_id)
-  } else {  # Collection (subcollection)
+  } else { # Collection (subcollection)
     collection_dir <- fs::path(parent_dir, collection_id)
   }
 
@@ -463,7 +463,7 @@ write_items <- function(items, items_dir, overwrite = FALSE) {
     item_path <- fs::path(items_dir, item$id, ext = "json")
 
     if (fs::file_exists(item_path) && !overwrite) {
-      next  # Skip existing
+      next # Skip existing
     }
 
     write_stac(item, item_path)
