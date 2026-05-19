@@ -1,0 +1,13 @@
+{
+  "type": "Catalog",
+  "stac_version": "1.0.0",
+  "id": "lidar-catalog",
+  "description": "Root catalog for LiDAR datasets",
+  "links": [
+    {
+      "rel": "child",
+      "href": "./collections/solling_2024/collection.json",
+      "type": "application/json"
+    }
+  ]
+}
