@@ -22,7 +22,7 @@
 #'
 #' @export
 #'
-#' @seealso  \code{\link{filter_first}}, \code{\link{filter_latest}}, \code{\link{filter_spatial}},
+#' @seealso  \code{\link{filter_earliest}}, \code{\link{filter_latest}}, \code{\link{filter_spatial}},
 #'   \code{\link{filter_multitemporal}}
 #'
 #' @examples
