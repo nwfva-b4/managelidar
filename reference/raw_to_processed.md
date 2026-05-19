@@ -9,6 +9,7 @@ clouds with comprehensive metadata and overview images.
 raw_to_processed(
   path,
   out_dir = tempdir(),
+  log_dir = tempdir(),
   epsg = 25832L,
   region = NULL,
   from_csv = NULL,
@@ -26,6 +27,11 @@ raw_to_processed(
 - out_dir:
 
   Character. Output directory where processed files and metadata will be
+  saved.
+
+- log_dir:
+
+  Character. Output directory where logfiles and data summaries will be
   saved.
 
 - epsg:
@@ -117,11 +123,11 @@ structure in `out_dir` if not otherwise defined:
 
   Processing logs with timing and status information
 
-- `logfiles/summary_in`:
+- `logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_in`:
 
   Data summaries of input LASfiles
 
-- `logfiles/summary_out`:
+- `logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_out`:
 
   Data summaries of output LASfiles
 

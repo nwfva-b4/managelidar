@@ -47,6 +47,7 @@ comprehensive metadata and overview images.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">raw_to_processed</span><span class="op">(</span></span>
 <span>  <span class="va">path</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  log_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  epsg <span class="op">=</span> <span class="fl">25832L</span>,</span>
 <span>  region <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  from_csv <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -65,6 +66,11 @@ comprehensive metadata and overview images.</p>
 
 <dt id="arg-out-dir">out_dir<a class="anchor" aria-label="anchor" href="#arg-out-dir"></a></dt>
 <dd><p>Character. Output directory where processed files and metadata
+will be saved.</p></dd>
+
+
+<dt id="arg-log-dir">log_dir<a class="anchor" aria-label="anchor" href="#arg-log-dir"></a></dt>
+<dd><p>Character. Output directory where logfiles and data summaries
 will be saved.</p></dd>
 
 
@@ -131,10 +137,10 @@ The function creates the following directory structure in <code>out_dir</code> i
 <dt><code>logfiles/</code></dt>
 <dd><p>Processing logs with timing and status information</p></dd>
 
-<dt><code>logfiles/summary_in</code></dt>
+<dt><code>logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_in</code></dt>
 <dd><p>Data summaries of input LASfiles</p></dd>
 
-<dt><code>logfiles/summary_out</code></dt>
+<dt><code>logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_out</code></dt>
 <dd><p>Data summaries of output LASfiles</p></dd>
 
 

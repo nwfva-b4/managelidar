@@ -150,11 +150,5 @@ folder <- system.file("extdata", package = "managelidar")
 vpc_enriched <- folder |>
   raw_to_processed() |>
   create_vpc_enriched()
-#> Process 5 LASfiles
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in packageVersion("lasR"): there is no package called ‘lasR’
+#> Error in read_log_entries(dir_logfiles): could not find function "read_log_entries"
 ```
