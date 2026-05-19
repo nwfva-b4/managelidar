@@ -588,10 +588,45 @@ raw_to_processed <- function(path,
 
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # convert overview
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # get imgage statistics
+    ds <- new(gdalraster::GDALRaster, overview_file)
+    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
+    ds$quiet <- TRUE
+    mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
+    ds$close()
+
+    # scale image data
+    tmp_byte <- "/vsimem/tmp_byte.tif"
+    gdalraster::translate(overview_file, tmp_byte, quiet = TRUE, cl_arg = c(
+      "-ot", "Byte", "-scale", mm[1], mm[2], "0", "255", "-of", "GTiff"
+    ))
+
+    # apply colour table
+    ds <- new(gdalraster::GDALRaster, tmp_byte, read_only = FALSE)
+    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
+    cols <- viridis::viridis(256)
+    rgb_mat <- col2rgb(cols)
+    colortable <- cbind(0:255, t(rgb_mat), 255L)
+    ds$setColorTable(band = 1, col_tbl = colortable, palette_interp = "RGB")
+    ds$close()
+
+    # convert to webp
+    overview_img <- fs::path(dir_overviews, fs::path_ext_set(generated_filename, ".webp"))
+    gdalraster::translate(tmp_byte, overview_img, cl_arg = c("-of", "WEBP", "-expand", "rgb"), quiet = TRUE)
+
+    # delete intermediate data
+    gdalraster::vsi_unlink(tmp_byte)
+    fs::file_delete(overview_file)
+
+    created_outputs <- c(created_outputs, overview_img)
+
+
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # save vpc to disk
     # add summary metadata
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-
     vpc <- resolve_vpc(pointcloud_file, epsg = epsg, out_file = NULL)
 
     bbox_vals <- vpc$features$properties[[1]]$`proj:bbox`
@@ -612,9 +647,10 @@ raw_to_processed <- function(path,
 
       # Point and pulse density
       if (!is.null(size_extent_m2) && size_extent_m2 > 0) {
-        new_props$pointdensity <- round(metadata_content$npoints / size_extent_m2, 2)
+        new_props$`pc:density` <- round(metadata_content$npoints / size_extent_m2, 2)
         first_returns <- metadata_content$npoints_per_return[["1"]]
-        new_props$pulsedensity <- round(first_returns / size_extent_m2, 2)
+        # pulse density not yet implemented, but as suggested in https://github.com/stac-extensions/pointcloud/issues/18
+        new_props$`pc:pulse_density` <- round(first_returns / size_extent_m2, 2)
       }
 
       new_props$date_source <- date_source
@@ -686,47 +722,23 @@ raw_to_processed <- function(path,
       vpc$features$properties[[1]] <- c(current_props, new_props)
     }
 
+    # add metadata when data was processed
+    vpc$features$assets[[1]]$data$created <- format(as.POSIXct(processing_start), format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+
+    # add overview reference
+    vpc$features$assets[[1]]$overview$href <- fs::path("./../overviews", fs::path_file(overview_img))
+    vpc$features$assets[[1]]$overview$type <- "image/webp"
+    vpc$features$assets[[1]]$overview$roles <- "overview"
+
+    # make pointcloud reference relative
+    vpc$features$assets[[1]]$data$href <- fs::path("./../pointcloud", fs::path_file(pointcloud_file))
+
     # write VPC to disk
     vpc_file <- fs::path(dir_vpc, fs::path_ext_set(generated_filename, ".vpc"))
     yyjsonr::write_json_file(vpc, vpc_file, pretty = TRUE, auto_unbox = TRUE)
 
     created_outputs <- c(created_outputs, vpc_file)
 
-
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # convert overview
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # get imgage statistics
-    ds <- new(gdalraster::GDALRaster, overview_file)
-    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
-    ds$quiet <- TRUE
-    mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
-    ds$close()
-
-    # scale image data
-    tmp_byte <- "/vsimem/tmp_byte.tif"
-    gdalraster::translate(overview_file, tmp_byte, quiet = TRUE, cl_arg = c(
-      "-ot", "Byte", "-scale", mm[1], mm[2], "0", "255", "-of", "GTiff"
-    ))
-
-    # apply colour table
-    ds <- new(gdalraster::GDALRaster, tmp_byte, read_only = FALSE)
-    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
-    cols <- viridis::viridis(256)
-    rgb_mat <- col2rgb(cols)
-    colortable <- cbind(0:255, t(rgb_mat), 255L)
-    ds$setColorTable(band = 1, col_tbl = colortable, palette_interp = "RGB")
-    ds$close()
-
-    # convert to webp
-    overview_img <- fs::path(dir_overviews, fs::path_ext_set(generated_filename, ".webp"))
-    gdalraster::translate(tmp_byte, overview_img, cl_arg = c("-of", "WEBP", "-expand", "rgb"), quiet = TRUE)
-
-    # delete intermediate data
-    gdalraster::vsi_unlink(tmp_byte)
-    fs::file_delete(overview_file)
-
-    created_outputs <- c(created_outputs, overview_img)
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # cleanup memory
