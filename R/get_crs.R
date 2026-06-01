@@ -35,7 +35,7 @@ get_crs <- function(path, full.names = FALSE) {
     filename = files,
     crs = sapply(files, function(f) {
       hdr <- lidR::readLASheader(f)
-      epsg <- lidR::epsg(hdr)
+      epsg <- sf::st_crs(hdr)$epsg
       if (is_valid_crs(epsg)) epsg else NA_integer_
     }),
     stringsAsFactors = FALSE,
