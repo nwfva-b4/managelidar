@@ -2,18 +2,25 @@
 #'
 #' `get_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a collection of LAS/LAZ/COPC
 #' files into Geopackage. VPCs can be read and visualized by QGIS, however individual tiles (features) can not be queried as is.
-#' To do this we convert it to a Geopackage, which can easily be explored in any GIS.
+#' To enable this we convert it to a Geopackage, which can be easily explored in any GIS.
 #' Each LAS tile becomes a feature with its spatial extent and some metadata.
 #'
-#' Summary metrics (optional) can be included by setting `metrics = TRUE` for default metrics
-#' or providing a character vector of custom metrics. Computing metrics requires reading the actual point data,
-#' und thus can be much slower. See `get_summary()` for details.
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
 #'   or a Virtual Point Cloud (.vpc) file.
 #' @param out_file Path to the output Geopackage (.gpkg) file (default: tempfile).
 #' @param overwrite Logical. If TRUE, overwrite the output file if it exists (default: FALSE).
 #' @param crs Integer. Optional EPSG code to reproject the VPC (default: 25832).
+#' @param metrics Optional. Controls whether summary metrics are computed and
+#'   added to the output layer.
+#'   - `NULL` (default): no summary metrics are computed.
+#'   - `TRUE`: compute the default set of metrics returned by `get_summary()`.
+#'   - Character vector: compute only the specified metrics, e.g.
+#'     `c("z_mean", "classification_mode", "intensity_mean")`.
+#'
+#'   Computing metrics requires reading the point data from all files and can
+#'   substantially increase processing time. See `get_summary()` for available
+#'   metrics and details.
 #'
 #' @return Invisibly returns an `sf` object representing the tiles written to the Geopackage.
 #' @export
@@ -38,12 +45,6 @@ get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = F
   # Read VPC as sf
   # ------------------------------------------------------------------
   vpc_sf <- sf::st_read(vpc_file, quiet = TRUE)
-
-  # Drop non-exportable / redundant columns
-  vpc_sf <- dplyr::select(
-    vpc_sf,
-    -dplyr::any_of(c("pc.count", "pc.type", "proj.wkt2"))
-  )
 
 
   # ------------------------------------------------------------
@@ -125,6 +126,17 @@ get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = F
         )
       )
   }
+
+
+  # ------------------------------------------------------------------
+  # Drop non-exportable / redundant columns
+  # ------------------------------------------------------------------
+  vpc_sf <- dplyr::select(
+    vpc_sf,
+    -dplyr::any_of(c("proj.wkt2"))
+  )
+
+  vpc_sf <- vpc_sf[, !sapply(vpc_sf, is.list)]
 
 
   # ------------------------------------------------------------------

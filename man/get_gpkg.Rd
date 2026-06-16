@@ -21,6 +21,19 @@ or a Virtual Point Cloud (.vpc) file.}
 \item{overwrite}{Logical. If TRUE, overwrite the output file if it exists (default: FALSE).}
 
 \item{crs}{Integer. Optional EPSG code to reproject the VPC (default: 25832).}
+
+\item{metrics}{Optional. Controls whether summary metrics are computed and
+added to the output layer.
+\itemize{
+\item \code{NULL} (default): no summary metrics are computed.
+\item \code{TRUE}: compute the default set of metrics returned by \code{get_summary()}.
+\item Character vector: compute only the specified metrics, e.g.
+\code{c("z_mean", "classification_mode", "intensity_mean")}.
+}
+
+Computing metrics requires reading the point data from all files and can
+substantially increase processing time. See \code{get_summary()} for available
+metrics and details.}
 }
 \value{
 Invisibly returns an \code{sf} object representing the tiles written to the Geopackage.
@@ -28,13 +41,8 @@ Invisibly returns an \code{sf} object representing the tiles written to the Geop
 \description{
 \code{get_gpkg()} converts the metadata of a Virtual Point Cloud (.vpc) or a collection of LAS/LAZ/COPC
 files into Geopackage. VPCs can be read and visualized by QGIS, however individual tiles (features) can not be queried as is.
-To do this we convert it to a Geopackage, which can easily be explored in any GIS.
+To enable this we convert it to a Geopackage, which can be easily explored in any GIS.
 Each LAS tile becomes a feature with its spatial extent and some metadata.
-}
-\details{
-Summary metrics (optional) can be included by setting \code{metrics = TRUE} for default metrics
-or providing a character vector of custom metrics. Computing metrics requires reading the actual point data,
-und thus can be much slower. See \code{get_summary()} for details.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
