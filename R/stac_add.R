@@ -103,35 +103,37 @@ stac_add <- function(
 
   # Exactly one of collection_info or collection_path must be provided
   if (is.null(collection_info) && is.null(collection_path)) {
-    stop("Either collection_info or collection_path must be provided")
+    cli::cli_abort("Either {.arg collection_info} or {.arg collection_path} must be provided")
   }
 
   if (!is.null(collection_info) && !is.null(collection_path)) {
-    stop("Only one of collection_info or collection_path can be provided")
+    cli::cli_abort("Only one of {.arg collection_info} or {.arg collection_path} can be provided")
   }
 
   # parent is required when creating new collection
   if (!is.null(collection_info) && is.null(parent)) {
-    stop("parent is required when creating a new collection with collection_info")
+    cli::cli_abort("{.arg parent} is required when creating a new collection with {.arg collection_info}")
   }
 
   # Validate parent exists if provided
   if (!is.null(parent) && !fs::file_exists(parent)) {
-    stop("Parent STAC file does not exist: ", parent)
+    cli::cli_abort("Parent STAC file does not exist: {.path {parent}}")
   }
 
   # Validate collection_info has id if creating new collection
   if (!is.null(collection_info) && is.null(collection_info$id)) {
-    stop("collection_info must contain an 'id' field")
+    cli::cli_abort("{.arg collection_info} must contain an {.field id} field")
   }
 
   # Validate collection_path exists if provided
   if (!is.null(collection_path) && !fs::file_exists(collection_path)) {
-    stop("collection_path does not exist: ", collection_path)
+    cli::cli_abort("{.arg collection_path} does not exist: {.path {collection_path}}")
   }
 
 
   # Resolve VPC ----------------------------------------------------------------
+
+  is_new_collection <- !is.null(collection_info)
 
   vpc_obj <- resolve_vpc(path)
 
@@ -148,8 +150,8 @@ stac_add <- function(
 
     # Check if collection already exists
     if (fs::file_exists(collection_file)) {
-      message("Collection already exists: ", collection_file)
-      message("To add items to this collection, use collection_path instead of collection_info")
+      cli::cli_alert_warning("Collection already exists: {.path {collection_file}}")
+      cli::cli_alert_info("To add items to this collection, use {.arg collection_path} instead of {.arg collection_info}")
       return(invisible(collection_file))
     }
   } else {
@@ -165,7 +167,7 @@ stac_add <- function(
         parent_href <- collection_obj_temp$links$href[parent_rows[1]]
         parent <- fs::path_abs(parent_href, start = collection_dir)
       } else {
-        stop("Cannot determine parent from collection - please provide parent parameter")
+        cli::cli_abort("Cannot determine parent from collection - please provide {.arg parent} parameter")
       }
     }
 
@@ -233,8 +235,8 @@ stac_add <- function(
 
 
   # Convert VPC items to STAC items --------------------------------------------
-
-  items <- vpc_to_stac_items(vpc_obj, collection_dir, items_dir)
+  root_path <- find_root_catalog(parent)
+  items <- vpc_to_stac_items(vpc_obj, collection_dir, items_dir, root_path)
 
 
   # Write items ----------------------------------------------------------------
@@ -243,16 +245,14 @@ stac_add <- function(
 
   skipped_count <- length(items) - length(written_ids)
 
-  if (length(written_ids) > 0) {
-    message("Wrote ", length(written_ids), " items to ", items_dir)
-  }
-
   if (skipped_count > 0) {
-    message("Skipped ", skipped_count, " existing items (use overwrite_items = TRUE to replace)")
+    cli::cli_alert_warning(
+      "Skipped {skipped_count} existing item{?s} (use {.code overwrite_items = TRUE} to replace)"
+    )
   }
 
   if (length(written_ids) == 0 && skipped_count == 0) {
-    message("No items to write")
+    cli::cli_alert_warning("No items to write")
   }
 
 
@@ -285,12 +285,16 @@ stac_add <- function(
   # Return ---------------------------------------------------------------------
 
   if (length(written_ids) > 0) {
-    message("Successfully updated collection: ", collection_file)
-  } else if (skipped_count > 0) {
-    message("Collection unchanged (all items already exist): ", collection_file)
-  } else {
-    message("Collection processed: ", collection_file)
+    cli::cli_alert_success("Created {length(written_ids)} item{?s} in {.path {items_dir}}")
   }
+
+  if (is_new_collection) {
+    cli::cli_alert_success("Created collection {.field {collection_obj$id}} at {.path {collection_file}}")
+  } else {
+    cli::cli_alert_success("Updated collection {.field {collection_obj$id}} at {.path {collection_file}}")
+  }
+
+  cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {parent}}")
 
   invisible(collection_file)
 }

@@ -40,9 +40,10 @@ write_stac <- function(obj, path) {
 #' @param vpc_obj VPC object (list with $features)
 #' @param collection_dir Path to collection directory
 #' @param items_dir Path to items directory
+#' @param root_path Absolute path to root catalog
 #' @return List of STAC item objects
 #' @keywords internal
-vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir) {
+vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path) {
   features <- vpc_obj$features
 
   # features is a data frame
@@ -62,7 +63,7 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir) {
 
     # Set type to "Feature" and add links
     item$type <- "Feature"
-    item$links <- build_item_links(item$id, items_dir, collection_dir)
+    item$links <- build_item_links(item$id, items_dir, collection_dir, root_path)
     item
   })
 
@@ -320,9 +321,10 @@ add_child_link <- function(parent_obj, child_rel_path, child_title = NULL) {
 #' @param item_id Item ID
 #' @param items_dir Path to items directory
 #' @param collection_dir Path to collection directory
+#' @param root_path Absolute path to root catalog
 #' @return List of link objects
 #' @keywords internal
-build_item_links <- function(item_id, items_dir, collection_dir) {
+build_item_links <- function(item_id, items_dir, collection_dir, root_path) {
   collection_file <- fs::path(collection_dir, "collection.json")
 
   list(
@@ -333,6 +335,11 @@ build_item_links <- function(item_id, items_dir, collection_dir) {
         items_dir
       )),
       type = "application/geo+json"
+    ),
+    list(
+      rel = "root",
+      href = fs::path_rel(root_path, items_dir),
+      type = "application/json"
     ),
     list(
       rel = "collection",
