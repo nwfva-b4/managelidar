@@ -26,7 +26,7 @@ read_stac <- function(path) {
 write_stac <- function(obj, path) {
   yyjsonr::write_json_file(
     x = obj,
-    path = path,
+    filename = path,
     pretty = TRUE,
     auto_unbox = TRUE
   )
