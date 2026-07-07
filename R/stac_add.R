@@ -2,13 +2,14 @@
 # User-facing functions for managing STAC catalogs and collections
 # Part of the managelidar package
 
-#' Add VPC items to STAC catalog or collection
+#' Add LASfiles to STAC catalog or collection
 #'
-#' Add items from a Virtual Point Cloud (VPC) to a STAC catalog structure by
+#' Add LASfiles as items to a STAC catalog structure by
 #' creating a new collection or updating an existing one. Collections can be
 #' added directly to catalogs or nested under other collections.
 #'
-#' @param vpc Path to VPC file or VPC object (list with type="FeatureCollection")
+#' @param path Character vector of input paths, or a list containing VPC objects.
+#'   Can be a mix of file paths (strings) and VPC objects (lists with type="FeatureCollection").
 #' @param parent Path to parent STAC JSON file (catalog.json or collection.json).
 #'   Required when creating a new collection with `collection_info`. Optional
 #'   when adding to an existing collection with `collection_path` (parent info
@@ -92,7 +93,7 @@
 #'
 #' @export
 stac_add <- function(
-  vpc,
+  path,
   parent = NULL,
   collection_info = NULL,
   collection_path = NULL,
@@ -132,7 +133,7 @@ stac_add <- function(
 
   # Resolve VPC ----------------------------------------------------------------
 
-  vpc_obj <- resolve_vpc(vpc)
+  vpc_obj <- resolve_vpc(path)
 
 
   # Determine collection directory and paths ----------------------------------
