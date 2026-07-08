@@ -122,7 +122,7 @@ stac_add_collection <- function(
     assets = assets
   )
 
-  collection_obj$links <- build_collection_links(collection_dir, parent, items_dir)
+  collection_obj$links <- build_collection_links(collection_dir, parent)
 
   write_stac(collection_obj, collection_file)
 
@@ -156,13 +156,12 @@ propagate_extent_to_ancestors <- function(collection_path, spatial_extent, tempo
   collection_dir <- fs::path_dir(collection_path)
   obj <- read_stac(collection_path)
 
-  parent_rows <- which(obj$links$rel == "parent")
-  if (length(parent_rows) == 0) {
+  parent_link <- find_link(obj$links, "parent")
+  if (is.null(parent_link)) {
     return(invisible())
   }
 
-  parent_href <- obj$links$href[parent_rows[1]]
-  parent_path <- fs::path_abs(parent_href, start = collection_dir)
+  parent_path <- fs::path_abs(parent_link$href, start = collection_dir)
   parent_obj <- read_stac(parent_path)
 
   if (get_stac_type(parent_obj) != "Collection") {
@@ -219,6 +218,7 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
 
   collection_obj <- read_stac(collection)
   collection_dir <- fs::path_dir(collection)
+  collection_id <- collection_obj$id
   items_dir <- get_items_dir(collection_dir)
 
   # Was the collection empty before this call? Determines replace vs merge.
@@ -226,12 +226,11 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
   is_first_batch <- existing_item_count == 0
 
   # Root is already known from the collection's own links
-  root_rows <- which(collection_obj$links$rel == "root")
-  if (length(root_rows) == 0) {
+  root_link <- find_link(collection_obj$links, "root")
+  if (is.null(root_link)) {
     cli::cli_abort("Collection has no root link - malformed STAC structure")
   }
-  root_href <- collection_obj$links$href[root_rows[1]]
-  root_path <- fs::path_abs(root_href, start = collection_dir)
+  root_path <- fs::path_abs(root_link$href, start = collection_dir)
 
   vpc_obj <- resolve_vpc(path)
 
@@ -239,7 +238,7 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
   temporal_extent <- extract_temporal_extent(vpc_obj)
   crs <- extract_crs(vpc_obj)
 
-  items <- vpc_to_stac_items(vpc_obj, collection_dir, items_dir, root_path)
+  items <- vpc_to_stac_items(vpc_obj, collection_dir, items_dir, root_path, collection_id)
 
   written_ids <- write_items(items, items_dir, overwrite = overwrite_items)
   skipped_count <- length(items) - length(written_ids)
@@ -282,6 +281,9 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
     collection_obj$stac_extensions,
     required_lidar_stac_extensions()
   )
+
+  # Keep the collection's per-item `item` links in sync with items on disk
+  collection_obj$links <- rebuild_item_links(collection_obj$links, collection_dir, items_dir)
 
   write_stac(collection_obj, collection)
 
