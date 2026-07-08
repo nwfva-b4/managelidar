@@ -12,7 +12,7 @@
 #'   written inside this directory.
 #' @param id Catalog ID.
 #' @param title Catalog title. Defaults to `id`.
-#' @param description Catalog description. Defaults to `""`.
+#' @param description Catalog description. Defaults to `"STAC catalog"`.
 #'
 #' @return Path to `catalog.json` (invisibly), for piping into
 #'   [stac_add_collection()].
@@ -22,7 +22,7 @@
 #'   stac_create_catalog(id = "lidar_ni", title = "Sample Catalog")
 #'
 #' @export
-stac_create_catalog <- function(path, id, title = id, description = "") {
+stac_create_catalog <- function(path, id, title = id, description = "STAC catalog") {
   fs::dir_create(path)
   catalog_file <- fs::path(path, "catalog.json")
 
@@ -52,7 +52,7 @@ stac_create_catalog <- function(path, id, title = id, description = "") {
 #'   previous [stac_add_collection()] call (to nest a subcollection).
 #' @param id Collection ID.
 #' @param title Collection title. Defaults to `id`.
-#' @param description Collection description. Defaults to `""`.
+#' @param description Collection description. Defaults to `"STAC collection"`.
 #' @param license License string. Defaults to `"other"`.
 #' @param keywords Character vector of keywords.
 #' @param providers List of provider objects.
@@ -86,7 +86,7 @@ stac_add_collection <- function(
   parent,
   id,
   title = id,
-  description = "",
+  description = "STAC collection",
   license = "other",
   keywords = NULL,
   providers = NULL,
@@ -115,7 +115,7 @@ stac_add_collection <- function(
     description = description,
     extent = empty_extent(),
     license = license,
-    stac_extensions = stac_extensions,
+    stac_extensions = stac_extensions %||% required_lidar_stac_extensions(),
     keywords = keywords,
     providers = providers,
     summaries = summaries,
@@ -135,6 +135,52 @@ stac_add_collection <- function(
   cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {parent}}")
 
   invisible(collection_file)
+}
+
+#' Propagate a new extent up the STAC tree
+#'
+#' Walks up the chain of `parent` links starting from `collection_path`,
+#' updating each ancestor collection's extent to account for the new items
+#' just added lower in the tree. Stops once it reaches a Catalog (which has
+#' no `extent` field) or runs out of `parent` links.
+#'
+#' @param collection_path Path to the collection whose ancestors should be
+#'   updated (typically the collection items were just added to).
+#' @param spatial_extent Spatial extent of the newly added items
+#'   (list format, as returned by [extract_spatial_extent()]).
+#' @param temporal_extent Temporal extent of the newly added items
+#'   (list format, as returned by [extract_temporal_extent()]).
+#' @return Invisible NULL
+#' @keywords internal
+propagate_extent_to_ancestors <- function(collection_path, spatial_extent, temporal_extent) {
+  collection_dir <- fs::path_dir(collection_path)
+  obj <- read_stac(collection_path)
+
+  parent_rows <- which(obj$links$rel == "parent")
+  if (length(parent_rows) == 0) {
+    return(invisible())
+  }
+
+  parent_href <- obj$links$href[parent_rows[1]]
+  parent_path <- fs::path_abs(parent_href, start = collection_dir)
+  parent_obj <- read_stac(parent_path)
+
+  if (get_stac_type(parent_obj) != "Collection") {
+    return(invisible()) # reached the root catalog; catalogs have no extent
+  }
+
+  if (extent_is_placeholder(parent_obj$extent)) {
+    parent_obj$extent$spatial <- spatial_extent
+    parent_obj$extent$temporal <- temporal_extent
+  } else {
+    parent_obj$extent$spatial <- merge_spatial_extents(parent_obj$extent$spatial, spatial_extent)
+    parent_obj$extent$temporal <- merge_temporal_extents(parent_obj$extent$temporal, temporal_extent)
+  }
+
+  write_stac(parent_obj, parent_path)
+  cli::cli_alert_success("Updated extent of ancestor collection {.field {parent_obj$id}} at {.path {parent_path}}")
+
+  propagate_extent_to_ancestors(parent_path, spatial_extent, temporal_extent)
 }
 
 #' Add LASfile items to an existing STAC collection
@@ -230,12 +276,21 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
   summaries$`pc:type` <- list("lidar")
   collection_obj$summaries <- summaries
 
+  # These summary fields belong to the pointcloud/projection extensions;
+  # make sure both are declared on the collection
+  collection_obj$stac_extensions <- union(
+    collection_obj$stac_extensions,
+    required_lidar_stac_extensions()
+  )
+
   write_stac(collection_obj, collection)
 
   if (length(written_ids) > 0) {
     cli::cli_alert_success("Created {length(written_ids)} item{?s} in {.path {items_dir}}")
   }
   cli::cli_alert_success("Updated collection {.field {collection_obj$id}} at {.path {collection}}")
+
+  propagate_extent_to_ancestors(collection, spatial_extent, temporal_extent)
 
   invisible(collection)
 }
