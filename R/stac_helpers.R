@@ -210,6 +210,17 @@ build_catalog <- function(id, title, description) {
   )
 }
 
+#' STAC extensions required whenever pointcloud/projection fields
+#' (`proj:epsg`, `pc:type`) are present on a collection's summaries.
+#' @return Character vector of extension schema URLs
+#' @keywords internal
+required_lidar_stac_extensions <- function() {
+  c(
+    "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+  )
+}
+
 #' Build a collection object structure
 #' @param id Collection ID
 #' @param title Collection title
@@ -230,10 +241,7 @@ build_collection <- function(
   description,
   extent,
   license,
-  stac_extensions = c(
-    "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
-    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
-  ),
+  stac_extensions = required_lidar_stac_extensions(),
   keywords = NULL,
   providers = NULL,
   summaries = NULL,
@@ -362,7 +370,6 @@ build_item_links <- function(item_id, items_dir, collection_dir, root_path) {
 #' @keywords internal
 build_collection_links <- function(collection_dir, parent_path, items_dir) {
   root_path <- find_root_catalog(parent_path)
-  collection_file <- fs::path(collection_dir, "collection.json")
 
   list(
     list(
@@ -377,7 +384,7 @@ build_collection_links <- function(collection_dir, parent_path, items_dir) {
     ),
     list(
       rel = "self",
-      href = fs::path_abs(collection_file),
+      href = fs::path(".", "collection.json"),
       type = "application/json"
     ),
     list(
@@ -402,7 +409,7 @@ build_catalog_links <- function(catalog_file, catalog_dir) {
     ),
     list(
       rel = "self",
-      href = fs::path_abs(catalog_file),
+      href = fs::path(".", "catalog.json"),
       type = "application/json"
     )
   )
@@ -455,6 +462,20 @@ get_items_dir <- function(collection_dir) {
   items_dir <- fs::path(collection_dir, "items")
   fs::dir_create(items_dir)
   items_dir
+}
+
+#' Check whether a collection's extent is still the empty placeholder
+#' written by stac_add_collection() (as opposed to a real extent derived
+#' from items). Only the spatial bbox is checked, since a zero bbox is the
+#' only placeholder signal available (STAC does not allow `null` bbox
+#' values, unlike temporal intervals).
+#' @param extent Extent list as read from disk (bbox as matrix)
+#' @return Logical
+#' @keywords internal
+extent_is_placeholder <- function(extent) {
+  bbox <- extent$spatial$bbox
+  bbox <- if (is.matrix(bbox)) bbox[1, ] else bbox[[1]]
+  isTRUE(all(bbox == 0))
 }
 
 #' Find root catalog by following links
