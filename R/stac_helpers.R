@@ -5,6 +5,13 @@
 # I/O Operations ---------------------------------------------------------------
 
 #' Read a STAC JSON file
+#'
+#' Links are normalized to a plain list of link objects via
+#' [normalize_links()], regardless of yyjsonr's internal data-frame
+#' representation. This prevents optional fields (like `title`) that are
+#' absent on some links from round-tripping back out as explicit `null`
+#' values when the object is later written with [write_stac()].
+#'
 #' @param path Path to STAC JSON file
 #' @return List representing STAC object
 #' @keywords internal
@@ -12,10 +19,14 @@ read_stac <- function(path) {
   if (!fs::file_exists(path)) {
     stop("STAC file does not exist: ", path)
   }
-  yyjsonr::read_json_file(
+  obj <- yyjsonr::read_json_file(
     path,
     opts = yyjsonr::opts_read_json(df_missing_list_elem = "null")
   )
+  if (!is.null(obj$links)) {
+    obj$links <- normalize_links(obj$links)
+  }
+  obj
 }
 
 #' Write a STAC object to JSON file
@@ -280,6 +291,58 @@ build_collection <- function(
 
 # Link Management --------------------------------------------------------------
 
+#' Normalize a links structure into a plain list of link objects
+#'
+#' yyjsonr represents an array of link objects as a data frame when read
+#' from disk, filling any field missing on a given link (e.g. `title`) with
+#' an explicit `NULL` (per `df_missing_list_elem = "null"`). Serializing
+#' that data frame back out would emit those as literal `"title": null`,
+#' which is invalid for a STAC link (`title` must be a string or absent).
+#' This function converts either representation into a uniform list of
+#' named lists, dropping NA/NULL optional fields entirely so a link is
+#' either a proper string or not present in the output at all.
+#'
+#' @param links Links as returned by [read_stac()] (data frame) or already
+#'   a list of link objects
+#' @return List of link objects (named lists), never containing NA/NULL
+#'   field values
+#' @keywords internal
+normalize_links <- function(links) {
+  if (is.null(links) || length(links) == 0) {
+    return(list())
+  }
+
+  is_empty_value <- function(v) length(v) == 0 || (length(v) == 1 && is.na(v))
+
+  if (is.data.frame(links)) {
+    lapply(seq_len(nrow(links)), function(i) {
+      link <- list()
+      for (col in names(links)) {
+        val <- links[[col]][[i]]
+        if (is_empty_value(val)) next
+        link[[col]] <- val
+      }
+      link
+    })
+  } else {
+    lapply(links, function(link) {
+      link[!vapply(link, is_empty_value, logical(1))]
+    })
+  }
+}
+
+#' Find the first link with a given `rel` value
+#' @param links List of link objects (as returned by [read_stac()])
+#' @param rel Relation type to search for (e.g. `"root"`, `"parent"`)
+#' @return The matching link object, or `NULL` if none found
+#' @keywords internal
+find_link <- function(links, rel) {
+  for (link in links) {
+    if (identical(link$rel, rel)) return(link)
+  }
+  NULL
+}
+
 #' Add a child link to parent object
 #' @param parent_obj Parent STAC object (list)
 #' @param child_rel_path Relative path to child from parent directory
@@ -287,28 +350,11 @@ build_collection <- function(
 #' @return Updated parent object
 #' @keywords internal
 add_child_link <- function(parent_obj, child_rel_path, child_title = NULL) {
-  # yyjsonr always returns links as a data frame
-  # Convert data frame to list of lists
-  links_list <- lapply(seq_len(nrow(parent_obj$links)), function(i) {
-    link <- list(
-      rel = parent_obj$links$rel[i],
-      href = parent_obj$links$href[i],
-      type = parent_obj$links$type[i]
-    )
-    # Add title if it exists and is not NA
-    if ("title" %in% names(parent_obj$links) && !is.na(parent_obj$links$title[i])) {
-      link$title <- parent_obj$links$title[i]
-    }
-    link
-  })
-
-  # Check if link already exists
-  existing_hrefs <- sapply(links_list, function(link) link$href)
+  existing_hrefs <- vapply(parent_obj$links, function(link) link$href, character(1))
   if (child_rel_path %in% existing_hrefs) {
     return(parent_obj) # Link already exists, skip
   }
 
-  # Create new link
   new_link <- list(
     rel = "child",
     href = child_rel_path,
@@ -319,8 +365,7 @@ add_child_link <- function(parent_obj, child_rel_path, child_title = NULL) {
     new_link$title <- child_title
   }
 
-  # Add to links list
-  parent_obj$links <- c(links_list, list(new_link))
+  parent_obj$links <- c(parent_obj$links, list(new_link))
 
   parent_obj
 }
@@ -363,12 +408,19 @@ build_item_links <- function(item_id, items_dir, collection_dir, root_path) {
 }
 
 #' Build links for a collection
+#'
+#' Note: does not include an `items` link pointing at the items directory.
+#' That convention is for a live OGC API - Features endpoint that returns a
+#' `FeatureCollection` on request; a static file server just exposes the
+#' raw directory, which STAC clients can't use. Static catalogs instead
+#' list each item individually via `rel: "item"` links - see
+#' [rebuild_item_links()], called from [stac_add_items()].
+#'
 #' @param collection_dir Path to collection directory
 #' @param parent_path Path to parent STAC file
-#' @param items_dir Path to items directory
 #' @return List of link objects
 #' @keywords internal
-build_collection_links <- function(collection_dir, parent_path, items_dir) {
+build_collection_links <- function(collection_dir, parent_path) {
   root_path <- find_root_catalog(parent_path)
 
   list(
@@ -386,11 +438,6 @@ build_collection_links <- function(collection_dir, parent_path, items_dir) {
       rel = "self",
       href = fs::path(".", "collection.json"),
       type = "application/json"
-    ),
-    list(
-      rel = "items",
-      href = fs::path(".", fs::path_rel(items_dir, collection_dir)),
-      type = "application/geo+json"
     )
   )
 }
@@ -413,6 +460,38 @@ build_catalog_links <- function(catalog_file, catalog_dir) {
       type = "application/json"
     )
   )
+}
+
+#' Rebuild a collection's `item` links from the files present in items_dir
+#'
+#' Static STAC catalogs list each item directly on the collection via
+#' `rel: "item"` links (the item-level equivalent of `rel: "child"` for
+#' sub-collections). This re-derives that set from the items actually on
+#' disk, so it stays correct across repeated [stac_add_items()] calls
+#' (including ones using `overwrite_items`) without accumulating stale or
+#' duplicate entries.
+#'
+#' @param links Existing links list; non-`item` links are preserved as-is
+#' @param collection_dir Path to collection directory
+#' @param items_dir Path to items directory
+#' @return Updated links list
+#' @keywords internal
+rebuild_item_links <- function(links, collection_dir, items_dir) {
+  links <- Filter(function(link) !identical(link$rel, "item"), links)
+
+  item_files <- fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)
+
+  item_links <- lapply(item_files, function(f) {
+    list(
+      rel = "item",
+      href = fs::path(".", fs::path_rel(f, collection_dir)),
+      type = "application/geo+json",
+      title = fs::path_ext_remove(fs::path_file(f))
+    )
+  })
+  names(item_links) <- NULL
+
+  c(links, item_links)
 }
 
 #' Build an empty placeholder extent for a newly created collection
@@ -491,13 +570,9 @@ find_root_catalog <- function(stac_path) {
     return(fs::path_abs(stac_path))
   }
 
-  # Look for root link
-  # yyjsonr always returns links as a data frame
-  root_rows <- which(stac_obj$links$rel == "root")
-  if (length(root_rows) > 0) {
-    root_href <- stac_obj$links$href[root_rows[1]]
-    root_path <- fs::path_abs(root_href, start = stac_dir)
-    return(root_path)
+  root_link <- find_link(stac_obj$links, "root")
+  if (!is.null(root_link)) {
+    return(fs::path_abs(root_link$href, start = stac_dir))
   }
 
   # If no root link and is Collection, error
