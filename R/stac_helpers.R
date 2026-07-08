@@ -388,6 +388,43 @@ build_collection_links <- function(collection_dir, parent_path, items_dir) {
   )
 }
 
+#' Build links for a root catalog
+#' @param catalog_file Path to catalog.json
+#' @param catalog_dir Path to catalog directory
+#' @return List of link objects
+#' @keywords internal
+build_catalog_links <- function(catalog_file, catalog_dir) {
+  list(
+    list(
+      rel = "root",
+      href = fs::path(".", fs::path_rel(catalog_file, catalog_dir)),
+      type = "application/json"
+    ),
+    list(
+      rel = "self",
+      href = fs::path_abs(catalog_file),
+      type = "application/json"
+    )
+  )
+}
+
+#' Build an empty placeholder extent for a newly created collection
+#'
+#' Spatial bbox has no valid "unknown" representation in STAC (must be
+#' numeric), so a zero bbox is used as a clearly-empty placeholder.
+#' Temporal interval bounds may legally be `NULL` per the STAC spec, meaning
+#' "unknown". Both are meant to be replaced (not merged) the first time
+#' items are added via [stac_add_items()].
+#'
+#' @return List with placeholder spatial and temporal extent
+#' @keywords internal
+empty_extent <- function() {
+  list(
+    spatial = list(bbox = list(c(0, 0, 0, 0, 0, 0))),
+    temporal = list(interval = list(list(NULL, NULL)))
+  )
+}
+
 
 # Path Helpers -----------------------------------------------------------------
 
