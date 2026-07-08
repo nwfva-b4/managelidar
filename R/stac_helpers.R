@@ -45,6 +45,21 @@ write_stac <- function(obj, path) {
 }
 
 
+
+path_to_file_uri <- function(path) {
+  # normalize separators
+  path <- gsub("\\\\", "/", path)
+
+  # Windows drive letter?
+  if (grepl("^[A-Za-z]:/", path)) {
+    paste0("file:///", path)
+  } else if (startsWith(path, "/")) {
+    paste0("file://", path)
+  } else {
+    path
+  }
+}
+
 # VPC Processing ---------------------------------------------------------------
 
 #' Convert VPC features to STAC items
@@ -52,28 +67,42 @@ write_stac <- function(obj, path) {
 #' @param collection_dir Path to collection directory
 #' @param items_dir Path to items directory
 #' @param root_path Absolute path to root catalog
+#' @param collection_id Parent collection ID
 #' @return List of STAC item objects
 #' @keywords internal
-vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path) {
+vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, collection_id) {
   features <- vpc_obj$features
 
-  # features is a data frame
-  # Convert each row to a list item
   items <- lapply(seq_len(nrow(features)), function(i) {
-    # Extract each column's value for row i
+
+    assets <- features$assets[[i]]
+
+    # Convert asset hrefs to file URIs
+    for (name in names(assets)) {
+      if (!is.null(assets[[name]]$href)) {
+        assets[[name]]$href <- path_to_file_uri(assets[[name]]$href)
+      }
+
+      # Ensure roles is an array
+      if (!is.null(assets[[name]]$roles) &&
+          is.character(assets[[name]]$roles) &&
+          length(assets[[name]]$roles) == 1) {
+        assets[[name]]$roles <- list(assets[[name]]$roles)
+      }
+    }
+
     item <- list(
-      type = features$type[i],
+      type = "Feature",
+      collection = collection_id,
       stac_version = features$stac_version[i],
       stac_extensions = features$stac_extensions[[i]],
       id = features$id[i],
       geometry = features$geometry[[i]],
       bbox = features$bbox[[i]],
       properties = features$properties[[i]],
-      assets = features$assets[[i]]
+      assets = assets
     )
 
-    # Set type to "Feature" and add links
-    item$type <- "Feature"
     item$links <- build_item_links(item$id, items_dir, collection_dir, root_path)
     item
   })
@@ -227,7 +256,7 @@ build_catalog <- function(id, title, description) {
 #' @keywords internal
 required_lidar_stac_extensions <- function() {
   c(
-    "https://stac-extensions.github.io/pointcloud/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
     "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
   )
 }
