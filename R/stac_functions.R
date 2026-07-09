@@ -32,7 +32,7 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
   }
 
   catalog_obj <- build_catalog(id = id, title = title, description = description)
-  catalog_obj$links <- build_catalog_links(catalog_file, path)
+  catalog_obj$links <- build_catalog_links(catalog_file, path, title)
 
   write_stac(catalog_obj, catalog_file)
 
@@ -122,7 +122,7 @@ stac_add_collection <- function(
     assets = assets
   )
 
-  collection_obj$links <- build_collection_links(collection_dir, parent)
+  collection_obj$links <- build_collection_links(collection_dir, parent, title)
 
   write_stac(collection_obj, collection_file)
 
@@ -238,7 +238,10 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
   temporal_extent <- extract_temporal_extent(vpc_obj)
   crs <- extract_crs(vpc_obj)
 
-  items <- vpc_to_stac_items(vpc_obj, collection_dir, items_dir, root_path, collection_id)
+  items <- vpc_to_stac_items(
+    vpc_obj, collection_dir, items_dir, root_path, collection_id,
+    root_title = root_link$title, collection_title = collection_obj$title
+  )
 
   written_ids <- write_items(items, items_dir, overwrite = overwrite_items)
   skipped_count <- length(items) - length(written_ids)

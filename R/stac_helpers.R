@@ -68,9 +68,11 @@ path_to_file_uri <- function(path) {
 #' @param items_dir Path to items directory
 #' @param root_path Absolute path to root catalog
 #' @param collection_id Parent collection ID
+#' @param root_title Title of the root catalog
+#' @param collection_title Title of the owning collection
 #' @return List of STAC item objects
 #' @keywords internal
-vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, collection_id) {
+vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, collection_id, root_title, collection_title) {
   features <- vpc_obj$features
 
   items <- lapply(seq_len(nrow(features)), function(i) {
@@ -109,7 +111,9 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, col
       assets = assets
     )
 
-    item$links <- build_item_links(item$id, items_dir, collection_dir, root_path)
+    item$links <- build_item_links(
+      item$id, items_dir, collection_dir, root_path, root_title, collection_title
+    )
     item
   })
 
@@ -410,9 +414,11 @@ add_child_link <- function(parent_obj, child_rel_path, child_title = NULL) {
 #' @param items_dir Path to items directory
 #' @param collection_dir Path to collection directory
 #' @param root_path Absolute path to root catalog
+#' @param root_title Title of the root catalog
+#' @param collection_title Title of the owning collection
 #' @return List of link objects
 #' @keywords internal
-build_item_links <- function(item_id, items_dir, collection_dir, root_path) {
+build_item_links <- function(item_id, items_dir, collection_dir, root_path, root_title, collection_title) {
   collection_file <- fs::path(collection_dir, "collection.json")
 
   list(
@@ -422,22 +428,26 @@ build_item_links <- function(item_id, items_dir, collection_dir, root_path) {
         fs::path(items_dir, item_id, ext = "json"),
         items_dir
       )),
-      type = "application/geo+json"
+      type = "application/geo+json",
+      title = item_id
     ),
     list(
       rel = "root",
       href = fs::path_rel(root_path, items_dir),
-      type = "application/json"
+      type = "application/json",
+      title = root_title
     ),
     list(
       rel = "collection",
       href = fs::path_rel(collection_file, items_dir),
-      type = "application/json"
+      type = "application/json",
+      title = collection_title
     ),
     list(
       rel = "parent",
       href = fs::path_rel(collection_file, items_dir),
-      type = "application/json"
+      type = "application/json",
+      title = collection_title
     )
   )
 }
@@ -453,26 +463,32 @@ build_item_links <- function(item_id, items_dir, collection_dir, root_path) {
 #'
 #' @param collection_dir Path to collection directory
 #' @param parent_path Path to parent STAC file
+#' @param title Title of this collection (used on its own `self` link)
 #' @return List of link objects
 #' @keywords internal
-build_collection_links <- function(collection_dir, parent_path) {
+build_collection_links <- function(collection_dir, parent_path, title) {
   root_path <- find_root_catalog(parent_path)
+  root_obj <- read_stac(root_path)
+  parent_obj <- read_stac(parent_path)
 
   list(
     list(
       rel = "root",
       href = fs::path_rel(root_path, collection_dir),
-      type = "application/json"
+      type = "application/json",
+      title = root_obj$title
     ),
     list(
       rel = "parent",
       href = fs::path_rel(parent_path, collection_dir),
-      type = "application/json"
+      type = "application/json",
+      title = parent_obj$title
     ),
     list(
       rel = "self",
       href = fs::path(".", "collection.json"),
-      type = "application/json"
+      type = "application/json",
+      title = title
     )
   )
 }
@@ -480,19 +496,22 @@ build_collection_links <- function(collection_dir, parent_path) {
 #' Build links for a root catalog
 #' @param catalog_file Path to catalog.json
 #' @param catalog_dir Path to catalog directory
+#' @param title Title of this catalog
 #' @return List of link objects
 #' @keywords internal
-build_catalog_links <- function(catalog_file, catalog_dir) {
+build_catalog_links <- function(catalog_file, catalog_dir, title) {
   list(
     list(
       rel = "root",
       href = fs::path(".", fs::path_rel(catalog_file, catalog_dir)),
-      type = "application/json"
+      type = "application/json",
+      title = title
     ),
     list(
       rel = "self",
       href = fs::path(".", "catalog.json"),
-      type = "application/json"
+      type = "application/json",
+      title = title
     )
   )
 }
