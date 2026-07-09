@@ -85,5 +85,12 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 las_files |> get_spatial_extent()
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Get spatial extent
+#>   ▼ 4 LASfiles
+#>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725991.98  (xmin, ymin, xmax, ymax; EPSG:25832)
+#>                            filename   xmin    ymin     xmax    ymax
+#> 1 3dm_32_547_5724_1_ni_20240327.laz 547690 5724000 547999.7 5725000
+#> 2 3dm_32_547_5725_1_ni_20240327.laz 547648 5725000 547998.1 5725991
+#> 3 3dm_32_548_5724_1_ni_20240327.laz 548000 5724000 548992.0 5724997
+#> 4 3dm_32_548_5725_1_ni_20240327.laz 548000 5725000 548995.4 5725992
 ```

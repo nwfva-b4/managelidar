@@ -67,5 +67,13 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
 get_intersection(las_files, las_file)
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
+#> $path1
+#>                            filename
+#> 4 3dm_32_548_5725_1_ni_20240327.laz
+#> 
+#> $path2
+#>                            filename
+#> 1 3dm_32_548_5725_1_ni_20230904.laz
+#> 
 ```

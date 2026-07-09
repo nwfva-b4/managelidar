@@ -99,7 +99,11 @@ coordinates that are genuinely misaligned.</p>
 <span class="r-in"><span><span class="co"># check tiling scheme with 10m tolerance</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">check_tiling</span><span class="op">(</span>tolerance <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            filename size_ok grid_ok valid</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 3dm_32_547_5724_1_ni_20240327.laz   FALSE   FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3dm_32_547_5725_1_ni_20240327.laz   FALSE   FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 3dm_32_548_5724_1_ni_20240327.laz    TRUE    TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 3dm_32_548_5725_1_ni_20240327.laz    TRUE    TRUE  TRUE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -112,7 +116,7 @@ coordinates that are genuinely misaligned.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

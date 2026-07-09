@@ -38,7 +38,7 @@ VPC objects. Automatically writes VPC objects to temporary files as needed by la
     </div>
 
     <div class="ref-description section level2">
-    <p>Wrapper for <code>lasR::exec()</code> that works seamlessly in VPC-pipelines and handles
+    <p>Wrapper for <code><a href="https://rdrr.io/pkg/lasR/man/exec.html" class="external-link">lasR::exec()</a></code> that works seamlessly in VPC-pipelines and handles
 VPC objects. Automatically writes VPC objects to temporary files as needed by lasR.</p>
     </div>
 
@@ -61,12 +61,12 @@ or a VPC object already loaded in R.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments passed to <code>lasR::exec()</code>.</p></dd>
+<dd><p>Additional arguments passed to <code><a href="https://rdrr.io/pkg/lasR/man/exec.html" class="external-link">lasR::exec()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Result from <code>lasR::exec()</code>, typically a list with pipeline outputs.</p>
+    <p>Result from <code><a href="https://rdrr.io/pkg/lasR/man/exec.html" class="external-link">lasR::exec()</a></code>, typically a list with pipeline outputs.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -80,9 +80,18 @@ or a VPC object already loaded in R.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">folder</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="filter_temporal.html">filter_temporal</a></span><span class="op">(</span><span class="st">"2024"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">run_pipeline</span><span class="op">(</span><span class="fu">lasR</span><span class="fu">::</span><span class="fu">dsm</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">run_pipeline</span><span class="op">(</span><span class="fu">lasR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lasR/man/dsm.html" class="external-link">dsm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loadNamespace(x):</span> there is no package called ‘lasR’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Filter temporal extent</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   ▼ 4 LASfiles retained (2024-03-27)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> class       : SpatRaster</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> size        : 1992, 1349, 1  (nrow, ncol, nlyr)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> resolution  : 1, 1  (x, y)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> extent      : 547647, 548996, 5724000, 5725992  (xmin, xmax, ymin, ymax)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> coord. ref. : ETRS89 / UTM zone 32N (EPSG:25832)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> source      : file2c902b3368a4.tif</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> name        : max</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -94,7 +103,7 @@ or a VPC object already loaded in R.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

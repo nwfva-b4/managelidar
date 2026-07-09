@@ -79,15 +79,10 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 las_files |> is_classified(add_classes = TRUE)
-#> ERROR processing 3dm_32_547_5724_1_ni_20240327.laz: there is no package called ‘lasR’
-#> ERROR processing 3dm_32_547_5725_1_ni_20240327.laz: there is no package called ‘lasR’
-#> ERROR processing 3dm_32_548_5724_1_ni_20240327.laz: there is no package called ‘lasR’
-#> ERROR processing 3dm_32_548_5725_1_ni_20240327.laz: there is no package called ‘lasR’
-#> Column 1 ['3dm_32_547_5725_1_ni_20240327.laz'] of item 2 is missing in item 1. Use fill=TRUE to fill with NA (NULL for list columns), or use.names=FALSE to ignore column names. use.names='check' (default from v1.12.2) emits this message and proceeds as if use.names=FALSE for  backwards compatibility. See news item 5 in v1.12.2 for options to control this message.
-#>    3dm_32_547_5724_1_ni_20240327.laz
-#>                               <list>
-#> 1: there is no package called ‘lasR’
-#> 2: there is no package called ‘lasR’
-#> 3: there is no package called ‘lasR’
-#> 4: there is no package called ‘lasR’
+#>                                 file classified classes
+#>                               <char>     <lgcl>  <AsIs>
+#> 1: 3dm_32_547_5724_1_ni_20240327.laz       TRUE       2
+#> 2: 3dm_32_547_5725_1_ni_20240327.laz       TRUE       2
+#> 3: 3dm_32_548_5724_1_ni_20240327.laz       TRUE      12
+#> 4: 3dm_32_548_5725_1_ni_20240327.laz       TRUE      12
 ```

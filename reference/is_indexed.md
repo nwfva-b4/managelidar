@@ -47,5 +47,9 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 las_files |> is_indexed()
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#>                            filename indexed
+#> 1 3dm_32_547_5724_1_ni_20240327.laz    TRUE
+#> 2 3dm_32_547_5725_1_ni_20240327.laz    TRUE
+#> 3 3dm_32_548_5724_1_ni_20240327.laz    TRUE
+#> 4 3dm_32_548_5725_1_ni_20240327.laz    TRUE
 ```

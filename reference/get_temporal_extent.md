@@ -115,21 +115,49 @@ las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 # Get dates per file
 las_files |> get_temporal_extent()
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Get temporal extent
+#>   ▼ 5 LASfiles
+#>   Temporal extent: 2023-09-05 to 2024-03-27
+#>                            filename       date gpstime         date_source
+#> 1 3dm_32_547_5724_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
+#> 2 3dm_32_547_5725_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
+#> 3 3dm_32_548_5724_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 2023-09-05    TRUE gpstime_first_point
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
 
 # Get combined date range
 las_files |> get_temporal_extent(per_file = FALSE)
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Get temporal extent
+#>   ▼ 5 LASfiles
+#>   Temporal extent: 2023-09-05 to 2024-03-27
+#>        start        end
+#> 1 2023-09-05 2024-03-27
 
 # Get reference years
 las_files |> get_temporal_extent(return_referenceyear = TRUE)
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Get temporal extent
+#>   ▼ 5 LASfiles
+#>   Temporal extent: 2023 to 2024
+#>                            filename date gpstime         date_source
+#> 1 3dm_32_547_5724_1_ni_20240327.laz 2024    TRUE gpstime_first_point
+#> 2 3dm_32_547_5725_1_ni_20240327.laz 2024    TRUE gpstime_first_point
+#> 3 3dm_32_548_5724_1_ni_20240327.laz 2024    TRUE gpstime_first_point
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 2023    TRUE gpstime_first_point
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 2024    TRUE gpstime_first_point
 
 # Using CSV for reference dates
 csv_path <- system.file("extdata", "acquisition_dates.csv", package = "managelidar")
 get_temporal_extent(folder, from_csv = csv_path)
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Get temporal extent
+#>   ▼ 5 LASfiles
+#>   Temporal extent: 2023-09-05 to 2024-03-27
+#>                            filename       date gpstime         date_source
+#> 1 3dm_32_547_5724_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
+#> 2 3dm_32_547_5725_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
+#> 3 3dm_32_548_5724_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
+#> 4 3dm_32_548_5725_1_ni_20230904.laz 2023-09-05    TRUE gpstime_first_point
+#> 5 3dm_32_548_5725_1_ni_20240327.laz 2024-03-27    TRUE gpstime_first_point
 ```

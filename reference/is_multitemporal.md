@@ -93,5 +93,10 @@ las_files <- list.files(folder, full.names = T, pattern = "*.laz")
 
 las_files |> is_multitemporal(tolerance = 10)
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> # A tibble: 3 × 5
+#>   filename                          tile   date       multitemporal observations
+#>   <chr>                             <chr>  <date>     <lgl>                <int>
+#> 1 3dm_32_548_5725_1_ni_20230904.laz 548_5… 2023-09-05 TRUE                     2
+#> 2 3dm_32_548_5724_1_ni_20240327.laz 548_5… 2024-03-27 FALSE                    1
+#> 3 3dm_32_548_5725_1_ni_20240327.laz 548_5… 2024-03-27 TRUE                     2
 ```

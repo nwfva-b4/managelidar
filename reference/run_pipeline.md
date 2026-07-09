@@ -1,8 +1,8 @@
 # Execute lasR pipeline on catalog
 
-Wrapper for `lasR::exec()` that works seamlessly in VPC-pipelines and
-handles VPC objects. Automatically writes VPC objects to temporary files
-as needed by lasR.
+Wrapper for [`lasR::exec()`](https://rdrr.io/pkg/lasR/man/exec.html)
+that works seamlessly in VPC-pipelines and handles VPC objects.
+Automatically writes VPC objects to temporary files as needed by lasR.
 
 ## Usage
 
@@ -23,11 +23,13 @@ run_pipeline(path, pipeline, ...)
 
 - ...:
 
-  Additional arguments passed to `lasR::exec()`.
+  Additional arguments passed to
+  [`lasR::exec()`](https://rdrr.io/pkg/lasR/man/exec.html).
 
 ## Value
 
-Result from `lasR::exec()`, typically a list with pipeline outputs.
+Result from [`lasR::exec()`](https://rdrr.io/pkg/lasR/man/exec.html),
+typically a list with pipeline outputs.
 
 ## Details
 
@@ -48,5 +50,14 @@ folder |>
   filter_temporal("2024") |>
   run_pipeline(lasR::dsm())
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Filter temporal extent
+#>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
+#>   ▼ 4 LASfiles retained (2024-03-27)
+#> class       : SpatRaster
+#> size        : 1992, 1349, 1  (nrow, ncol, nlyr)
+#> resolution  : 1, 1  (x, y)
+#> extent      : 547647, 548996, 5724000, 5725992  (xmin, xmax, ymin, ymax)
+#> coord. ref. : ETRS89 / UTM zone 32N (EPSG:25832)
+#> source      : file2c902b3368a4.tif
+#> name        : max
 ```

@@ -3,8 +3,8 @@
 `get_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a
 collection of LAS/LAZ/COPC files into Geopackage. VPCs can be read and
 visualized by QGIS, however individual tiles (features) can not be
-queried as is. To do this we convert it to a Geopackage, which can
-easily be explored in any GIS. Each LAS tile becomes a feature with its
+queried as is. To enable this we convert it to a Geopackage, which can
+be easily explored in any GIS. Each LAS tile becomes a feature with its
 spatial extent and some metadata.
 
 ## Usage
@@ -39,19 +39,28 @@ get_gpkg(
 
   Integer. Optional EPSG code to reproject the VPC (default: 25832).
 
+- metrics:
+
+  Optional. Controls whether summary metrics are computed and added to
+  the output layer.
+
+  - `NULL` (default): no summary metrics are computed.
+
+  - `TRUE`: compute the default set of metrics returned by
+    [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md).
+
+  - Character vector: compute only the specified metrics, e.g.
+    `c("z_mean", "classification_mode", "intensity_mean")`.
+
+  Computing metrics requires reading the point data from all files and
+  can substantially increase processing time. See
+  [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
+  for available metrics and details.
+
 ## Value
 
 Invisibly returns an `sf` object representing the tiles written to the
 Geopackage.
-
-## Details
-
-Summary metrics (optional) can be included by setting `metrics = TRUE`
-for default metrics or providing a character vector of custom metrics.
-Computing metrics requires reading the actual point data, und thus can
-be much slower. See
-[`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md)
-for details.
 
 ## Examples
 
@@ -60,5 +69,5 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 las_files |> get_gpkg()
 #> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
-#> Error in loadNamespace(x): there is no package called ‘lasR’
+#> Wrote Geopackage: /tmp/RtmpCCVm6F/file2c9048fec245.gpkg
 ```
