@@ -17,10 +17,12 @@ Imports:
     fs,
     gdalraster,
     glue,
+    lasR,
     lidR,
     lubridate,
     mapview,
     purrr,
+    rlas, 
     sf,
     yyjsonr
 Suggests: 
@@ -32,3 +34,5 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
+Additional_repositories:
+    https://r-lidar.r-universe.dev
