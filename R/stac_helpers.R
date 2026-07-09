@@ -97,7 +97,11 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, col
       # lasR writes v.1.0.0, we manually bump it here
       # stac_version = features$stac_version[i],
       stac_version = "1.1.0",
-      stac_extensions = features$stac_extensions[[i]],
+      # Override whatever extension versions the VPC source data declares
+      # (e.g. lasR bakes in pointcloud v1.0.0) so items always match the
+      # versions this package targets - see required_lidar_stac_extensions().
+      stac_extensions = required_lidar_stac_extensions(),
+      # stac_extensions = features$stac_extensions[[i]],
       id = features$id[i],
       geometry = features$geometry[[i]],
       bbox = features$bbox[[i]],
