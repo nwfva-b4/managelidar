@@ -2,17 +2,33 @@
 # User-facing functions for managing STAC catalogs and collections
 # Part of the managelidar package
 
-#' Create a new STAC catalog
+#' Create (or update) a STAC catalog
 #'
 #' Creates a new root STAC catalog at the given path. This is the entry
 #' point of a STAC tree; collections are added underneath it with
 #' [stac_add_collection()].
 #'
+#' If a catalog already exists at `path`, it is updated in place instead
+#' of being recreated: any argument you explicitly pass (`title`,
+#' `description`, `icon`) is applied; anything you don't pass is left
+#' untouched, so re-running this with just a new `icon` won't reset the
+#' title back to its default. Existing links (e.g. `child` links to
+#' collections added since) are preserved.
+#'
 #' @param path Directory in which to create the catalog. `catalog.json` is
 #'   written inside this directory.
-#' @param id Catalog ID.
-#' @param title Catalog title. Defaults to `id`.
-#' @param description Catalog description. Defaults to `"STAC catalog"`.
+#' @param id Catalog ID. Ignored (with a warning) if a catalog already
+#'   exists at `path` with a different ID, since IDs aren't renamed here.
+#' @param title Catalog title. Defaults to `id` for a new catalog; left
+#'   unchanged on update unless explicitly passed.
+#' @param description Catalog description. Defaults to `"STAC catalog"`
+#'   for a new catalog; left unchanged on update unless explicitly passed.
+#' @param icon A URL, or a path to a local image file, to set as the
+#'   catalog's icon link (shown in headers/listings by STAC Browser and
+#'   similar clients). See [stac_set_icon()] for details.
+#' @param copy Whether to copy `icon` into the catalog tree rather than
+#'   reference it in place. See [stac_set_icon()] for the default
+#'   behavior.
 #'
 #' @return Path to `catalog.json` (invisibly), for piping into
 #'   [stac_add_collection()].
@@ -22,44 +38,90 @@
 #'   stac_create_catalog(id = "lidar_ni", title = "Sample Catalog")
 #'
 #' @export
-stac_create_catalog <- function(path, id, title = id, description = "STAC catalog") {
+stac_create_catalog <- function(path, id, title = id, description = "STAC catalog", icon = NULL, copy = NULL) {
   fs::dir_create(path)
   catalog_file <- fs::path(path, "catalog.json")
+  already_exists <- fs::file_exists(catalog_file)
 
-  if (fs::file_exists(catalog_file)) {
-    cli::cli_alert_warning("Catalog already exists: {.path {catalog_file}}")
-    return(invisible(catalog_file))
+  if (already_exists) {
+    catalog_obj <- read_stac(catalog_file)
+
+    if (!identical(catalog_obj$id, id)) {
+      cli::cli_alert_warning(
+        "Existing catalog ID {.field {catalog_obj$id}} differs from {.field {id}} - keeping the existing ID"
+      )
+    }
+    if (!missing(title)) catalog_obj$title <- title
+    if (!missing(description)) catalog_obj$description <- description
+  } else {
+    catalog_obj <- build_catalog(id = id, title = title, description = description)
   }
 
-  catalog_obj <- build_catalog(id = id, title = title, description = description)
-  catalog_obj$links <- build_catalog_links(catalog_file, path, title)
+  fresh_links <- build_catalog_links(catalog_file, path, catalog_obj$title)
+  for (l in fresh_links) {
+    catalog_obj$links <- set_link(catalog_obj$links, l)
+  }
 
   write_stac(catalog_obj, catalog_file)
 
-  cli::cli_alert_success("Created catalog {.field {id}} at {.path {catalog_file}}")
+  if (already_exists) {
+    cli::cli_alert_success("Updated catalog {.field {catalog_obj$id}} at {.path {catalog_file}}")
+  } else {
+    cli::cli_alert_success("Created catalog {.field {id}} at {.path {catalog_file}}")
+  }
+
+  if (!is.null(icon)) {
+    stac_set_icon(catalog_file, icon, copy = copy)
+  }
 
   invisible(catalog_file)
 }
 
-#' Add a new (empty) collection to a STAC catalog or collection
+#' Add (or update) a collection on a STAC catalog or collection
 #'
 #' Creates a new collection nested under a catalog or another collection.
-#' The collection starts out empty; use [stac_add_items()] to populate it
-#' with items afterwards.
+#' A freshly created collection starts out empty; use [stac_add_items()]
+#' to populate it with items afterwards.
+#'
+#' If a collection with this `id` already exists under `parent`, it's
+#' updated in place instead of being recreated: any argument you
+#' explicitly pass (`title`, `description`, `license`, `keywords`,
+#' `providers`, `summaries`, `assets`, `stac_extensions`, `thumbnail`,
+#' `overview`, `icon`) is applied; anything you don't pass is left
+#' untouched, so re-running this to just add a `thumbnail` won't reset
+#' the title or wipe out items already added. The collection's `extent`
+#' is never touched here - only [stac_add_items()] manages it.
 #'
 #' @param parent Path to parent STAC JSON file (`catalog.json` or
 #'   `collection.json`). Can be the output of [stac_create_catalog()] or a
 #'   previous [stac_add_collection()] call (to nest a subcollection).
 #' @param id Collection ID.
-#' @param title Collection title. Defaults to `id`.
-#' @param description Collection description. Defaults to `"STAC collection"`.
-#' @param license License string. Defaults to `"other"`.
+#' @param title Collection title. Defaults to `id` for a new collection;
+#'   left unchanged on update unless explicitly passed.
+#' @param description Collection description. Defaults to
+#'   `"STAC collection"` for a new collection; left unchanged on update
+#'   unless explicitly passed.
+#' @param license License string. Defaults to `"other"` for a new
+#'   collection; left unchanged on update unless explicitly passed.
 #' @param keywords Character vector of keywords.
 #' @param providers List of provider objects.
 #' @param summaries List of summary objects. `proj:epsg` and `pc:type` are
 #'   added automatically by [stac_add_items()] once items are added.
-#' @param assets List of asset objects.
+#' @param assets List of asset objects. For a thumbnail/overview image,
+#'   prefer the `thumbnail`/`overview` arguments below instead of building
+#'   this by hand.
 #' @param stac_extensions Character vector of extension URLs.
+#' @param thumbnail A URL, or a path to a local image file, to set as the
+#'   collection's thumbnail asset. See [stac_add_collection_asset()].
+#' @param overview A URL, or a path to a local image file, to set as the
+#'   collection's overview asset. See [stac_add_collection_asset()].
+#' @param icon A URL, or a path to a local image file, to set as the
+#'   collection's icon link (shown in headers/listings). See
+#'   [stac_set_icon()].
+#' @param copy Whether to copy `thumbnail`/`overview`/`icon` into the
+#'   catalog tree rather than reference them in place. See
+#'   [stac_add_collection_asset()]/[stac_set_icon()] for the default
+#'   behavior.
 #'
 #' @details
 #' Directory structure created:
@@ -68,12 +130,13 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 #'   \item For collection parent: `{parent_dir}/{id}/` (subcollection)
 #' }
 #'
-#' The new collection is written with a placeholder empty extent (zero
-#' bbox, `NULL` temporal interval), which [stac_add_items()] replaces with
-#' the real extent the first time items are added.
+#' A newly created collection is written with a placeholder empty extent
+#' (zero bbox, `NULL` temporal interval), which [stac_add_items()]
+#' replaces with the real extent the first time items are added.
 #'
-#' @return Path to the new `collection.json` (invisibly), for piping into
-#'   [stac_add_collection()] (subcollection) or [stac_add_items()].
+#' @return Path to the collection's `collection.json` (invisibly), for
+#'   piping into [stac_add_collection()] (subcollection) or
+#'   [stac_add_items()].
 #'
 #' @examples
 #' tempfile("stac-managelidar-") |>
@@ -92,7 +155,11 @@ stac_add_collection <- function(
   providers = NULL,
   summaries = NULL,
   assets = NULL,
-  stac_extensions = NULL
+  stac_extensions = NULL,
+  thumbnail = NULL,
+  overview = NULL,
+  icon = NULL,
+  copy = NULL
 ) {
   if (!fs::file_exists(parent)) {
     cli::cli_abort("Parent STAC file does not exist: {.path {parent}}")
@@ -100,39 +167,63 @@ stac_add_collection <- function(
 
   collection_dir <- resolve_collection_dir(parent, id)
   collection_file <- fs::path(collection_dir, "collection.json")
+  already_exists <- fs::file_exists(collection_file)
+  get_items_dir(collection_dir) # ensure items/ exists either way
 
-  if (fs::file_exists(collection_file)) {
-    cli::cli_alert_warning("Collection already exists: {.path {collection_file}}")
-    cli::cli_alert_info("Use {.fn stac_add_items} to add items to it")
-    return(invisible(collection_file))
+  if (already_exists) {
+    collection_obj <- read_stac(collection_file)
+
+    if (!missing(title)) collection_obj$title <- title
+    if (!missing(description)) collection_obj$description <- description
+    if (!missing(license)) collection_obj$license <- license
+    if (!missing(keywords)) collection_obj$keywords <- keywords
+    if (!missing(providers)) collection_obj$providers <- providers
+    if (!missing(summaries)) collection_obj$summaries <- summaries
+    if (!missing(assets)) collection_obj$assets <- assets
+    if (!missing(stac_extensions)) collection_obj$stac_extensions <- stac_extensions
+  } else {
+    collection_obj <- build_collection(
+      id = id,
+      title = title,
+      description = description,
+      extent = empty_extent(),
+      license = license,
+      stac_extensions = stac_extensions %||% required_lidar_stac_extensions(),
+      keywords = keywords,
+      providers = providers,
+      summaries = summaries,
+      assets = assets
+    )
   }
 
-  items_dir <- get_items_dir(collection_dir)
-
-  collection_obj <- build_collection(
-    id = id,
-    title = title,
-    description = description,
-    extent = empty_extent(),
-    license = license,
-    stac_extensions = stac_extensions %||% required_lidar_stac_extensions(),
-    keywords = keywords,
-    providers = providers,
-    summaries = summaries,
-    assets = assets
-  )
-
-  collection_obj$links <- build_collection_links(collection_dir, parent, title)
+  fresh_links <- build_collection_links(collection_dir, parent, collection_obj$title)
+  for (l in fresh_links) {
+    collection_obj$links <- set_link(collection_obj$links, l)
+  }
 
   write_stac(collection_obj, collection_file)
 
   parent_obj <- read_stac(parent)
   child_rel_path <- fs::path(".", fs::path_rel(collection_file, fs::path_dir(parent)))
-  parent_obj <- add_child_link(parent_obj, child_rel_path, child_title = title)
+  parent_obj <- add_child_link(parent_obj, child_rel_path, child_title = collection_obj$title)
   write_stac(parent_obj, parent)
 
-  cli::cli_alert_success("Created collection {.field {id}} at {.path {collection_file}}")
+  if (already_exists) {
+    cli::cli_alert_success("Updated collection {.field {id}} at {.path {collection_file}}")
+  } else {
+    cli::cli_alert_success("Created collection {.field {id}} at {.path {collection_file}}")
+  }
   cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {parent}}")
+
+  if (!is.null(thumbnail)) {
+    stac_add_collection_asset(collection_file, thumbnail, roles = "thumbnail", copy = copy)
+  }
+  if (!is.null(overview)) {
+    stac_add_collection_asset(collection_file, overview, roles = "overview", copy = copy)
+  }
+  if (!is.null(icon)) {
+    stac_set_icon(collection_file, icon, copy = copy)
+  }
 
   invisible(collection_file)
 }
@@ -182,6 +273,133 @@ propagate_extent_to_ancestors <- function(collection_path, spatial_extent, tempo
   propagate_extent_to_ancestors(parent_path, spatial_extent, temporal_extent)
 }
 
+#' Set an icon on a catalog or collection
+#'
+#' Adds a link with `rel: "icon"`. STAC Browser (and other clients) use
+#' this - specifically a *link*, not an asset - to show a small icon in
+#' the page header and in lists of Catalogs, Collections and Items. This
+#' works on both catalogs and collections.
+#'
+#' For a preview image shown on a collection's own page (not in listings),
+#' use [stac_add_collection_asset()] with `roles = "thumbnail"` instead -
+#' that's an asset, not a link, which is a different STAC Browser
+#' convention for a different purpose.
+#'
+#' @param stac_object Path to a `catalog.json` or `collection.json`.
+#' @param source A URL, or a path to a local image file (png, jpg/jpeg,
+#'   webp, gif, or tif/tiff).
+#' @param copy Whether to copy the image into the catalog tree rather than
+#'   reference it in place. Defaults to `FALSE` for URLs (already
+#'   web-accessible) and `TRUE` for local files (otherwise unreachable from
+#'   a browser via [stac_browse()]).
+#'
+#' @return Path to `stac_object` (invisibly), for piping into further
+#'   calls.
+#'
+#' @examples
+#' cat <- tempfile("stac-managelidar-") |>
+#'   stac_create_catalog(id = "lidar_ni")
+#' col <- cat |>
+#'   stac_add_collection(id = "lidar_ni", title = "Lidar Solling", keywords = c("lidar", "ALS", "Solling", "test")) |> 
+#'   stac_set_icon("https://raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/man/figures/logo.png")
+#'
+#' @export
+stac_set_icon <- function(stac_object, source, copy = NULL) {
+  if (!fs::file_exists(stac_object)) {
+    cli::cli_abort("STAC file does not exist: {.path {stac_object}}")
+  }
+
+  obj_dir <- fs::path_dir(stac_object)
+  resolved <- resolve_image_asset(source, obj_dir, key = "icon", copy = copy)
+
+  obj <- read_stac(stac_object)
+
+  icon_link <- list(rel = "icon", href = resolved$href)
+  if (!is.null(resolved$type)) icon_link$type <- resolved$type
+  obj$links <- set_link(obj$links, icon_link)
+
+  write_stac(obj, stac_object)
+  cli::cli_alert_success("Set icon on {.path {stac_object}}")
+
+  invisible(stac_object)
+}
+
+#' Add a visual asset (thumbnail, overview, ...) to a collection
+#'
+#' Registers an image as a collection-level asset, using `roles` to tell
+#' STAC Browser (and other clients) how to display it - `"thumbnail"` is
+#' shown as a preview image on the collection's own page. For an icon
+#' shown in headers and listings, use [stac_set_icon()] instead - STAC
+#' Browser treats icons as *links*, not assets, which is a different
+#' mechanism.
+#'
+#' @param collection Path to an existing `collection.json`.
+#' @param source A URL, or a path to a local image file (png, jpg/jpeg,
+#'   webp, gif, or tif/tiff).
+#' @param roles Character vector of asset roles. Defaults to
+#'   `"thumbnail"`. Multiple roles can be combined on the same image, e.g.
+#'   `c("thumbnail", "overview")`.
+#' @param key Asset key (dictionary key under `assets`). Defaults to the
+#'   first role (e.g. `"thumbnail"`). A second call with the same key
+#'   replaces it.
+#' @param title Asset title. Defaults to a title-cased version of `key`.
+#' @param copy Whether to copy the image into the catalog tree rather than
+#'   reference it in place. Defaults to `FALSE` for URLs (already
+#'   web-accessible) and `TRUE` for local files (otherwise unreachable from
+#'   a browser via [stac_browse()]).
+#'
+#' @return Path to `collection.json` (invisibly), for piping into further
+#'   calls.
+#'
+#' @examples
+#' cat <- tempfile("stac-managelidar-") |>
+#'   stac_create_catalog(id = "lidar_ni") 
+#' col <- cat |>
+#'   stac_add_collection(id = "lidar_ni", title = "Lidar Solling", keywords = c("lidar", "ALS", "Solling", "test")) |> 
+#'   stac_add_collection_asset(
+#'     "https://raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/man/figures/logo.png",
+#'     roles = "thumbnail"
+#'   )
+#'
+#' @export
+stac_add_collection_asset <- function(
+  collection,
+  source,
+  roles = "thumbnail",
+  key = NULL,
+  title = NULL,
+  copy = NULL
+) {
+  if (!fs::file_exists(collection)) {
+    cli::cli_abort("Collection file does not exist: {.path {collection}}")
+  }
+
+  key <- key %||% roles[1]
+  collection_dir <- fs::path_dir(collection)
+  resolved <- resolve_image_asset(source, collection_dir, key = key, copy = copy)
+
+  collection_obj <- read_stac(collection)
+
+  assets <- collection_obj$assets
+  if (is.null(assets)) assets <- list()
+
+  asset <- list(href = resolved$href)
+  if (!is.null(resolved$type)) asset$type <- resolved$type
+  asset$title <- title %||% tools::toTitleCase(gsub("[_-]", " ", key))
+  asset$roles <- as.list(roles)
+
+  assets[[key]] <- asset
+  collection_obj$assets <- assets
+
+  write_stac(collection_obj, collection)
+
+  cli::cli_alert_success(
+    "Added {.field {key}} asset ({paste(roles, collapse = ', ')}) to {.path {collection}}"
+  )
+
+  invisible(collection)
+}
+
 #' Add LASfile items to an existing STAC collection
 #'
 #' Converts LASfiles (via VPC) to STAC items and writes them into an
@@ -205,10 +423,16 @@ propagate_extent_to_ancestors <- function(collection_path, spatial_extent, tempo
 #'   [stac_add_items()] calls.
 #'
 #' @examples
-#' \dontrun{
-#' "path/to/catalog/collections/lidar_ni_2023/collection.json" |>
-#'   stac_add_items(path = "path/to/new_data.vpc")
-#' }
+#' cat <- tempfile("stac-managelidar-") |>
+#'   stac_create_catalog(id = "lidar_ni") 
+#' col |>
+#'   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
+#'   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
+#' 
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+#' items <- col |>
+#'   stac_add_items(path = las_files)
 #'
 #' @export
 stac_add_items <- function(collection, path, overwrite_items = FALSE) {

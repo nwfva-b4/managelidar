@@ -382,29 +382,62 @@ find_link <- function(links, rel) {
   NULL
 }
 
-#' Add a child link to parent object
+#' Replace the link with a given `rel`, or add it if not present
+#'
+#' For relation types that should only appear once per object (`root`,
+#' `parent`, `self`, `icon`). Not suitable for `child`/`item` links, which
+#' are multi-valued - see [add_child_link()] and [rebuild_item_links()]
+#' for those.
+#'
+#' @param links List of link objects
+#' @param new_link The link object to set (its `rel` determines what gets
+#'   replaced)
+#' @return Updated links list
+#' @keywords internal
+set_link <- function(links, new_link) {
+  links <- Filter(function(link) !identical(link$rel, new_link$rel), links)
+  c(links, list(new_link))
+}
+
+#' Add or update a child link on a parent object
+#'
+#' If a child link with this href already exists, its title is updated in
+#' place (so renaming a collection also updates its listing in the
+#' parent); otherwise a new child link is appended.
+#'
+#' Hrefs are compared as plain character strings (via `as.character()`),
+#' not with `identical()`. A freshly built href from `fs::path()` carries
+#' an `fs_path` S3 class, but an href read back from JSON via
+#' [read_stac()] is a plain character string after the round-trip -
+#' `identical()` treats those as different even when the string content
+#' matches, which silently defeated this match on every call after the
+#' first (each "update" appended a duplicate child link instead).
+#'
 #' @param parent_obj Parent STAC object (list)
 #' @param child_rel_path Relative path to child from parent directory
 #' @param child_title Optional title for the link
 #' @return Updated parent object
 #' @keywords internal
 add_child_link <- function(parent_obj, child_rel_path, child_title = NULL) {
-  existing_hrefs <- vapply(parent_obj$links, function(link) link$href, character(1))
-  if (child_rel_path %in% existing_hrefs) {
-    return(parent_obj) # Link already exists, skip
+  new_link <- list(rel = "child", href = child_rel_path, type = "application/json")
+  if (!is.null(child_title)) new_link$title <- child_title
+
+  target_href <- as.character(child_rel_path)
+
+  existing_idx <- NULL
+  for (i in seq_along(parent_obj$links)) {
+    link <- parent_obj$links[[i]]
+    if (identical(link$rel, "child") && identical(as.character(link$href), target_href)) {
+      existing_idx <- i
+      break
+    }
   }
 
-  new_link <- list(
-    rel = "child",
-    href = child_rel_path,
-    type = "application/json"
-  )
-
-  if (!is.null(child_title)) {
-    new_link$title <- child_title
+  if (!is.null(existing_idx)) {
+    parent_obj$links[[existing_idx]] <- new_link
+  } else {
+    parent_obj$links <- c(parent_obj$links, list(new_link))
   }
-
-  parent_obj$links <- c(parent_obj$links, list(new_link))
 
   parent_obj
 }
@@ -565,6 +598,106 @@ empty_extent <- function() {
   )
 }
 
+
+#' Guess the media type of an image from its file extension
+#'
+#' Strips any URL query string/fragment before checking the extension, so
+#' this works for both local paths and URLs.
+#'
+#' @param path Path or URL to an image file
+#' @return Character media type, or `NULL` (with a warning) if the
+#'   extension isn't recognized
+#' @keywords internal
+guess_image_media_type <- function(path) {
+  clean <- sub("[?#].*$", "", path)
+  ext <- tolower(fs::path_ext(clean))
+  type <- switch(
+    ext,
+    png = "image/png",
+    jpg = ,
+    jpeg = "image/jpeg",
+    webp = "image/webp",
+    gif = "image/gif",
+    tif = ,
+    tiff = "image/tiff; application=geotiff",
+    NULL
+  )
+  if (is.null(type)) {
+    cli::cli_alert_warning("Could not determine media type for {.path {path}}; omitting {.field type}")
+  }
+  type
+}
+
+#' Resolve an image source (local path or URL) into an href usable in a
+#' STAC link or asset, optionally copying it into the catalog tree first
+#'
+#' Local files default to being copied into `{containing_dir}/assets/`,
+#' since a bare local path (or even a `file://` URI) can't be loaded by a
+#' browser viewing the catalog through [stac_browse()]. URLs default to
+#' being referenced in place, since they're already web-accessible; pass
+#' `copy = TRUE` to download and vendor them into the catalog instead (so
+#' the catalog keeps working even if the original URL later goes away).
+#'
+#' @param source A URL (`http://`/`https://`), or a path to a local image
+#'   file
+#' @param containing_dir Directory of the catalog/collection file this
+#'   image is being attached to; hrefs are made relative to this
+#' @param key Base filename (without extension) to use if the image is
+#'   copied/downloaded
+#' @param copy Logical, or `NULL` to use the default described above
+#' @return List with `href` (character) and `type` (character or `NULL`)
+#' @keywords internal
+resolve_image_asset <- function(source, containing_dir, key, copy = NULL) {
+  is_url <- grepl("^https?://", source)
+
+  if (is_url) {
+    copy <- copy %||% FALSE
+    if (!copy) {
+      return(list(href = source, type = guess_image_media_type(source)))
+    }
+
+    dest_dir <- fs::path(containing_dir, "assets")
+    fs::dir_create(dest_dir)
+    ext <- fs::path_ext(sub("[?#].*$", "", source))
+    if (ext == "") ext <- "png" # best-effort default when the URL has none
+    dest_file <- fs::path(dest_dir, key, ext = ext)
+
+    result <- tryCatch(
+      utils::download.file(source, dest_file, mode = "wb", quiet = TRUE),
+      error = function(e) cli::cli_abort("Failed to download {.url {source}}: {conditionMessage(e)}")
+    )
+
+    return(list(
+      href = fs::path(".", fs::path_rel(dest_file, containing_dir)),
+      type = guess_image_media_type(dest_file)
+    ))
+  }
+
+  if (!fs::file_exists(source)) {
+    cli::cli_abort("Image file does not exist: {.path {source}}")
+  }
+
+  copy <- copy %||% TRUE
+  if (!copy) {
+    cli::cli_alert_warning(
+      "Referencing local image without copying - it won't be viewable via {.fn stac_browse}"
+    )
+    return(list(
+      href = path_to_file_uri(fs::path_abs(source)),
+      type = guess_image_media_type(source)
+    ))
+  }
+
+  dest_dir <- fs::path(containing_dir, "assets")
+  fs::dir_create(dest_dir)
+  dest_file <- fs::path(dest_dir, key, ext = fs::path_ext(source))
+  fs::file_copy(source, dest_file, overwrite = TRUE)
+
+  list(
+    href = fs::path(".", fs::path_rel(dest_file, containing_dir)),
+    type = guess_image_media_type(dest_file)
+  )
+}
 
 # Path Helpers -----------------------------------------------------------------
 
