@@ -168,10 +168,13 @@ stac_add_collection <- function(
   collection_dir <- resolve_collection_dir(parent, id)
   collection_file <- fs::path(collection_dir, "collection.json")
   already_exists <- fs::file_exists(collection_file)
-  get_items_dir(collection_dir) # ensure items/ exists either way
+  items_dir <- get_items_dir(collection_dir) # ensure items/ exists either way
+
+  old_title <- NULL
 
   if (already_exists) {
     collection_obj <- read_stac(collection_file)
+    old_title <- collection_obj$title
 
     if (!missing(title)) collection_obj$title <- title
     if (!missing(description)) collection_obj$description <- description
@@ -215,6 +218,11 @@ stac_add_collection <- function(
   }
   cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {parent}}")
 
+  if (already_exists && !identical(old_title, collection_obj$title)) {
+    child_links <- Filter(function(l) identical(l$rel, "child"), collection_obj$links)
+    propagate_title_to_children(collection_dir, items_dir, collection_obj$title, child_links)
+  }
+
   if (!is.null(thumbnail)) {
     stac_add_collection_asset(collection_file, thumbnail, roles = "thumbnail", copy = copy)
   }
@@ -226,6 +234,69 @@ stac_add_collection <- function(
   }
 
   invisible(collection_file)
+}
+
+#' Propagate a collection's title down to its immediate children
+#'
+#' Item files store their owning collection's title inline, in the
+#' `collection`/`parent` links baked in by [stac_add_items()] - since
+#' items are static files, not computed on read, renaming a collection
+#' doesn't retroactively update items already written unless something
+#' patches them. Direct child collections' own `parent` link title is
+#' refreshed the same way.
+#'
+#' This is deliberately single-level, unlike
+#' [propagate_extent_to_ancestors()]'s unbounded walk: a grandchild item
+#' or collection references its *immediate* parent's title, which didn't
+#' change here, so there's nothing further to cascade.
+#'
+#' @param collection_dir Path to the collection whose title changed
+#' @param items_dir That collection's items directory
+#' @param new_title The collection's current (just-changed) title
+#' @param child_links This collection's own `rel: "child"` links
+#' @return Invisible NULL
+#' @keywords internal
+propagate_title_to_children <- function(collection_dir, items_dir, new_title, child_links) {
+  update_title <- function(link, rel_types) {
+    if (link$rel %in% rel_types && !identical(link$title, new_title)) {
+      link$title <- new_title
+    }
+    link
+  }
+
+  item_files <- fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)
+  n_items_updated <- 0
+  for (f in item_files) {
+    item_obj <- read_stac(f)
+    before <- item_obj$links
+    item_obj$links <- lapply(item_obj$links, update_title, rel_types = c("collection", "parent"))
+    if (!identical(before, item_obj$links)) {
+      write_stac(item_obj, f)
+      n_items_updated <- n_items_updated + 1
+    }
+  }
+  if (n_items_updated > 0) {
+    cli::cli_alert_success("Updated title on {n_items_updated} item link{?s} in {.path {items_dir}}")
+  }
+
+  n_children_updated <- 0
+  for (child in child_links) {
+    child_path <- fs::path_abs(child$href, start = collection_dir)
+    if (!fs::file_exists(child_path)) next
+
+    child_obj <- read_stac(child_path)
+    before <- child_obj$links
+    child_obj$links <- lapply(child_obj$links, update_title, rel_types = "parent")
+    if (!identical(before, child_obj$links)) {
+      write_stac(child_obj, child_path)
+      n_children_updated <- n_children_updated + 1
+    }
+  }
+  if (n_children_updated > 0) {
+    cli::cli_alert_success("Updated parent link title on {n_children_updated} child collection{?s}")
+  }
+
+  invisible()
 }
 
 #' Propagate a new extent up the STAC tree
