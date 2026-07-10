@@ -101,8 +101,7 @@ metrics and details.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">T</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">get_gpkg</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Wrote Geopackage: /tmp/RtmpCCVm6F/file2c9048fec245.gpkg</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Wrote Geopackage: /tmp/RtmpLL4p8L/file225b71e00a38.gpkg</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

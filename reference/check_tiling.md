@@ -65,7 +65,6 @@ las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 # check tiling scheme with 10m tolerance
 las_files |> check_tiling(tolerance = 10)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #>                            filename size_ok grid_ok valid
 #> 1 3dm_32_547_5724_1_ni_20240327.laz   FALSE   FALSE FALSE
 #> 2 3dm_32_547_5725_1_ni_20240327.laz   FALSE   FALSE FALSE

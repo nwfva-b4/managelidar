@@ -84,7 +84,6 @@ combined extent.
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 las_files |> get_spatial_extent()
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Get spatial extent
 #>   ▼ 4 LASfiles
 #>   Overall extent: 547647.97, 5724000.00, 548995.44, 5725991.98  (xmin, ymin, xmax, ymax; EPSG:25832)

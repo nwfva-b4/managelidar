@@ -49,7 +49,6 @@ folder <- system.file("extdata", package = "managelidar")
 folder |>
   filter_temporal("2024") |>
   run_pipeline(lasR::dsm())
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter temporal extent
 #>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
 #>   ▼ 4 LASfiles retained (2024-03-27)
@@ -58,6 +57,6 @@ folder |>
 #> resolution  : 1, 1  (x, y)
 #> extent      : 547647, 548996, 5724000, 5725992  (xmin, xmax, ymin, ymax)
 #> coord. ref. : ETRS89 / UTM zone 32N (EPSG:25832)
-#> source      : file2c902b3368a4.tif
+#> source      : file225b55fd3d6f.tif
 #> name        : max
 ```

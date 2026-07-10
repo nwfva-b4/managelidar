@@ -77,7 +77,6 @@ f <- system.file("extdata", package = "managelidar")
 
 # get latest acquisition per tile (entire tiles only, with 10m tolerance)
 vpc <- filter_earliest(f, tolerance = 10)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter first acquisition
 #>   ▼ 5 LASfiles in 2 tiles (1 multi-temporal)
 #>   ▼ 2 LASfiles retained

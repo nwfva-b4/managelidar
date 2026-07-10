@@ -92,7 +92,6 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*.laz")
 
 las_files |> is_multitemporal(tolerance = 10)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> # A tibble: 3 × 5
 #>   filename                          tile   date       multitemporal observations
 #>   <chr>                             <chr>  <date>     <lgl>                <int>

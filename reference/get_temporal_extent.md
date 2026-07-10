@@ -114,7 +114,6 @@ las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 
 # Get dates per file
 las_files |> get_temporal_extent()
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Get temporal extent
 #>   ▼ 5 LASfiles
 #>   Temporal extent: 2023-09-05 to 2024-03-27
@@ -127,7 +126,6 @@ las_files |> get_temporal_extent()
 
 # Get combined date range
 las_files |> get_temporal_extent(per_file = FALSE)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Get temporal extent
 #>   ▼ 5 LASfiles
 #>   Temporal extent: 2023-09-05 to 2024-03-27
@@ -136,7 +134,6 @@ las_files |> get_temporal_extent(per_file = FALSE)
 
 # Get reference years
 las_files |> get_temporal_extent(return_referenceyear = TRUE)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Get temporal extent
 #>   ▼ 5 LASfiles
 #>   Temporal extent: 2023 to 2024
@@ -150,7 +147,6 @@ las_files |> get_temporal_extent(return_referenceyear = TRUE)
 # Using CSV for reference dates
 csv_path <- system.file("extdata", "acquisition_dates.csv", package = "managelidar")
 get_temporal_extent(folder, from_csv = csv_path)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Get temporal extent
 #>   ▼ 5 LASfiles
 #>   Temporal extent: 2023-09-05 to 2024-03-27

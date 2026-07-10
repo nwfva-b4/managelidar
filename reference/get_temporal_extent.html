@@ -145,7 +145,6 @@ shifted to the following year to standardize reference years.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get dates per file</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">get_temporal_extent</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Get temporal extent</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   ▼ 5 LASfiles</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Temporal extent: 2023-09-05 to 2024-03-27</span>
@@ -158,7 +157,6 @@ shifted to the following year to standardize reference years.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get combined date range</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">get_temporal_extent</span><span class="op">(</span>per_file <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Get temporal extent</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   ▼ 5 LASfiles</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Temporal extent: 2023-09-05 to 2024-03-27</span>
@@ -167,7 +165,6 @@ shifted to the following year to standardize reference years.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get reference years</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">get_temporal_extent</span><span class="op">(</span>return_referenceyear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Get temporal extent</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   ▼ 5 LASfiles</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Temporal extent: 2023 to 2024</span>
@@ -181,7 +178,6 @@ shifted to the following year to standardize reference years.</p>
 <span class="r-in"><span><span class="co"># Using CSV for reference dates</span></span></span>
 <span class="r-in"><span><span class="va">csv_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"acquisition_dates.csv"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">get_temporal_extent</span><span class="op">(</span><span class="va">folder</span>, from_csv <span class="op">=</span> <span class="va">csv_path</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Get temporal extent</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   ▼ 5 LASfiles</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   Temporal extent: 2023-09-05 to 2024-03-27</span>

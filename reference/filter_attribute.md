@@ -108,7 +108,6 @@ folder <- system.file("extdata", package = "managelidar")
 # Filter by point count (use backticks for properties with special chars)
 folder |>
   filter_attribute(`pc:count` > 5000)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter by attribute
 #>   ▼ 5 LASfiles (`pc:count` > 5000)
 #>   ▼ 3 LASfiles retained
@@ -153,7 +152,6 @@ folder |>
 # Filter by type
 folder |>
   filter_attribute(`pc:type` == "lidar")
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter by attribute
 #>   ▼ 5 LASfiles (`pc:type` == "lidar")
 #>   ▼ 5 LASfiles retained
@@ -214,7 +212,6 @@ folder |>
 # Multiple conditions (AND)
 folder |>
   filter_attribute(`pc:count` > 5000, `pc:type` == "lidar")
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter by attribute
 #>   ▼ 5 LASfiles (`pc:count` > 5000 & `pc:type` == "lidar")
 #>   ▼ 3 LASfiles retained
@@ -259,7 +256,6 @@ folder |>
 # Using OR
 folder |>
   filter_attribute(`pc:count` > 10000 | `pc:type` == "lidar")
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter by attribute
 #>   ▼ 5 LASfiles (`pc:count` > 10000 | `pc:type` == "lidar")
 #>   ▼ 5 LASfiles retained
@@ -320,7 +316,6 @@ folder |>
 # Filter by feature ID (exposed for convenience)
 folder |>
   filter_attribute(id == "3dm_32_547_5724_1_ni_20240327")
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter by attribute
 #>   ▼ 5 LASfiles (id == "3dm_32_547_5724_1_ni_20240327")
 #>   ▼ 1 LASfiles retained
@@ -352,7 +347,6 @@ folder |>
     "3dm_32_547_5724_1_ni_20240327",
     "3dm_32_548_5724_1_ni_20240327"
   ))
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter by attribute
 #>   ▼ 5 LASfiles (id %in% ...)
 #>   ▼ 2 LASfiles retained
@@ -390,7 +384,6 @@ folder |>
 folder |>
   create_vpc_enriched() |>
   filter_attribute(pointdensity >= 10)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Create enriched VPC with 5 features
 #> No outline directory found - skipping geometry enrichment
 #> No metadata directory found - skipping metadata enrichment
@@ -402,7 +395,6 @@ folder |>
   filter_temporal("2024-03") |>
   filter_attribute(`pc:count` > 5000) |>
   filter_spatial(c(547900, 5724900, 548100, 5725100))
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter temporal extent
 #>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
 #>   ▼ 4 LASfiles retained (2024-03-27)
@@ -445,7 +437,6 @@ folder |>
 # Note: For spatial/temporal filtering, prefer dedicated functions:
 folder |>
   filter_temporal("2024-03-27") # Better than filter_attribute(datetime == ...)
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter temporal extent
 #>   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)
 #>   ▼ 4 LASfiles retained (2024-03-27)
@@ -497,6 +488,5 @@ folder |>
 
 folder |>
   filter_spatial(bbox) # Better than filter_attribute with proj:bbox
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Error: object 'bbox' not found
 ```

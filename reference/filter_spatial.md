@@ -56,7 +56,6 @@ folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
 
 vpc <- las_files |> filter_spatial(c(548700, 5725010))
-#> Warning: This LAS object stores the CRS as WKT. CRS field might not be correctly populated, yielding uncertain results; use 'wkt()' instead.
 #> Filter spatial extent
 #>   ▼ 4 LASfiles
 #>   ▼ 1 LASfiles retained
