@@ -83,19 +83,31 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 #' A freshly created collection starts out empty; use [stac_add_items()]
 #' to populate it with items afterwards.
 #'
-#' If a collection with this `id` already exists under `parent`, it's
-#' updated in place instead of being recreated: any argument you
-#' explicitly pass (`title`, `description`, `license`, `keywords`,
-#' `providers`, `summaries`, `assets`, `stac_extensions`, `thumbnail`,
-#' `overview`, `icon`) is applied; anything you don't pass is left
-#' untouched, so re-running this to just add a `thumbnail` won't reset
-#' the title or wipe out items already added. The collection's `extent`
-#' is never touched here - only [stac_add_items()] manages it.
+#' There are two ways to target an existing collection for update:
+#' \itemize{
+#'   \item Pass `parent` + `id` as usual (the combination used to create
+#'     it). If a collection with that `id` already exists under `parent`,
+#'     it's updated in place instead of recreated.
+#'   \item Omit `id` and pass the collection's own `collection.json` path
+#'     as `parent` instead - useful when you already have that path (e.g.
+#'     from an earlier pipe) and don't want to look up or retype its
+#'     `id`/location. `parent` in this mode means "the collection to
+#'     update", not "its parent".
+#' }
+#' Either way, any argument you explicitly pass (`title`, `description`,
+#' `license`, `keywords`, `providers`, `summaries`, `assets`,
+#' `stac_extensions`, `thumbnail`, `overview`, `icon`) is applied;
+#' anything you don't pass is left untouched, so re-running this to just
+#' add `providers` won't reset the title or wipe out items already added.
+#' The collection's `extent` is never touched here - only
+#' [stac_add_items()] manages it.
 #'
-#' @param parent Path to parent STAC JSON file (`catalog.json` or
-#'   `collection.json`). Can be the output of [stac_create_catalog()] or a
-#'   previous [stac_add_collection()] call (to nest a subcollection).
-#' @param id Collection ID.
+#' @param parent Path to the parent STAC JSON file (`catalog.json` or
+#'   `collection.json`) when `id` is given, to create/locate a child under
+#'   it. Or, when `id` is omitted, the path to the collection's own
+#'   `collection.json` to update it directly - see Details.
+#' @param id Collection ID. Required to create a new collection; optional
+#'   when updating one you already have the path to (see Details).
 #' @param title Collection title. Defaults to `id` for a new collection;
 #'   left unchanged on update unless explicitly passed.
 #' @param description Collection description. Defaults to
@@ -104,7 +116,9 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 #' @param license License string. Defaults to `"other"` for a new
 #'   collection; left unchanged on update unless explicitly passed.
 #' @param keywords Character vector of keywords.
-#' @param providers List of provider objects.
+#' @param providers List of provider objects, e.g.
+#'   `list(list(name = "Org Name", roles = c("host", "producer"), url = "https://example.org"))`.
+#'   Valid roles are `"licensor"`, `"producer"`, `"processor"`, `"host"`.
 #' @param summaries List of summary objects. `proj:epsg` and `pc:type` are
 #'   added automatically by [stac_add_items()] once items are added.
 #' @param assets List of asset objects. For a thumbnail/overview image,
@@ -124,7 +138,7 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 #'   behavior.
 #'
 #' @details
-#' Directory structure created:
+#' Directory structure created (when creating via `parent` + `id`):
 #' \itemize{
 #'   \item For catalog parent: `{parent_dir}/collections/{id}/`
 #'   \item For collection parent: `{parent_dir}/{id}/` (subcollection)
@@ -135,20 +149,25 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 #' replaces with the real extent the first time items are added.
 #'
 #' @return Path to the collection's `collection.json` (invisibly), for
-#'   piping into [stac_add_collection()] (subcollection) or
-#'   [stac_add_items()].
+#'   piping into [stac_add_collection()] (subcollection), [stac_add_items()],
+#'   or a later update call.
 #'
 #' @examples
-#' tempfile("stac-managelidar-") |>
+#' col <- tempfile("stac-managelidar-") |>
 #'   stac_create_catalog(id = "lidar_ni") |>
 #'   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
 #'   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
 #'
+#' # Update later using just the path - no need to know/retype its id
+#' col |> stac_add_collection(providers = list(
+#'   list(name = "NW-FVA", roles = c("host", "processor"), url = "https://www.nw-fva.de/")
+#' ))
+#'
 #' @export
 stac_add_collection <- function(
   parent,
-  id,
-  title = id,
+  id = NULL,
+  title,
   description = "STAC collection",
   license = "other",
   keywords = NULL,
@@ -162,12 +181,33 @@ stac_add_collection <- function(
   copy = NULL
 ) {
   if (!fs::file_exists(parent)) {
-    cli::cli_abort("Parent STAC file does not exist: {.path {parent}}")
+    cli::cli_abort("STAC file does not exist: {.path {parent}}")
   }
 
-  collection_dir <- resolve_collection_dir(parent, id)
-  collection_file <- fs::path(collection_dir, "collection.json")
-  already_exists <- fs::file_exists(collection_file)
+  if (is.null(id)) {
+    # Update mode: `parent` is the collection itself, not its parent
+    collection_file <- parent
+    peek_obj <- read_stac(collection_file)
+    if (!identical(get_stac_type(peek_obj), "Collection")) {
+      cli::cli_abort(
+        "{.path {collection_file}} is not a collection - pass {.arg id} to create/locate one under it"
+      )
+    }
+    collection_dir <- fs::path_dir(collection_file)
+    already_exists <- TRUE
+
+    grandparent_link <- find_link(peek_obj$links, "parent")
+    if (is.null(grandparent_link)) {
+      cli::cli_abort("Collection has no parent link - malformed STAC structure")
+    }
+    grandparent <- fs::path_abs(grandparent_link$href, start = collection_dir)
+  } else {
+    collection_dir <- resolve_collection_dir(parent, id)
+    collection_file <- fs::path(collection_dir, "collection.json")
+    already_exists <- fs::file_exists(collection_file)
+    grandparent <- parent
+  }
+
   items_dir <- get_items_dir(collection_dir) # ensure items/ exists either way
 
   old_title <- NULL
@@ -185,6 +225,7 @@ stac_add_collection <- function(
     if (!missing(assets)) collection_obj$assets <- assets
     if (!missing(stac_extensions)) collection_obj$stac_extensions <- stac_extensions
   } else {
+    if (missing(title)) title <- id
     collection_obj <- build_collection(
       id = id,
       title = title,
@@ -199,24 +240,24 @@ stac_add_collection <- function(
     )
   }
 
-  fresh_links <- build_collection_links(collection_dir, parent, collection_obj$title)
+  fresh_links <- build_collection_links(collection_dir, grandparent, collection_obj$title)
   for (l in fresh_links) {
     collection_obj$links <- set_link(collection_obj$links, l)
   }
 
   write_stac(collection_obj, collection_file)
 
-  parent_obj <- read_stac(parent)
-  child_rel_path <- fs::path(".", fs::path_rel(collection_file, fs::path_dir(parent)))
+  parent_obj <- read_stac(grandparent)
+  child_rel_path <- fs::path(".", fs::path_rel(collection_file, fs::path_dir(grandparent)))
   parent_obj <- add_child_link(parent_obj, child_rel_path, child_title = collection_obj$title)
-  write_stac(parent_obj, parent)
+  write_stac(parent_obj, grandparent)
 
   if (already_exists) {
-    cli::cli_alert_success("Updated collection {.field {id}} at {.path {collection_file}}")
+    cli::cli_alert_success("Updated collection {.field {collection_obj$id}} at {.path {collection_file}}")
   } else {
     cli::cli_alert_success("Created collection {.field {id}} at {.path {collection_file}}")
   }
-  cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {parent}}")
+  cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {grandparent}}")
 
   if (already_exists && !identical(old_title, collection_obj$title)) {
     child_links <- Filter(function(l) identical(l$rel, "child"), collection_obj$links)
