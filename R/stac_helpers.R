@@ -79,6 +79,13 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, col
 
     assets <- features$assets[[i]]
 
+    if (is.data.frame(assets)) {
+      assets <- lapply(names(assets), function(x) {
+    as.list(assets[[x]])
+  })
+  names(assets) <- names(features$assets[[i]])
+}
+
     # Convert asset hrefs to file URIs
     for (name in names(assets)) {
       if (!is.null(assets[[name]]$href)) {
