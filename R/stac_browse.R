@@ -2,8 +2,11 @@
 #'
 #' Opens a STAC catalog (created with [stac_create_catalog()]) in your
 #' browser so you can explore its collections and items visually.
+#' Uses either [STAC Map](https://github.com/developmentseed/stac-map) or [STAC Browser](https://github.com/radiantearth/stac-browser).
 #'
 #' @param catalog Path to `catalog.json` (the root of the STAC tree).
+#' 
+#' @param tool Can be either `"stac-browser"` (default) or `"stac-map"`.
 #'
 #' @return Nothing (called for its side effect of opening a browser).
 #'
@@ -15,7 +18,7 @@
 #' cat |> stac_browse()
 #'
 #' @export
-stac_browse <- function(catalog) {
+stac_browse <- function(catalog, tool = "stac-browser") {
   if (!fs::file_exists(catalog)) {
     cli::cli_abort("Catalog file does not exist: {.path {catalog}}")
   }
@@ -26,10 +29,20 @@ stac_browse <- function(catalog) {
   app <- list(call = function(req) stac_browse_handle_request(req, root_dir))
   httpuv::startServer("127.0.0.1", port, app)
 
-  browser_url <- sprintf(
-    "https://radiantearth.github.io/stac-browser/#/external/http://localhost:%d/catalog.json",
-    port
-  )
+  # Set URL based on tool parameter
+  if (tool == "stac-browser") {
+    browser_url <- sprintf(
+      "https://radiantearth.github.io/stac-browser/#/external/http://localhost:%d/catalog.json",
+      port
+    )
+  } else if (tool == "stac-map") {
+    browser_url <- sprintf(
+      "https://developmentseed.org/stac-map/?href=http://localhost:%d/catalog.json",
+      port
+    )
+  } else {
+    cli::cli_abort("Invalid tool parameter: {.val {tool}}. Must be 'stac-browser' or 'stac-map'.")
+  }
 
   cli::cli_alert_success("Opening catalog in your browser...")
   utils::browseURL(browser_url)
