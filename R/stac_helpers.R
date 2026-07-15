@@ -2,6 +2,13 @@
 # Internal utilities for managing STAC catalogs and collections
 # Part of the managelidar package
 
+#' Current time as an RFC 3339 / STAC-compliant UTC timestamp
+#' @return Character, e.g. `"2026-07-15T14:32:07Z"`
+#' @keywords internal
+stac_timestamp <- function() {
+  strftime(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+}
+
 # I/O Operations ---------------------------------------------------------------
 
 #' Read a STAC JSON file
@@ -117,6 +124,19 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, col
       properties = features$properties[[i]],
       assets = assets
     )
+
+    # created/updated (STAC Common Metadata). If this item already exists
+    # on disk (e.g. this batch is being written with overwrite_items =
+    # TRUE), keep its original created timestamp rather than resetting it -
+    # only updated should move.
+    item_path <- fs::path(items_dir, item$id, ext = "json")
+    if (fs::file_exists(item_path)) {
+      existing <- tryCatch(read_stac(item_path), error = function(e) NULL)
+      item$properties$created <- existing$properties$created %||% stac_timestamp()
+    } else {
+      item$properties$created <- stac_timestamp()
+    }
+    item$properties$updated <- stac_timestamp()
 
     item$links <- build_item_links(
       item$id, items_dir, collection_dir, root_path, root_title, collection_title

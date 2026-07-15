@@ -53,8 +53,11 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
     }
     if (!missing(title)) catalog_obj$title <- title
     if (!missing(description)) catalog_obj$description <- description
+    catalog_obj$updated <- stac_timestamp()
   } else {
     catalog_obj <- build_catalog(id = id, title = title, description = description)
+    catalog_obj$created <- stac_timestamp()
+    catalog_obj$updated <- catalog_obj$created
   }
 
   fresh_links <- build_catalog_links(catalog_file, path, catalog_obj$title)
@@ -224,6 +227,7 @@ stac_add_collection <- function(
     if (!missing(summaries)) collection_obj$summaries <- summaries
     if (!missing(assets)) collection_obj$assets <- assets
     if (!missing(stac_extensions)) collection_obj$stac_extensions <- stac_extensions
+    collection_obj$updated <- stac_timestamp()
   } else {
     if (missing(title)) title <- id
     collection_obj <- build_collection(
@@ -238,6 +242,8 @@ stac_add_collection <- function(
       summaries = summaries,
       assets = assets
     )
+    collection_obj$created <- stac_timestamp()
+    collection_obj$updated <- collection_obj$created
   }
 
   fresh_links <- build_collection_links(collection_dir, grandparent, collection_obj$title)
@@ -312,6 +318,7 @@ propagate_title_to_children <- function(collection_dir, items_dir, new_title, ch
     before <- item_obj$links
     item_obj$links <- lapply(item_obj$links, update_title, rel_types = c("collection", "parent"))
     if (!identical(before, item_obj$links)) {
+      item_obj$properties$updated <- stac_timestamp()
       write_stac(item_obj, f)
       n_items_updated <- n_items_updated + 1
     }
@@ -329,6 +336,7 @@ propagate_title_to_children <- function(collection_dir, items_dir, new_title, ch
     before <- child_obj$links
     child_obj$links <- lapply(child_obj$links, update_title, rel_types = "parent")
     if (!identical(before, child_obj$links)) {
+      child_obj$updated <- stac_timestamp()
       write_stac(child_obj, child_path)
       n_children_updated <- n_children_updated + 1
     }
@@ -379,6 +387,7 @@ propagate_extent_to_ancestors <- function(collection_path, spatial_extent, tempo
     parent_obj$extent$temporal <- merge_temporal_extents(parent_obj$extent$temporal, temporal_extent)
   }
 
+  parent_obj$updated <- stac_timestamp()
   write_stac(parent_obj, parent_path)
   cli::cli_alert_success("Updated extent of ancestor collection {.field {parent_obj$id}} at {.path {parent_path}}")
 
@@ -430,6 +439,7 @@ stac_set_icon <- function(stac_object, source, copy = NULL) {
   if (!is.null(resolved$type)) icon_link$type <- resolved$type
   obj$links <- set_link(obj$links, icon_link)
 
+  obj$updated <- stac_timestamp()
   write_stac(obj, stac_object)
   cli::cli_alert_success("Set icon on {.path {stac_object}}")
 
@@ -503,6 +513,7 @@ stac_add_collection_asset <- function(
   assets[[key]] <- asset
   collection_obj$assets <- assets
 
+  collection_obj$updated <- stac_timestamp()
   write_stac(collection_obj, collection)
 
   cli::cli_alert_success(
@@ -624,6 +635,7 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
   # Keep the collection's per-item `item` links in sync with items on disk
   collection_obj$links <- rebuild_item_links(collection_obj$links, collection_dir, items_dir)
 
+  collection_obj$updated <- stac_timestamp()
   write_stac(collection_obj, collection)
 
   if (length(written_ids) > 0) {
