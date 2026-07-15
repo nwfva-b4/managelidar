@@ -43,8 +43,12 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
   catalog_file <- fs::path(path, "catalog.json")
   already_exists <- fs::file_exists(catalog_file)
 
+  original <- NULL
+
   if (already_exists) {
     catalog_obj <- read_stac(catalog_file)
+    original <- catalog_obj
+    if (is.null(catalog_obj$created)) catalog_obj$created <- stac_timestamp()
 
     if (!identical(catalog_obj$id, id)) {
       cli::cli_alert_warning(
@@ -53,11 +57,8 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
     }
     if (!missing(title)) catalog_obj$title <- title
     if (!missing(description)) catalog_obj$description <- description
-    catalog_obj$updated <- stac_timestamp()
   } else {
     catalog_obj <- build_catalog(id = id, title = title, description = description)
-    catalog_obj$created <- stac_timestamp()
-    catalog_obj$updated <- catalog_obj$created
   }
 
   fresh_links <- build_catalog_links(catalog_file, path, catalog_obj$title)
@@ -65,12 +66,26 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
     catalog_obj$links <- set_link(catalog_obj$links, l)
   }
 
-  write_stac(catalog_obj, catalog_file)
+  # Compared before either `created` or `updated` is touched, so this only
+  # reflects real content changes - not "we called this function again".
+  changed <- is.null(original) || !identical(original, catalog_obj)
 
-  if (already_exists) {
+  if (changed) {
+    if (is.null(original)) {
+      catalog_obj$created <- stac_timestamp()
+      catalog_obj$updated <- catalog_obj$created
+    } else {
+      catalog_obj$updated <- stac_timestamp()
+    }
+    write_stac(catalog_obj, catalog_file)
+  }
+
+  if (!already_exists) {
+    cli::cli_alert_success("Created catalog {.field {id}} at {.path {catalog_file}}")
+  } else if (changed) {
     cli::cli_alert_success("Updated catalog {.field {catalog_obj$id}} at {.path {catalog_file}}")
   } else {
-    cli::cli_alert_success("Created catalog {.field {id}} at {.path {catalog_file}}")
+    cli::cli_alert_info("No changes to catalog {.field {catalog_obj$id}} at {.path {catalog_file}}")
   }
 
   if (!is.null(icon)) {
@@ -214,9 +229,12 @@ stac_add_collection <- function(
   items_dir <- get_items_dir(collection_dir) # ensure items/ exists either way
 
   old_title <- NULL
+  original <- NULL
 
   if (already_exists) {
     collection_obj <- read_stac(collection_file)
+    original <- collection_obj
+    if (is.null(collection_obj$created)) collection_obj$created <- stac_timestamp()
     old_title <- collection_obj$title
 
     if (!missing(title)) collection_obj$title <- title
@@ -227,7 +245,6 @@ stac_add_collection <- function(
     if (!missing(summaries)) collection_obj$summaries <- summaries
     if (!missing(assets)) collection_obj$assets <- assets
     if (!missing(stac_extensions)) collection_obj$stac_extensions <- stac_extensions
-    collection_obj$updated <- stac_timestamp()
   } else {
     if (missing(title)) title <- id
     collection_obj <- build_collection(
@@ -242,8 +259,6 @@ stac_add_collection <- function(
       summaries = summaries,
       assets = assets
     )
-    collection_obj$created <- stac_timestamp()
-    collection_obj$updated <- collection_obj$created
   }
 
   fresh_links <- build_collection_links(collection_dir, grandparent, collection_obj$title)
@@ -251,19 +266,41 @@ stac_add_collection <- function(
     collection_obj$links <- set_link(collection_obj$links, l)
   }
 
-  write_stac(collection_obj, collection_file)
+  # Compared before either `created` or `updated` is touched, so this only
+  # reflects real content changes - not "we called this function again".
+  changed <- is.null(original) || !identical(original, collection_obj)
+
+  if (changed) {
+    if (is.null(original)) {
+      collection_obj$created <- stac_timestamp()
+      collection_obj$updated <- collection_obj$created
+    } else {
+      collection_obj$updated <- stac_timestamp()
+    }
+    write_stac(collection_obj, collection_file)
+  }
 
   parent_obj <- read_stac(grandparent)
+  before_parent_links <- parent_obj$links
   child_rel_path <- fs::path(".", fs::path_rel(collection_file, fs::path_dir(grandparent)))
   parent_obj <- add_child_link(parent_obj, child_rel_path, child_title = collection_obj$title)
-  write_stac(parent_obj, grandparent)
+  parent_changed <- !identical(before_parent_links, parent_obj$links)
 
-  if (already_exists) {
+  if (parent_changed) {
+    parent_obj$updated <- stac_timestamp()
+    write_stac(parent_obj, grandparent)
+  }
+
+  if (!already_exists) {
+    cli::cli_alert_success("Created collection {.field {id}} at {.path {collection_file}}")
+  } else if (changed) {
     cli::cli_alert_success("Updated collection {.field {collection_obj$id}} at {.path {collection_file}}")
   } else {
-    cli::cli_alert_success("Created collection {.field {id}} at {.path {collection_file}}")
+    cli::cli_alert_info("No changes to collection {.field {collection_obj$id}} at {.path {collection_file}}")
   }
-  cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {grandparent}}")
+  if (parent_changed) {
+    cli::cli_alert_success("Updated parent {.field {parent_obj$id}} at {.path {grandparent}}")
+  }
 
   if (already_exists && !identical(old_title, collection_obj$title)) {
     child_links <- Filter(function(l) identical(l$rel, "child"), collection_obj$links)
@@ -379,6 +416,8 @@ propagate_extent_to_ancestors <- function(collection_path, spatial_extent, tempo
     return(invisible()) # reached the root catalog; catalogs have no extent
   }
 
+  original_extent <- parent_obj$extent
+
   if (extent_is_placeholder(parent_obj$extent)) {
     parent_obj$extent$spatial <- spatial_extent
     parent_obj$extent$temporal <- temporal_extent
@@ -387,9 +426,11 @@ propagate_extent_to_ancestors <- function(collection_path, spatial_extent, tempo
     parent_obj$extent$temporal <- merge_temporal_extents(parent_obj$extent$temporal, temporal_extent)
   }
 
-  parent_obj$updated <- stac_timestamp()
-  write_stac(parent_obj, parent_path)
-  cli::cli_alert_success("Updated extent of ancestor collection {.field {parent_obj$id}} at {.path {parent_path}}")
+  if (!extents_equal(original_extent, parent_obj$extent)) {
+    parent_obj$updated <- stac_timestamp()
+    write_stac(parent_obj, parent_path)
+    cli::cli_alert_success("Updated extent of ancestor collection {.field {parent_obj$id}} at {.path {parent_path}}")
+  }
 
   propagate_extent_to_ancestors(parent_path, spatial_extent, temporal_extent)
 }
@@ -434,14 +475,21 @@ stac_set_icon <- function(stac_object, source, copy = NULL) {
   resolved <- resolve_image_asset(source, obj_dir, key = "icon", copy = copy)
 
   obj <- read_stac(stac_object)
+  original_links <- obj$links
 
   icon_link <- list(rel = "icon", href = resolved$href)
   if (!is.null(resolved$type)) icon_link$type <- resolved$type
   obj$links <- set_link(obj$links, icon_link)
 
-  obj$updated <- stac_timestamp()
-  write_stac(obj, stac_object)
-  cli::cli_alert_success("Set icon on {.path {stac_object}}")
+  changed <- !identical(original_links, obj$links)
+
+  if (changed) {
+    obj$updated <- stac_timestamp()
+    write_stac(obj, stac_object)
+    cli::cli_alert_success("Set icon on {.path {stac_object}}")
+  } else {
+    cli::cli_alert_info("Icon unchanged on {.path {stac_object}}")
+  }
 
   invisible(stac_object)
 }
@@ -501,6 +549,7 @@ stac_add_collection_asset <- function(
   resolved <- resolve_image_asset(source, collection_dir, key = key, copy = copy)
 
   collection_obj <- read_stac(collection)
+  original_assets <- collection_obj$assets
 
   assets <- collection_obj$assets
   if (is.null(assets)) assets <- list()
@@ -513,12 +562,17 @@ stac_add_collection_asset <- function(
   assets[[key]] <- asset
   collection_obj$assets <- assets
 
-  collection_obj$updated <- stac_timestamp()
-  write_stac(collection_obj, collection)
+  changed <- !identical(original_assets, collection_obj$assets)
 
-  cli::cli_alert_success(
-    "Added {.field {key}} asset ({paste(roles, collapse = ', ')}) to {.path {collection}}"
-  )
+  if (changed) {
+    collection_obj$updated <- stac_timestamp()
+    write_stac(collection_obj, collection)
+    cli::cli_alert_success(
+      "Added {.field {key}} asset ({paste(roles, collapse = ', ')}) to {.path {collection}}"
+    )
+  } else {
+    cli::cli_alert_info("{.field {key}} asset unchanged on {.path {collection}}")
+  }
 
   invisible(collection)
 }
@@ -567,6 +621,7 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
   collection_dir <- fs::path_dir(collection)
   collection_id <- collection_obj$id
   items_dir <- get_items_dir(collection_dir)
+  original_links <- collection_obj$links
 
   # Was the collection empty before this call? Determines replace vs merge.
   existing_item_count <- length(fs::dir_ls(items_dir, glob = "*.json", fail = FALSE))
@@ -603,47 +658,70 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
     cli::cli_alert_warning("No items to write")
   }
 
-  # Update extent: replace if this is the first batch, merge otherwise
-  if (is_first_batch) {
-    collection_obj$extent$spatial <- spatial_extent
-    collection_obj$extent$temporal <- temporal_extent
-  } else {
-    collection_obj$extent$spatial <- merge_spatial_extents(
-      collection_obj$extent$spatial,
-      spatial_extent
-    )
-    collection_obj$extent$temporal <- merge_temporal_extents(
-      collection_obj$extent$temporal,
-      temporal_extent
+  # Whether any item files were actually (re)written to disk is the one
+  # unambiguous "something changed" signal here - unlike extent, which
+  # would falsely appear "changed" on every call due to representation
+  # differences (matrix from disk vs list freshly computed), even when
+  # nothing about the actual data changed. So extent/summaries are only
+  # touched at all when there's real new data to reflect.
+  items_changed <- length(written_ids) > 0
+
+  if (items_changed) {
+    # Update extent: replace if this is the first batch, merge otherwise
+    if (is_first_batch) {
+      collection_obj$extent$spatial <- spatial_extent
+      collection_obj$extent$temporal <- temporal_extent
+    } else {
+      collection_obj$extent$spatial <- merge_spatial_extents(
+        collection_obj$extent$spatial,
+        spatial_extent
+      )
+      collection_obj$extent$temporal <- merge_temporal_extents(
+        collection_obj$extent$temporal,
+        temporal_extent
+      )
+    }
+
+    # Ensure CRS / point cloud type summaries are present
+    summaries <- collection_obj$summaries
+    if (is.null(summaries)) summaries <- list()
+    summaries$`proj:epsg` <- list(crs)
+    summaries$`pc:type` <- list("lidar")
+    collection_obj$summaries <- summaries
+
+    # These summary fields belong to the pointcloud/projection extensions;
+    # make sure both are declared on the collection
+    collection_obj$stac_extensions <- union(
+      collection_obj$stac_extensions,
+      required_lidar_stac_extensions()
     )
   }
 
-  # Ensure CRS / point cloud type summaries are present
-  summaries <- collection_obj$summaries
-  if (is.null(summaries)) summaries <- list()
-  summaries$`proj:epsg` <- list(crs)
-  summaries$`pc:type` <- list("lidar")
-  collection_obj$summaries <- summaries
-
-  # These summary fields belong to the pointcloud/projection extensions;
-  # make sure both are declared on the collection
-  collection_obj$stac_extensions <- union(
-    collection_obj$stac_extensions,
-    required_lidar_stac_extensions()
-  )
-
-  # Keep the collection's per-item `item` links in sync with items on disk
+  # Keep the collection's per-item `item` links in sync with items on disk,
+  # regardless of items_changed - this is cheap and self-healing (e.g. it
+  # catches an item file that was deleted outside this package).
   collection_obj$links <- rebuild_item_links(collection_obj$links, collection_dir, items_dir)
+  links_changed <- !identical(original_links, collection_obj$links)
 
-  collection_obj$updated <- stac_timestamp()
-  write_stac(collection_obj, collection)
+  changed <- items_changed || links_changed
+
+  if (changed) {
+    collection_obj$updated <- stac_timestamp()
+    write_stac(collection_obj, collection)
+  }
 
   if (length(written_ids) > 0) {
     cli::cli_alert_success("Created {length(written_ids)} item{?s} in {.path {items_dir}}")
   }
-  cli::cli_alert_success("Updated collection {.field {collection_obj$id}} at {.path {collection}}")
+  if (changed) {
+    cli::cli_alert_success("Updated collection {.field {collection_obj$id}} at {.path {collection}}")
+  } else {
+    cli::cli_alert_info("No changes to collection {.field {collection_obj$id}} at {.path {collection}}")
+  }
 
-  propagate_extent_to_ancestors(collection, spatial_extent, temporal_extent)
+  if (items_changed) {
+    propagate_extent_to_ancestors(collection, spatial_extent, temporal_extent)
+  }
 
   invisible(collection)
 }

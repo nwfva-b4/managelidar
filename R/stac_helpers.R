@@ -416,14 +416,33 @@ find_link <- function(links, rel) {
 #' are multi-valued - see [add_child_link()] and [rebuild_item_links()]
 #' for those.
 #'
+#' Replaces in place (at the existing link's position) rather than
+#' removing and re-appending, so a call that doesn't actually change
+#' anything doesn't reorder the links list either - that reordering would
+#' otherwise make before/after equality checks (used to detect whether a
+#' write is actually needed) report a change that isn't really there.
+#'
 #' @param links List of link objects
 #' @param new_link The link object to set (its `rel` determines what gets
 #'   replaced)
 #' @return Updated links list
 #' @keywords internal
 set_link <- function(links, new_link) {
-  links <- Filter(function(link) !identical(link$rel, new_link$rel), links)
-  c(links, list(new_link))
+  idx <- NULL
+  for (i in seq_along(links)) {
+    if (identical(links[[i]]$rel, new_link$rel)) {
+      idx <- i
+      break
+    }
+  }
+
+  if (!is.null(idx)) {
+    links[[idx]] <- new_link
+  } else {
+    links <- c(links, list(new_link))
+  }
+
+  links
 }
 
 #' Add or update a child link on a parent object
@@ -724,6 +743,30 @@ resolve_image_asset <- function(source, containing_dir, key, copy = NULL) {
     href = fs::path(".", fs::path_rel(dest_file, containing_dir)),
     type = guess_image_media_type(dest_file)
   )
+}
+
+#' Compare two extents by value, ignoring internal representation
+#'
+#' An extent read from disk via [read_stac()] has its bbox/interval as a
+#' matrix; a freshly computed one (from [extract_spatial_extent()],
+#' [merge_spatial_extents()], etc.) has them as a list. A plain
+#' `identical()` on the two would report "different" even when the actual
+#' coordinates/dates match, purely due to representation - this compares
+#' the underlying values instead.
+#'
+#' @param extent1,extent2 Extent objects to compare
+#' @return Logical
+#' @keywords internal
+extents_equal <- function(extent1, extent2) {
+  normalize_bbox <- function(bbox) {
+    unname(if (is.matrix(bbox)) bbox[1, ] else bbox[[1]])
+  }
+  normalize_interval <- function(interval) {
+    as.character(unname(if (is.matrix(interval)) interval[1, ] else unlist(interval[[1]])))
+  }
+
+  isTRUE(all(normalize_bbox(extent1$spatial$bbox) == normalize_bbox(extent2$spatial$bbox))) &&
+    identical(normalize_interval(extent1$temporal$interval), normalize_interval(extent2$temporal$interval))
 }
 
 # Path Helpers -----------------------------------------------------------------
