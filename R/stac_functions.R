@@ -68,7 +68,7 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 
   # Compared before either `created` or `updated` is touched, so this only
   # reflects real content changes - not "we called this function again".
-  changed <- is.null(original) || !identical(original, catalog_obj)
+  changed <- is.null(original) || !identical(strip_fs_path(original), strip_fs_path(catalog_obj))
 
   if (changed) {
     if (is.null(original)) {
@@ -268,7 +268,7 @@ stac_add_collection <- function(
 
   # Compared before either `created` or `updated` is touched, so this only
   # reflects real content changes - not "we called this function again".
-  changed <- is.null(original) || !identical(original, collection_obj)
+  changed <- is.null(original) || !identical(strip_fs_path(original), strip_fs_path(collection_obj))
 
   if (changed) {
     if (is.null(original)) {
@@ -284,7 +284,7 @@ stac_add_collection <- function(
   before_parent_links <- parent_obj$links
   child_rel_path <- fs::path(".", fs::path_rel(collection_file, fs::path_dir(grandparent)))
   parent_obj <- add_child_link(parent_obj, child_rel_path, child_title = collection_obj$title)
-  parent_changed <- !identical(before_parent_links, parent_obj$links)
+  parent_changed <- !identical(strip_fs_path(before_parent_links), strip_fs_path(parent_obj$links))
 
   if (parent_changed) {
     parent_obj$updated <- stac_timestamp()
@@ -481,7 +481,7 @@ stac_set_icon <- function(stac_object, source, copy = NULL) {
   if (!is.null(resolved$type)) icon_link$type <- resolved$type
   obj$links <- set_link(obj$links, icon_link)
 
-  changed <- !identical(original_links, obj$links)
+  changed <- !identical(strip_fs_path(original_links), strip_fs_path(obj$links))
 
   if (changed) {
     obj$updated <- stac_timestamp()
@@ -562,7 +562,7 @@ stac_add_collection_asset <- function(
   assets[[key]] <- asset
   collection_obj$assets <- assets
 
-  changed <- !identical(original_assets, collection_obj$assets)
+  changed <- !identical(strip_fs_path(original_assets), strip_fs_path(collection_obj$assets))
 
   if (changed) {
     collection_obj$updated <- stac_timestamp()
@@ -589,6 +589,11 @@ stac_add_collection_asset <- function(
 #'   with `type = "FeatureCollection"`).
 #' @param overwrite_items Logical. If `TRUE`, overwrite existing item files.
 #'   Default is `FALSE` (skip existing items).
+#' @param footprints Logical. If `TRUE` (default), maintain a combined
+#'   footprints GeoJSON asset on the collection - a `FeatureCollection`
+#'   with one Feature per item (its footprint geometry plus item id),
+#'   registered as `collection_obj$assets$footprints`. Recomputed from
+#'   scratch (cheap) whenever this call actually writes new item data.
 #'
 #' @details
 #' If the collection is currently empty, its placeholder extent is
@@ -612,7 +617,7 @@ stac_add_collection_asset <- function(
 #'   stac_add_items(path = las_files)
 #'
 #' @export
-stac_add_items <- function(collection, path, overwrite_items = FALSE) {
+stac_add_items <- function(collection, path, overwrite_items = FALSE, footprints = TRUE) {
   if (!fs::file_exists(collection)) {
     cli::cli_abort("Collection file does not exist: {.path {collection}}")
   }
@@ -695,13 +700,17 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE) {
       collection_obj$stac_extensions,
       required_lidar_stac_extensions()
     )
+
+    if (footprints) {
+      collection_obj <- update_footprints_asset(collection_obj, collection_dir, items_dir)
+    }
   }
 
   # Keep the collection's per-item `item` links in sync with items on disk,
   # regardless of items_changed - this is cheap and self-healing (e.g. it
   # catches an item file that was deleted outside this package).
   collection_obj$links <- rebuild_item_links(collection_obj$links, collection_dir, items_dir)
-  links_changed <- !identical(original_links, collection_obj$links)
+  links_changed <- !identical(strip_fs_path(original_links), strip_fs_path(collection_obj$links))
 
   changed <- items_changed || links_changed
 

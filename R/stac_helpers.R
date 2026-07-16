@@ -9,6 +9,32 @@ stac_timestamp <- function() {
   strftime(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 }
 
+#' Recursively strip the `fs_path` S3 class from any values in a STAC
+#' object
+#'
+#' Hrefs built via `fs::path()`/`fs::path_rel()` carry an `fs_path` class
+#' on top of the underlying character value. The same href read back from
+#' JSON after a round-trip (via [read_stac()]) has no such class - so a
+#' plain `identical()` between a freshly-rebuilt object (fs_path hrefs)
+#' and one just read from disk (plain character hrefs) reports "changed"
+#' even when every string value actually matches. Every change-detection
+#' comparison in this package runs both sides through this first, the
+#' same way [extents_equal()] normalizes away the matrix-vs-list
+#' representation difference for extents.
+#'
+#' @param x Any R object (typically a STAC list structure)
+#' @return The same structure with `fs_path` classing removed
+#' @keywords internal
+strip_fs_path <- function(x) {
+  if (inherits(x, "fs_path")) {
+    return(unclass(x))
+  }
+  if (is.list(x)) {
+    return(lapply(x, strip_fs_path))
+  }
+  x
+}
+
 # I/O Operations ---------------------------------------------------------------
 
 #' Read a STAC JSON file
@@ -767,6 +793,69 @@ extents_equal <- function(extent1, extent2) {
 
   isTRUE(all(normalize_bbox(extent1$spatial$bbox) == normalize_bbox(extent2$spatial$bbox))) &&
     identical(normalize_interval(extent1$temporal$interval), normalize_interval(extent2$temporal$interval))
+}
+
+#' Build a combined footprints GeoJSON FeatureCollection from every item in
+#' a collection's items directory
+#'
+#' One Feature per item (its footprint geometry, tagged with the item's
+#' id) - a lightweight tile index, not a geometrically-dissolved single
+#' polygon. That's deliberately simpler (no `sf`-based union needed) and
+#' more useful for a lidar tile index, where seeing individual tile
+#' boundaries matters more than a single coverage outline.
+#'
+#' @param items_dir Path to items directory
+#' @return A list representing a GeoJSON FeatureCollection
+#' @keywords internal
+build_combined_geometry <- function(items_dir) {
+  item_files <- fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)
+
+  features <- lapply(item_files, function(f) {
+    item_obj <- read_stac(f)
+    list(
+      type = "Feature",
+      geometry = item_obj$geometry,
+      properties = list(id = item_obj$id)
+    )
+  })
+  names(features) <- NULL
+
+  list(type = "FeatureCollection", features = features)
+}
+
+#' Recompute and register a collection's combined-footprints GeoJSON asset
+#'
+#' Writes `{collection_dir}/assets/footprints.geojson` and registers it
+#' under `collection_obj$assets$footprints`, mirroring how
+#' [stac_add_collection_asset()] registers a thumbnail/overview - except
+#' this one is derived from the items themselves rather than supplied by
+#' the user, so it's meant to be called automatically whenever items
+#' change (see [stac_add_items()]) rather than invoked directly.
+#'
+#' @param collection_obj Collection object (list); `$assets` is updated
+#' @param collection_dir Path to collection directory
+#' @param items_dir Path to items directory
+#' @return Updated `collection_obj`
+#' @keywords internal
+update_footprints_asset <- function(collection_obj, collection_dir, items_dir) {
+  fc <- build_combined_geometry(items_dir)
+
+  assets_dir <- fs::path(collection_dir, "assets")
+  fs::dir_create(assets_dir)
+  dest_file <- fs::path(assets_dir, "footprints", ext = "geojson")
+  write_stac(fc, dest_file)
+
+  assets <- collection_obj$assets
+  if (is.null(assets)) assets <- list()
+  assets$footprints <- list(
+    href = as.character(fs::path(".", fs::path_rel(dest_file, collection_dir))),
+    title = "Item Footprints",
+    type = "application/geo+json",
+    roles = list("footprints")
+  )
+  collection_obj$assets <- assets
+
+  collection_obj
 }
 
 # Path Helpers -----------------------------------------------------------------
