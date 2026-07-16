@@ -45,10 +45,26 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
     -dplyr::any_of(c("pc.count", "pc.type", "proj.wkt2"))
   )
 
+  # ------------------------------------------------------------------
+  # Flatten any remaining list-columns to JSON text
+  # ------------------------------------------------------------------
+  # GDAL's GeoJSON/VPC reader can't flatten nested/irregular properties
+  # (e.g. `pc:statistics`, an array of per-attribute stat blocks with
+  # nested class-count maps) into a scalar column, so they come back as
+  # list-columns. sf::st_write() to GeoPackage only accepts list-columns
+  # that hold raw/blob content - anything else fails at write time with
+  # "list columns are only allowed with raw vector contents". Rather than
+  # maintaining a growing, fragile list of specific field names to drop
+  # (which breaks again the next time a new nested field is added
+  # upstream), any list-column still present at this point is generically
+  # serialized to a JSON string instead - the data stays inspectable as a
+  # text field in the GeoPackage rather than crashing the write or
+  # silently disappearing.
+  vpc_sf <- flatten_list_columns(vpc_sf)
 
   # ------------------------------------------------------------
   # Expand proj:bbox (list column → numeric columns)
-  # ------------------------------------------------------------
+  # ------------------------------------------------------
 
   bbox_df <- as.data.frame(do.call(rbind, vpc_sf$`proj:bbox`))
   names(bbox_df) <- c("xmin", "ymin", "xmax", "ymax")
@@ -145,4 +161,31 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
   message("Wrote Geopackage: ", out_file)
 
   invisible(vpc_sf)
+}
+
+#' Flatten any list-columns in a data frame / sf object to JSON text
+#'
+#' Leaves the geometry column (and any plain atomic column) untouched;
+#' every other list-column gets serialized element-wise to a JSON string,
+#' with `NULL`/length-zero entries becoming `NA`.
+#'
+#' @param df A data frame or sf object
+#' @return The same object with list-columns replaced by character columns
+#' @keywords internal
+flatten_list_columns <- function(df) {
+  geom_col <- attr(df, "sf_column")
+
+  for (col in names(df)) {
+    if (identical(col, geom_col)) next
+    if (!is.list(df[[col]])) next
+
+    df[[col]] <- vapply(df[[col]], function(x) {
+      if (is.null(x) || length(x) == 0) {
+        return(NA_character_)
+      }
+      yyjsonr::write_json_str(x, auto_unbox = TRUE)
+    }, character(1))
+  }
+
+  df
 }
