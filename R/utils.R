@@ -41,7 +41,7 @@ is_valid_crs <- function(epsg_code) {
 #' @keywords internal
 exec_write_vpc <- function(las_files, epsg = 25832L, use_gpstime = TRUE, absolute_path = TRUE) {
   header <- lidR::readLASheader(las_files[1])
-  crs <- lidR::wkt(header)
+  crs <- sf::st_crs(header)$epsg
   write_stage <- lasR::write_vpc(tempfile(fileext = ".vpc"), absolute_path = absolute_path, use_gpstime = use_gpstime)
   pipeline <- if (!is_valid_crs(crs)) lasR::set_crs(epsg) + write_stage else write_stage
   lasR::exec(pipeline, on = las_files)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/stac_helpers.R
 \name{add_child_link}
 \alias{add_child_link}
-\title{Add a child link to parent object}
+\title{Add or update a child link on a parent object}
 \usage{
 add_child_link(parent_obj, child_rel_path, child_title = NULL)
 }
@@ -17,6 +17,17 @@ add_child_link(parent_obj, child_rel_path, child_title = NULL)
 Updated parent object
 }
 \description{
-Add a child link to parent object
+If a child link with this href already exists, its title is updated in
+place (so renaming a collection also updates its listing in the
+parent); otherwise a new child link is appended.
+}
+\details{
+Hrefs are compared as plain character strings (via \code{as.character()}),
+not with \code{identical()}. A freshly built href from \code{fs::path()} carries
+an \code{fs_path} S3 class, but an href read back from JSON via
+\code{\link[=read_stac]{read_stac()}} is a plain character string after the round-trip -
+\code{identical()} treats those as different even when the string content
+matches, which silently defeated this match on every call after the
+first (each "update" appended a duplicate child link instead).
 }
 \keyword{internal}

@@ -6,6 +6,8 @@
 \alias{managelidar-package}
 \title{managelidar: Manage Lidar Data Files}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 The goal of managelidar is to facilitate the handling of lidar data files.
 }
 \seealso{

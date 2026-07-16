@@ -4,7 +4,14 @@
 \alias{build_item_links}
 \title{Build links for a STAC item}
 \usage{
-build_item_links(item_id, items_dir, collection_dir)
+build_item_links(
+  item_id,
+  items_dir,
+  collection_dir,
+  root_path,
+  root_title,
+  collection_title
+)
 }
 \arguments{
 \item{item_id}{Item ID}
@@ -12,6 +19,12 @@ build_item_links(item_id, items_dir, collection_dir)
 \item{items_dir}{Path to items directory}
 
 \item{collection_dir}{Path to collection directory}
+
+\item{root_path}{Absolute path to root catalog}
+
+\item{root_title}{Title of the root catalog}
+
+\item{collection_title}{Title of the owning collection}
 }
 \value{
 List of link objects

@@ -4,19 +4,24 @@
 \alias{build_collection_links}
 \title{Build links for a collection}
 \usage{
-build_collection_links(collection_dir, parent_path, items_dir)
+build_collection_links(collection_dir, parent_path, title)
 }
 \arguments{
 \item{collection_dir}{Path to collection directory}
 
 \item{parent_path}{Path to parent STAC file}
 
-\item{items_dir}{Path to items directory}
+\item{title}{Title of this collection (used on its own \code{self} link)}
 }
 \value{
 List of link objects
 }
 \description{
-Build links for a collection
+Note: does not include an \code{items} link pointing at the items directory.
+That convention is for a live OGC API - Features endpoint that returns a
+\code{FeatureCollection} on request; a static file server just exposes the
+raw directory, which STAC clients can't use. Static catalogs instead
+list each item individually via \code{rel: "item"} links - see
+\code{\link[=rebuild_item_links]{rebuild_item_links()}}, called from \code{\link[=stac_add_items]{stac_add_items()}}.
 }
 \keyword{internal}

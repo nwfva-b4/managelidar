@@ -13,6 +13,10 @@ read_stac(path)
 List representing STAC object
 }
 \description{
-Read a STAC JSON file
+Links are normalized to a plain list of link objects via
+\code{\link[=normalize_links]{normalize_links()}}, regardless of yyjsonr's internal data-frame
+representation. This prevents optional fields (like \code{title}) that are
+absent on some links from round-tripping back out as explicit \code{null}
+values when the object is later written with \code{\link[=write_stac]{write_stac()}}.
 }
 \keyword{internal}
