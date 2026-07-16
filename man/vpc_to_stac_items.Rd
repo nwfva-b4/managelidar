@@ -4,7 +4,15 @@
 \alias{vpc_to_stac_items}
 \title{Convert VPC features to STAC items}
 \usage{
-vpc_to_stac_items(vpc_obj, collection_dir, items_dir)
+vpc_to_stac_items(
+  vpc_obj,
+  collection_dir,
+  items_dir,
+  root_path,
+  collection_id,
+  root_title,
+  collection_title
+)
 }
 \arguments{
 \item{vpc_obj}{VPC object (list with $features)}
@@ -12,6 +20,14 @@ vpc_to_stac_items(vpc_obj, collection_dir, items_dir)
 \item{collection_dir}{Path to collection directory}
 
 \item{items_dir}{Path to items directory}
+
+\item{root_path}{Absolute path to root catalog}
+
+\item{collection_id}{Parent collection ID}
+
+\item{root_title}{Title of the root catalog}
+
+\item{collection_title}{Title of the owning collection}
 }
 \value{
 List of STAC item objects
