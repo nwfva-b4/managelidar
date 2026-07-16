@@ -795,62 +795,105 @@ extents_equal <- function(extent1, extent2) {
     identical(normalize_interval(extent1$temporal$interval), normalize_interval(extent2$temporal$interval))
 }
 
-#' Build a combined footprints GeoJSON FeatureCollection from every item in
-#' a collection's items directory
+#' Build a combined VPC (Virtual Point Cloud) FeatureCollection from every
+#' item in a collection's items directory
 #'
-#' One Feature per item (its footprint geometry, tagged with the item's
-#' id) - a lightweight tile index, not a geometrically-dissolved single
-#' polygon. That's deliberately simpler (no `sf`-based union needed) and
-#' more useful for a lidar tile index, where seeing individual tile
-#' boundaries matters more than a single coverage outline.
+#' [vpc_to_stac_items()] builds each item by taking a VPC feature and
+#' adding STAC-specific fields on top (`links`, `collection`). This
+#' reverses that: strips those two fields back off, leaving the original
+#' VPC feature shape (`type`/`stac_version`/`stac_extensions`/`id`/
+#' `geometry`/`bbox`/`properties`/`assets`) - so the result is a valid VPC
+#' representing every item currently in the collection.
 #'
 #' @param items_dir Path to items directory
-#' @return A list representing a GeoJSON FeatureCollection
+#' @return A list representing a VPC FeatureCollection
 #' @keywords internal
-build_combined_geometry <- function(items_dir) {
+build_combined_vpc <- function(items_dir) {
   item_files <- fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)
 
   features <- lapply(item_files, function(f) {
     item_obj <- read_stac(f)
-    list(
-      type = "Feature",
-      geometry = item_obj$geometry,
-      properties = list(id = item_obj$id)
-    )
+    item_obj$links <- NULL
+    item_obj$collection <- NULL
+    item_obj
   })
   names(features) <- NULL
 
   list(type = "FeatureCollection", features = features)
 }
 
-#' Recompute and register a collection's combined-footprints GeoJSON asset
+#' Recompute and register a collection's combined VPC asset
 #'
-#' Writes `{collection_dir}/assets/footprints.geojson` and registers it
-#' under `collection_obj$assets$footprints`, mirroring how
-#' [stac_add_collection_asset()] registers a thumbnail/overview - except
-#' this one is derived from the items themselves rather than supplied by
-#' the user, so it's meant to be called automatically whenever items
-#' change (see [stac_add_items()]) rather than invoked directly.
+#' Writes `{collection_dir}/assets/collection.vpc` and registers it under
+#' `collection_obj$assets$vpc`. Since this is derived from the items
+#' themselves (not user-supplied), it's meant to be called automatically
+#' whenever items change (see [stac_add_items()]).
 #'
 #' @param collection_obj Collection object (list); `$assets` is updated
 #' @param collection_dir Path to collection directory
 #' @param items_dir Path to items directory
-#' @return Updated `collection_obj`
+#' @return List with `collection_obj` (updated) and `vpc` (the combined
+#'   VPC object, for reuse by [update_footprints_asset()] without
+#'   re-reading every item file a second time)
 #' @keywords internal
-update_footprints_asset <- function(collection_obj, collection_dir, items_dir) {
-  fc <- build_combined_geometry(items_dir)
+update_vpc_asset <- function(collection_obj, collection_dir, items_dir) {
+  vpc <- build_combined_vpc(items_dir)
 
   assets_dir <- fs::path(collection_dir, "assets")
   fs::dir_create(assets_dir)
-  dest_file <- fs::path(assets_dir, "footprints", ext = "geojson")
-  write_stac(fc, dest_file)
+  vpc_file <- fs::path(assets_dir, "collection", ext = "vpc")
+  write_stac(vpc, vpc_file)
+
+  assets <- collection_obj$assets
+  if (is.null(assets)) assets <- list()
+  assets$vpc <- list(
+    href = as.character(fs::path(".", fs::path_rel(vpc_file, collection_dir))),
+    title = "Virtual Point Cloud",
+    type = "application/json",
+    roles = list("metadata", "index")
+  )
+  collection_obj$assets <- assets
+
+  list(collection_obj = collection_obj, vpc = vpc)
+}
+
+#' Recompute and register a collection's footprints GeoPackage asset
+#'
+#' Reuses [write_gpkg()] to convert the combined VPC (from
+#' [update_vpc_asset()]) into a queryable GeoPackage - one feature per
+#' item, with its footprint geometry and metadata as attributes, unlike a
+#' plain GeoJSON where per-tile attributes aren't easily queryable in GIS
+#' software.
+#'
+#' Deletes any existing file at the destination first: [write_gpkg()]
+#' checks its own `overwrite` argument before writing, but doesn't delete
+#' the existing file itself, and `sf::st_write()` can otherwise behave
+#' ambiguously (refuse, or append a duplicate layer) when the destination
+#' GeoPackage already exists - which it will, since this gets called
+#' again on the same path every time items are added.
+#'
+#' @param collection_obj Collection object (list); `$assets` is updated
+#' @param collection_dir Path to collection directory
+#' @param vpc The combined VPC object, as returned by
+#'   [update_vpc_asset()]
+#' @param crs EPSG code to reproject the footprints to (the collection's
+#'   own CRS)
+#' @return Updated `collection_obj`
+#' @keywords internal
+update_footprints_asset <- function(collection_obj, collection_dir, vpc, crs) {
+  assets_dir <- fs::path(collection_dir, "assets")
+  fs::dir_create(assets_dir)
+  gpkg_file <- fs::path(assets_dir, "footprints", ext = "gpkg")
+
+  if (fs::file_exists(gpkg_file)) fs::file_delete(gpkg_file)
+  write_gpkg(vpc, out_file = gpkg_file, overwrite = TRUE, crs = crs, metrics = NULL)
 
   assets <- collection_obj$assets
   if (is.null(assets)) assets <- list()
   assets$footprints <- list(
-    href = as.character(fs::path(".", fs::path_rel(dest_file, collection_dir))),
+    href = as.character(fs::path(".", fs::path_rel(gpkg_file, collection_dir))),
     title = "Item Footprints",
-    type = "application/geo+json",
+    type = "application/geopackage+sqlite3",
     roles = list("footprints")
   )
   collection_obj$assets <- assets

@@ -45,6 +45,18 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
     -dplyr::any_of(c("pc.count", "pc.type", "proj.wkt2"))
   )
 
+  # ------------------------------------------------------------
+  # Expand proj:bbox (list column → numeric columns)
+  # ------------------------------------------------------
+
+  bbox_df <- as.data.frame(do.call(rbind, vpc_sf$`proj:bbox`))
+  names(bbox_df) <- c("xmin", "ymin", "xmax", "ymax")
+
+  vpc_sf <- dplyr::bind_cols(
+    vpc_sf |> dplyr::select(-`proj:bbox`),
+    bbox_df
+  )
+
   # ------------------------------------------------------------------
   # Flatten any remaining list-columns to JSON text
   # ------------------------------------------------------------------
@@ -60,19 +72,12 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
   # serialized to a JSON string instead - the data stays inspectable as a
   # text field in the GeoPackage rather than crashing the write or
   # silently disappearing.
+  #
+  # Deliberately runs *after* the proj:bbox expansion above, not before -
+  # proj:bbox is itself a list-column (one numeric vector per row) with
+  # its own dedicated handling there; flattening it first would turn it
+  # into a JSON string and break do.call(rbind, ...) in that step.
   vpc_sf <- flatten_list_columns(vpc_sf)
-
-  # ------------------------------------------------------------
-  # Expand proj:bbox (list column → numeric columns)
-  # ------------------------------------------------------
-
-  bbox_df <- as.data.frame(do.call(rbind, vpc_sf$`proj:bbox`))
-  names(bbox_df) <- c("xmin", "ymin", "xmax", "ymax")
-
-  vpc_sf <- dplyr::bind_cols(
-    vpc_sf |> dplyr::select(-`proj:bbox`),
-    bbox_df
-  )
 
   # ------------------------------------------------------------------
   # Reproject if requested

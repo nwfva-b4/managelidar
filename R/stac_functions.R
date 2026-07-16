@@ -589,11 +589,12 @@ stac_add_collection_asset <- function(
 #'   with `type = "FeatureCollection"`).
 #' @param overwrite_items Logical. If `TRUE`, overwrite existing item files.
 #'   Default is `FALSE` (skip existing items).
-#' @param footprints Logical. If `TRUE` (default), maintain a combined
-#'   footprints GeoJSON asset on the collection - a `FeatureCollection`
-#'   with one Feature per item (its footprint geometry plus item id),
-#'   registered as `collection_obj$assets$footprints`. Recomputed from
-#'   scratch (cheap) whenever this call actually writes new item data.
+#' @param footprints Logical. If `TRUE` (default), also maintain a
+#'   footprints GeoPackage asset built from the combined VPC via
+#'   [write_gpkg()] - one feature per item with queryable metadata
+#'   attributes, registered as `collection_obj$assets$footprints`. The
+#'   combined VPC asset itself (`collection_obj$assets$vpc`) is always
+#'   maintained regardless of this argument.
 #'
 #' @details
 #' If the collection is currently empty, its placeholder extent is
@@ -701,8 +702,11 @@ stac_add_items <- function(collection, path, overwrite_items = FALSE, footprints
       required_lidar_stac_extensions()
     )
 
+    vpc_result <- update_vpc_asset(collection_obj, collection_dir, items_dir)
+    collection_obj <- vpc_result$collection_obj
+
     if (footprints) {
-      collection_obj <- update_footprints_asset(collection_obj, collection_dir, items_dir)
+      collection_obj <- update_footprints_asset(collection_obj, collection_dir, vpc_result$vpc, crs = crs)
     }
   }
 
