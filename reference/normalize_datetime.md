@@ -1,6 +1,7 @@
-# Internal helper to normalize datetime inputs (for explicit end dates)
+# Internal helper to normalize datetime inputs (for explicit end dates) - DEPRECATED
 
-Internal helper to normalize datetime inputs (for explicit end dates)
+Internal helper to normalize datetime inputs (for explicit end dates) -
+DEPRECATED
 
 ## Usage
 

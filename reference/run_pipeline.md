@@ -57,6 +57,6 @@ folder |>
 #> resolution  : 1, 1  (x, y)
 #> extent      : 547647, 548996, 5724000, 5725992  (xmin, xmax, ymin, ymax)
 #> coord. ref. : ETRS89 / UTM zone 32N (EPSG:25832)
-#> source      : file225b55fd3d6f.tif
+#> source      : file226e88de69b.tif
 #> name        : max
 ```
