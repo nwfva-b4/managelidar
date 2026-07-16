@@ -1,0 +1,95 @@
+{
+  "type": "Feature",
+  "collection": "example_subcollection2",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+  ],
+  "id": "3dm_32_548_5725_1_ni_20240327",
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          9.694164975,
+          51.67392191
+        ],
+        [
+          9.708559539,
+          51.673835961
+        ],
+        [
+          9.708698746,
+          51.682754557
+        ],
+        [
+          9.694301355,
+          51.682840533
+        ],
+        [
+          9.694164975,
+          51.67392191
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  },
+  "bbox": [
+    9.694164975,
+    51.673835961,
+    232.946,
+    9.708698746,
+    51.682840533,
+    385.486
+  ],
+  "properties": {
+    "datetime": "2024-03-27T00:00:00Z",
+    "pc:count": 10000,
+    "pc:type": "lidar",
+    "index:indexed": true,
+    "proj:bbox": [
+      548000.001,
+      5725000.003,
+      548995.435,
+      5725991.976
+    ],
+    "proj:wkt2": "PROJCRS[\"ETRS89 / UTM zone 32N\",BASEGEOGCRS[\"ETRS89\",ENSEMBLE[\"European Terrestrial Reference System 1989 ensemble\",MEMBER[\"European Terrestrial Reference Frame 1989\"],MEMBER[\"European Terrestrial Reference Frame 1990\"],MEMBER[\"European Terrestrial Reference Frame 1991\"],MEMBER[\"European Terrestrial Reference Frame 1992\"],MEMBER[\"European Terrestrial Reference Frame 1993\"],MEMBER[\"European Terrestrial Reference Frame 1994\"],MEMBER[\"European Terrestrial Reference Frame 1996\"],MEMBER[\"European Terrestrial Reference Frame 1997\"],MEMBER[\"European Terrestrial Reference Frame 2000\"],MEMBER[\"European Terrestrial Reference Frame 2005\"],MEMBER[\"European Terrestrial Reference Frame 2014\"],MEMBER[\"European Terrestrial Reference Frame 2020\"],ELLIPSOID[\"GRS 1980\",6378137,298.257222101,LENGTHUNIT[\"metre\",1]],ENSEMBLEACCURACY[0.1]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4258]],CONVERSION[\"UTM zone 32N\",METHOD[\"Transverse Mercator\",ID[\"EPSG\",9807]],PARAMETER[\"Latitude of natural origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8801]],PARAMETER[\"Longitude of natural origin\",9,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Scale factor at natural origin\",0.9996,SCALEUNIT[\"unity\",1],ID[\"EPSG\",8805]],PARAMETER[\"False easting\",500000,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],USAGE[SCOPE[\"Engineering survey, topographic mapping.\"],AREA[\"Europe between 6°E and 12°E: Austria; Denmark - onshore and offshore; Germany - onshore and offshore; Italy - onshore and offshore; Norway including Svalbard - onshore and offshore; Spain - offshore.\"],BBOX[36.53,6,84.01,12.01]],USAGE[SCOPE[\"Pan-European conformal mapping at scales larger than 1:500,000.\"],AREA[\"Europe between 6°E and 12°E and approximately 36°30'N to 84°N.\"],BBOX[36.53,6,84.01,12.01]],ID[\"EPSG\",25832]]",
+    "proj:epsg": 25832,
+    "created": "2026-07-16T13:17:41Z",
+    "updated": "2026-07-16T13:17:41Z"
+  },
+  "assets": {
+    "data": {
+      "href": "file:///C:/Users/jwiesehahn/arbeit/sideprojects/managelidar/inst/extdata/3dm_32_548_5725_1_ni_20240327.laz",
+      "roles": [
+        "data"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./3dm_32_548_5725_1_ni_20240327.json",
+      "type": "application/geo+json",
+      "title": "3dm_32_548_5725_1_ni_20240327"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json",
+      "type": "application/json",
+      "title": "Example subcollection #2"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json",
+      "type": "application/json",
+      "title": "Example subcollection #2"
+    }
+  ]
+}

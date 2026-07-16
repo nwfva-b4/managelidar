@@ -1,0 +1,101 @@
+{
+  "id": "example_collection1",
+  "type": "Collection",
+  "stac_version": "1.0.0",
+  "title": "Example Collection #1",
+  "description": "This is an example for a STAC-collection, there can be multiple collections per catalog and also collections within collections.",
+  "license": " \tCC-BY-4.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          9.689074427,
+          51.664845455,
+          222.866,
+          9.708698746,
+          51.682911794,
+          387.516
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2023-09-05T00:00:00Z",
+          "2024-03-27T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "keywords": [
+    "example",
+    "test",
+    "collection"
+  ],
+  "providers": [
+    {
+      "name": "Example Providername",
+      "roles": [
+        "host",
+        "producer",
+        "processor",
+        "licensor"
+      ],
+      "url": "https://github.com/nwfva-b4/managelidar"
+    },
+    {
+      "name": "Another provider",
+      "roles": [
+        "host",
+        "processor"
+      ],
+      "url": "https://github.com/nwfva-b4/managelidar"
+    }
+  ],
+  "links": [
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "parent",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json",
+      "title": "Example Collection #1"
+    },
+    {
+      "rel": "child",
+      "href": "./example_subcollection1/collection.json",
+      "type": "application/json",
+      "title": "Example subcollection #1"
+    },
+    {
+      "rel": "child",
+      "href": "./example_subcollection2/collection.json",
+      "type": "application/json",
+      "title": "Example subcollection #2"
+    }
+  ],
+  "created": "2026-07-16T13:17:40Z",
+  "updated": "2026-07-16T13:17:46Z",
+  "assets": {
+    "thumbnail": {
+      "href": "https://ps.w.org/kama-thumbnail/assets/icon-256x256.png?rev=2836004",
+      "type": "image/png",
+      "title": "Thumbnail",
+      "roles": "thumbnail"
+    }
+  }
+}

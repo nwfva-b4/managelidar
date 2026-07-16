@@ -1,0 +1,62 @@
+{
+  "id": "example_collection2",
+  "type": "Collection",
+  "stac_version": "1.0.0",
+  "title": "Example Collection #2",
+  "description": "This is another collection at the same hierach level than `Example collection #1`",
+  "license": "other",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          [],
+          []
+        ]
+      ]
+    }
+  },
+  "keywords": "example",
+  "links": [
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "parent",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json",
+      "title": "Example Collection #2"
+    },
+    {
+      "rel": "icon",
+      "href": "https://cdn-icons-png.flaticon.com/256/628/628647.png",
+      "type": "image/png"
+    }
+  ],
+  "created": "2026-07-16T13:17:40Z",
+  "updated": "2026-07-16T13:17:40Z"
+}
