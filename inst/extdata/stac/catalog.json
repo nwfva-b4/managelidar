@@ -1,0 +1,40 @@
+{
+  "id": "example_catalog",
+  "type": "Catalog",
+  "stac_version": "1.0.0",
+  "title": "Example Catalog",
+  "description": "This is an example for a Spatio Temporal Asset Catalog (STAC) created via {[managelidar](https://github.com/nwfva-b4/managelidar)} R-package.",
+  "links": [
+    {
+      "rel": "root",
+      "href": "./catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "self",
+      "href": "./catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "icon",
+      "href": "https://raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/man/figures/logo.png",
+      "type": "image/png"
+    },
+    {
+      "rel": "child",
+      "href": "./collections/example_collection1/collection.json",
+      "type": "application/json",
+      "title": "Example Collection #1"
+    },
+    {
+      "rel": "child",
+      "href": "./collections/example_collection2/collection.json",
+      "type": "application/json",
+      "title": "Example Collection #2"
+    }
+  ],
+  "created": "2026-07-16T13:17:39Z",
+  "updated": "2026-07-16T13:17:40Z"
+}

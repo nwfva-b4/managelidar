@@ -1,0 +1,104 @@
+{
+  "id": "example_subcollection1",
+  "type": "Collection",
+  "stac_version": "1.0.0",
+  "title": "Example subcollection #1",
+  "description": "STAC collection",
+  "license": "other",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/projection/v1.1.0/schema.json"
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          9.694165867,
+          51.673895414,
+          229.795,
+          9.708667547,
+          51.682911794,
+          387.516
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2023-09-05T00:00:00Z",
+          "2023-09-05T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "keywords": [
+    "subcollection",
+    "test"
+  ],
+  "providers": {
+    "name": "Examplename",
+    "roles": "host"
+  },
+  "links": [
+    {
+      "rel": "root",
+      "href": "../../../catalog.json",
+      "type": "application/json",
+      "title": "Example Catalog"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json",
+      "type": "application/json",
+      "title": "Example Collection #1"
+    },
+    {
+      "rel": "self",
+      "href": "./collection.json",
+      "type": "application/json",
+      "title": "Example subcollection #1"
+    },
+    {
+      "rel": "item",
+      "href": "./items/3dm_32_548_5725_1_ni_20230904.json",
+      "type": "application/geo+json",
+      "title": "3dm_32_548_5725_1_ni_20230904"
+    }
+  ],
+  "created": "2026-07-16T13:17:40Z",
+  "updated": "2026-07-16T13:17:41Z",
+  "assets": {
+    "overview": {
+      "href": "https://raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/man/figures/logo.png",
+      "type": "image/png",
+      "title": "Overview",
+      "roles": "overview"
+    },
+    "vpc": {
+      "href": "./assets/collection.vpc",
+      "title": "Virtual Point Cloud",
+      "type": "application/json",
+      "roles": [
+        "metadata",
+        "index"
+      ]
+    },
+    "footprints": {
+      "href": "./assets/footprints.gpkg",
+      "title": "Item Footprints",
+      "description": "All item footprints of collection combined in one geopackage.",
+      "type": "application/geopackage+sqlite3",
+      "roles": [
+        "footprints"
+      ]
+    }
+  },
+  "summaries": {
+    "proj:epsg": [
+      25832
+    ],
+    "pc:type": [
+      "lidar"
+    ]
+  }
+}

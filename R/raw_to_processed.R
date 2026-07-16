@@ -647,6 +647,41 @@ raw_to_processed <- function(path,
 
     created_outputs <- c(created_outputs, overview_img)
 
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # convert overview
+    #-------------------------------------------------------------------------------------------------------------------------------------------------#
+    # get imgage statistics
+    ds <- new(gdalraster::GDALRaster, overview_file)
+    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
+    ds$quiet <- TRUE
+    mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
+    ds$close()
+
+    # scale image data
+    tmp_byte <- "/vsimem/tmp_byte.tif"
+    gdalraster::translate(overview_file, tmp_byte, quiet = TRUE, cl_arg = c(
+      "-ot", "Byte", "-scale", mm[1], mm[2], "0", "255", "-of", "GTiff"
+    ))
+
+    # apply colour table
+    ds <- new(gdalraster::GDALRaster, tmp_byte, read_only = FALSE)
+    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
+    cols <- viridis::viridis(256)
+    rgb_mat <- col2rgb(cols)
+    colortable <- cbind(0:255, t(rgb_mat), 255L)
+    ds$setColorTable(band = 1, col_tbl = colortable, palette_interp = "RGB")
+    ds$close()
+
+    # convert to webp
+    overview_img <- fs::path(dir_overviews, fs::path_ext_set(generated_filename, ".webp"))
+    gdalraster::translate(tmp_byte, overview_img, cl_arg = c("-of", "WEBP", "-expand", "rgb"), quiet = TRUE)
+
+    # delete intermediate data
+    gdalraster::vsi_unlink(tmp_byte)
+    fs::file_delete(overview_file)
+
+    created_outputs <- c(created_outputs, overview_img)
+
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # save vpc to disk
@@ -747,16 +782,22 @@ raw_to_processed <- function(path,
       vpc$features$properties[[1]] <- c(current_props, new_props)
     }
 
-    # add metadata when data was processed
-    vpc$features$assets[[1]]$data$created <- format(as.POSIXct(processing_start), format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+    # add media typ to pointcloud data (missing by lasR)
+    vpc$features$assets[[1]]$data$title <- "Pointcloud"
+    vpc$features$assets[[1]]$data$type <- "application/vnd.laz"
+    # add processing date
+    vpc$features$assets[[1]]$data$created <- file_start
+    # add short data description
+    vpc$features$assets[[1]]$data$description <- "The pointcloud was processed with [managelidar](https://github.com/nwfva-b4/managelidar)."
 
-    # add overview reference
-    vpc$features$assets[[1]]$overview$href <- fs::path("./../overviews", fs::path_file(overview_img))
-    vpc$features$assets[[1]]$overview$type <- "image/webp"
-    vpc$features$assets[[1]]$overview$roles <- "overview"
+    # add overview asset
+    vpc$features$assets[[1]]$overview <- list(
+      href = path_to_file_uri(overview_img),
+      type = "image/webp",
+      roles = c("overview"),
+      description = "The Overview represents a basic Canopy Height Model with 1m resolution. It was created without information about surrounding data and thus might contain edge artifacts."
+    )
 
-    # make pointcloud reference relative
-    vpc$features$assets[[1]]$data$href <- fs::path("./../pointcloud", fs::path_file(pointcloud_file))
 
     # write VPC to disk
     vpc_file <- fs::path(dir_vpc, fs::path_ext_set(generated_filename, ".vpc"))

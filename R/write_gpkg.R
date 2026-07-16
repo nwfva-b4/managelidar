@@ -1,26 +1,19 @@
 #' Create a Geopackage containing metadata of LASfiles
 #'
-#' `get_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a collection of LAS/LAZ/COPC
+#' `write_gpkg()` converts the metadata of a Virtual Point Cloud (.vpc) or a collection of LAS/LAZ/COPC
 #' files into Geopackage. VPCs can be read and visualized by QGIS, however individual tiles (features) can not be queried as is.
-#' To enable this we convert it to a Geopackage, which can be easily explored in any GIS.
+#' To do this we convert it to a Geopackage, which can easily be explored in any GIS.
 #' Each LAS tile becomes a feature with its spatial extent and some metadata.
 #'
+#' Summary metrics (optional) can be included by setting `metrics = TRUE` for default metrics
+#' or providing a character vector of custom metrics. Computing metrics requires reading the actual point data,
+#' und thus can be much slower. See `get_summary()` for details.
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing LASfiles,
 #'   or a Virtual Point Cloud (.vpc) file.
 #' @param out_file Path to the output Geopackage (.gpkg) file (default: tempfile).
 #' @param overwrite Logical. If TRUE, overwrite the output file if it exists (default: FALSE).
 #' @param crs Integer. Optional EPSG code to reproject the VPC (default: 25832).
-#' @param metrics Optional. Controls whether summary metrics are computed and
-#'   added to the output layer.
-#'   - `NULL` (default): no summary metrics are computed.
-#'   - `TRUE`: compute the default set of metrics returned by `get_summary()`.
-#'   - Character vector: compute only the specified metrics, e.g.
-#'     `c("z_mean", "classification_mode", "intensity_mean")`.
-#'
-#'   Computing metrics requires reading the point data from all files and can
-#'   substantially increase processing time. See `get_summary()` for available
-#'   metrics and details.
 #'
 #' @return Invisibly returns an `sf` object representing the tiles written to the Geopackage.
 #' @export
@@ -28,9 +21,9 @@
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
 #' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
-#' las_files |> get_gpkg()
+#' las_files |> write_gpkg()
 #'
-get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = FALSE, crs = 25832, metrics = NULL) {
+write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = FALSE, crs = 25832, metrics = NULL) {
   # ------------------------------------------------------------------
   # Resolve LASfiles and build VPC if not provided
   # ------------------------------------------------------------------
@@ -46,10 +39,15 @@ get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = F
   # ------------------------------------------------------------------
   vpc_sf <- sf::st_read(vpc_file, quiet = TRUE)
 
+  # Drop non-exportable / redundant columns
+  vpc_sf <- dplyr::select(
+    vpc_sf,
+    -dplyr::any_of(c("pc.count", "pc.type", "proj.wkt2"))
+  )
 
   # ------------------------------------------------------------
   # Expand proj:bbox (list column → numeric columns)
-  # ------------------------------------------------------------
+  # ------------------------------------------------------
 
   bbox_df <- as.data.frame(do.call(rbind, vpc_sf$`proj:bbox`))
   names(bbox_df) <- c("xmin", "ymin", "xmax", "ymax")
@@ -58,6 +56,28 @@ get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = F
     vpc_sf |> dplyr::select(-`proj:bbox`),
     bbox_df
   )
+
+  # ------------------------------------------------------------------
+  # Flatten any remaining list-columns to JSON text
+  # ------------------------------------------------------------------
+  # GDAL's GeoJSON/VPC reader can't flatten nested/irregular properties
+  # (e.g. `pc:statistics`, an array of per-attribute stat blocks with
+  # nested class-count maps) into a scalar column, so they come back as
+  # list-columns. sf::st_write() to GeoPackage only accepts list-columns
+  # that hold raw/blob content - anything else fails at write time with
+  # "list columns are only allowed with raw vector contents". Rather than
+  # maintaining a growing, fragile list of specific field names to drop
+  # (which breaks again the next time a new nested field is added
+  # upstream), any list-column still present at this point is generically
+  # serialized to a JSON string instead - the data stays inspectable as a
+  # text field in the GeoPackage rather than crashing the write or
+  # silently disappearing.
+  #
+  # Deliberately runs *after* the proj:bbox expansion above, not before -
+  # proj:bbox is itself a list-column (one numeric vector per row) with
+  # its own dedicated handling there; flattening it first would turn it
+  # into a JSON string and break do.call(rbind, ...) in that step.
+  vpc_sf <- flatten_list_columns(vpc_sf)
 
   # ------------------------------------------------------------------
   # Reproject if requested
@@ -129,17 +149,6 @@ get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = F
 
 
   # ------------------------------------------------------------------
-  # Drop non-exportable / redundant columns
-  # ------------------------------------------------------------------
-  vpc_sf <- dplyr::select(
-    vpc_sf,
-    -dplyr::any_of(c("proj.wkt2"))
-  )
-
-  vpc_sf <- vpc_sf[, !sapply(vpc_sf, is.list)]
-
-
-  # ------------------------------------------------------------------
   # Write Geopackage
   # ------------------------------------------------------------------
   if (tools::file_ext(out_file) == "") {
@@ -157,4 +166,31 @@ get_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = F
   message("Wrote Geopackage: ", out_file)
 
   invisible(vpc_sf)
+}
+
+#' Flatten any list-columns in a data frame / sf object to JSON text
+#'
+#' Leaves the geometry column (and any plain atomic column) untouched;
+#' every other list-column gets serialized element-wise to a JSON string,
+#' with `NULL`/length-zero entries becoming `NA`.
+#'
+#' @param df A data frame or sf object
+#' @return The same object with list-columns replaced by character columns
+#' @keywords internal
+flatten_list_columns <- function(df) {
+  geom_col <- attr(df, "sf_column")
+
+  for (col in names(df)) {
+    if (identical(col, geom_col)) next
+    if (!is.list(df[[col]])) next
+
+    df[[col]] <- vapply(df[[col]], function(x) {
+      if (is.null(x) || length(x) == 0) {
+        return(NA_character_)
+      }
+      yyjsonr::write_json_str(x, auto_unbox = TRUE)
+    }, character(1))
+  }
+
+  df
 }

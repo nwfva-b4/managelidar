@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_temporal.R
 \name{normalize_datetime}
 \alias{normalize_datetime}
-\title{Internal helper to normalize datetime inputs (for explicit end dates)}
+\title{Internal helper to normalize datetime inputs (for explicit end dates) - DEPRECATED}
 \usage{
 normalize_datetime(dt)
 }
@@ -13,6 +13,6 @@ normalize_datetime(dt)
 POSIXct object in UTC
 }
 \description{
-Internal helper to normalize datetime inputs (for explicit end dates)
+Internal helper to normalize datetime inputs (for explicit end dates) - DEPRECATED
 }
 \keyword{internal}
