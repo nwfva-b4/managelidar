@@ -41,7 +41,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build_item_links</span><span class="op">(</span><span class="va">item_id</span>, <span class="va">items_dir</span>, <span class="va">collection_dir</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build_item_links</span><span class="op">(</span></span>
+<span>  <span class="va">item_id</span>,</span>
+<span>  <span class="va">items_dir</span>,</span>
+<span>  <span class="va">collection_dir</span>,</span>
+<span>  <span class="va">root_path</span>,</span>
+<span>  <span class="va">root_title</span>,</span>
+<span>  <span class="va">collection_title</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -58,6 +65,18 @@
 
 <dt id="arg-collection-dir">collection_dir<a class="anchor" aria-label="anchor" href="#arg-collection-dir"></a></dt>
 <dd><p>Path to collection directory</p></dd>
+
+
+<dt id="arg-root-path">root_path<a class="anchor" aria-label="anchor" href="#arg-root-path"></a></dt>
+<dd><p>Absolute path to root catalog</p></dd>
+
+
+<dt id="arg-root-title">root_title<a class="anchor" aria-label="anchor" href="#arg-root-title"></a></dt>
+<dd><p>Title of the root catalog</p></dd>
+
+
+<dt id="arg-collection-title">collection_title<a class="anchor" aria-label="anchor" href="#arg-collection-title"></a></dt>
+<dd><p>Title of the owning collection</p></dd>
 
 </dl></div>
     <div class="section level2">

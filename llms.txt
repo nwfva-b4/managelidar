@@ -263,8 +263,18 @@ ecosystem.
   : Execute lasR pipeline on catalog
 - [`set_names()`](https://wiesehahn.github.io/managelidar/reference/set_names.md)
   : Set LASfile names according to ADV standard
-- [`stac_add()`](https://wiesehahn.github.io/managelidar/reference/stac_add.md)
-  : Add VPC items to STAC catalog or collection
+- [`stac_add_collection()`](https://wiesehahn.github.io/managelidar/reference/stac_add_collection.md)
+  : Add (or update) a collection on a STAC catalog or collection
+- [`stac_add_collection_asset()`](https://wiesehahn.github.io/managelidar/reference/stac_add_collection_asset.md)
+  : Add a visual asset (thumbnail, overview, ...) to a collection
+- [`stac_add_items()`](https://wiesehahn.github.io/managelidar/reference/stac_add_items.md)
+  : Add LASfile items to an existing STAC collection
+- [`stac_browse()`](https://wiesehahn.github.io/managelidar/reference/stac_browse.md)
+  : Browse a STAC catalog
+- [`stac_create_catalog()`](https://wiesehahn.github.io/managelidar/reference/stac_create_catalog.md)
+  : Create (or update) a STAC catalog
+- [`stac_set_icon()`](https://wiesehahn.github.io/managelidar/reference/stac_set_icon.md)
+  : Set an icon on a catalog or collection
 - [`write_gpkg()`](https://wiesehahn.github.io/managelidar/reference/write_gpkg.md)
   : Create a Geopackage containing metadata of LASfiles
 

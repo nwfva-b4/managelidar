@@ -49,7 +49,7 @@ Returns NULL invisibly if no features match the filter.
 
 ## See also
 
-[`filter_earliest`](https://wiesehahn.github.io/managelidar/reference/filter_earliest.md),
+`filter_first`,
 [`filter_latest`](https://wiesehahn.github.io/managelidar/reference/filter_latest.md),
 [`filter_spatial`](https://wiesehahn.github.io/managelidar/reference/filter_spatial.md),
 [`filter_multitemporal`](https://wiesehahn.github.io/managelidar/reference/filter_multitemporal.md)
