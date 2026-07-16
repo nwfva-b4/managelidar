@@ -891,6 +891,7 @@ update_footprints_asset <- function(collection_obj, collection_dir, vpc, crs) {
   assets$footprints <- list(
     href = as.character(fs::path(".", fs::path_rel(gpkg_file, collection_dir))),
     title = "Item Footprints",
+    description = "All item footprints of collection combined in one geopackage."
     type = "application/geopackage+sqlite3",
     roles = list("footprints")
   )
