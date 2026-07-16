@@ -136,9 +136,7 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, col
     item <- list(
       type = "Feature",
       collection = collection_id,
-      # lasR writes v.1.0.0, we manually bump it here
-      # stac_version = features$stac_version[i],
-      stac_version = "1.1.0",
+      stac_version = features$stac_version[i],
       # Override whatever extension versions the VPC source data declares
       # (e.g. lasR bakes in pointcloud v1.0.0) so items always match the
       # versions this package targets - see required_lidar_stac_extensions().
@@ -306,7 +304,7 @@ build_catalog <- function(id, title, description) {
   list(
     id = id,
     type = "Catalog",
-    stac_version = "1.1.0",
+    stac_version = "1.0.0",
     title = title,
     description = description,
     links = list()
@@ -354,7 +352,7 @@ build_collection <- function(
   collection_obj <- list(
     id = id,
     type = "Collection",
-    stac_version = "1.1.0",
+    stac_version = "1.0.0",
     title = title,
     description = description,
     license = license,
