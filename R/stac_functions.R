@@ -131,8 +131,8 @@ stac_create_catalog <- function(path, id, title = id, description = "STAC catalo
 #' @param description Collection description. Defaults to
 #'   `"STAC collection"` for a new collection; left unchanged on update
 #'   unless explicitly passed.
-#' @param license License string. Defaults to `"other"` for a new
-#'   collection; left unchanged on update unless explicitly passed.
+#' @param license License string. Can be provided as [SPDX License identifier](https://spdx.org/licenses/) or [SPDX-license-expression](https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions/).
+#'    Defaults to `"other"` for a new collection; left unchanged on update unless explicitly passed.
 #' @param keywords Character vector of keywords.
 #' @param providers List of provider objects, e.g.
 #'   `list(list(name = "Org Name", roles = c("host", "producer"), url = "https://example.org"))`.
