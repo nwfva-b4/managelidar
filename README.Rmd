@@ -116,6 +116,7 @@ managelidar is designed around three core principles:
 4. **Pipepable**: Output of many functions can be used as input for other functions
 
 Most functions follow this pattern:
+
 - Create VPC in background if needed (fast)
 - Read metadata from VPC (very fast)
 - Only read point data when absolutely necessary
