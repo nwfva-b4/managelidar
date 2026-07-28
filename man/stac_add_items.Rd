@@ -41,7 +41,7 @@ existing one instead.
 \examples{
 cat <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni") 
-col |>
+col <- cat |>
   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
 
