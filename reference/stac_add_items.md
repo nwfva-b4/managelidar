@@ -54,15 +54,21 @@ existing one instead.
 ``` r
 cat <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni") 
-#> ✔ Created catalog lidar_ni at /tmp/RtmpWTNJfp/stac-managelidar-215b4bf85e01/catalog.json
-col |>
+#> ✔ Created catalog lidar_ni at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/catalog.json
+col <- cat |>
   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
-#> Error in enc2utf8(path): argument is not a character vector
+#> ✔ Created collection lidar_ni_2023 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/collection.json
+#> ✔ Updated parent lidar_ni at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/catalog.json
+#> ✔ Created collection 2023_q3 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/2023_q3/collection.json
+#> ✔ Updated parent lidar_ni_2023 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/collection.json
 
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = T, pattern = "*.laz")
 items <- col |>
   stac_add_items(path = las_files)
-#> Error in enc2utf8(path): argument is not a character vector
+#> Wrote Geopackage: /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/2023_q3/assets/footprints.gpkg
+#> ✔ Created 5 items in /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/2023_q3/items
+#> ✔ Updated collection 2023_q3 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/2023_q3/collection.json
+#> ✔ Updated extent of ancestor collection lidar_ni_2023 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f391222d9/collections/lidar_ni_2023/collection.json
 ```

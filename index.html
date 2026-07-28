@@ -172,7 +172,12 @@
 <li>
 <strong>Pipepable</strong>: Output of many functions can be used as input for other functions</li>
 </ol>
-<p>Most functions follow this pattern: - Create VPC in background if needed (fast) - Read metadata from VPC (very fast) - Only read point data when absolutely necessary</p>
+<p>Most functions follow this pattern:</p>
+<ul>
+<li>Create VPC in background if needed (fast)</li>
+<li>Read metadata from VPC (very fast)</li>
+<li>Only read point data when absolutely necessary</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="example-usage">Example Usage<a class="anchor" aria-label="anchor" href="#example-usage"></a>
@@ -185,8 +190,6 @@
 <span></span>
 <span><span class="co"># Get spatial extent from multiple files</span></span>
 <span><span class="va">path</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/get_spatial_extent.html">get_spatial_extent</a></span><span class="op">(</span>per_file <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: This LAS object stores the CRS as WKT. CRS field might not be</span></span>
-<span><span class="co">#&gt; correctly populated, yielding uncertain results; use 'wkt()' instead.</span></span>
 <span><span class="co">#&gt; Get spatial extent</span></span>
 <span><span class="co">#&gt;   ▼ 5 LASfiles</span></span>
 <span><span class="co">#&gt;   Overall extent: 547647.97, 5724000.00, 548995.44, 5725999.90  (xmin, ymin, xmax, ymax; EPSG:25832)</span></span>
@@ -197,8 +200,6 @@
 <span><span class="va">path</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">547900</span>, <span class="fl">5724900</span>, <span class="fl">548100</span>, <span class="fl">5724900</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/get_names.html">get_names</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: This LAS object stores the CRS as WKT. CRS field might not be</span></span>
-<span><span class="co">#&gt; correctly populated, yielding uncertain results; use 'wkt()' instead.</span></span>
 <span><span class="co">#&gt; Filter spatial extent</span></span>
 <span><span class="co">#&gt;   ▼ 5 LASfiles</span></span>
 <span><span class="co">#&gt;   ▼ 2 LASfiles retained</span></span>
@@ -209,8 +210,6 @@
 <span>  <span class="fu"><a href="reference/filter_temporal.html">filter_temporal</a></span><span class="op">(</span><span class="st">"2024-03"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/filter_spatial.html">filter_spatial</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">547900</span>, <span class="fl">5724900</span>, <span class="fl">548100</span>, <span class="fl">5724900</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/get_names.html">get_names</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: This LAS object stores the CRS as WKT. CRS field might not be</span></span>
-<span><span class="co">#&gt; correctly populated, yielding uncertain results; use 'wkt()' instead.</span></span>
 <span><span class="co">#&gt; Filter temporal extent</span></span>
 <span><span class="co">#&gt;   ▼ 5 LASfiles (2023-09-05 to 2024-03-27)</span></span>
 <span><span class="co">#&gt;   ▼ 4 LASfiles retained (2024-03-27)</span></span>
