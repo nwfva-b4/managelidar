@@ -6,7 +6,7 @@
 \usage{
 is_classified(
   path,
-  samplebased = TRUE,
+  sample_based = TRUE,
   full.names = FALSE,
   add_classes = FALSE
 )
@@ -15,7 +15,7 @@ is_classified(
 \item{path}{Character. Path to a LAS/LAZ/COPC file, a directory containing
 such files, or a Virtual Point Cloud (\code{.vpc}).}
 
-\item{samplebased}{Logical. If \code{TRUE} (default), reads only a spatial subsample of each file.}
+\item{sample_based}{Logical. If \code{TRUE} (default), reads only a spatial subsample of each file.}
 
 \item{full.names}{Logical. If \code{TRUE}, return full file paths; otherwise
 return base filenames only (default).}
@@ -52,7 +52,7 @@ classified this is usually sufficient, but to get class abundances consider usin
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> is_classified(add_classes = TRUE)
 

@@ -94,7 +94,7 @@ resolve_vpc <- function(paths, epsg = 25832L, out_file = NULL) {
           absolutize_hrefs(vpc, file) # <- resolve relative hrefs on read
         },
         error = function(e) {
-          warning("Could not read VPC file: ", file)
+          cli::cli_warn("Could not read VPC file: {file}")
           return(NULL)
         }
       )
@@ -108,7 +108,7 @@ resolve_vpc <- function(paths, epsg = 25832L, out_file = NULL) {
   # Check if we have any valid VPC objects
   # ------------------------------------------------------------
   if (length(to_merge_objects) == 0) {
-    warning("No valid VPC objects or LAS/LAZ/COPC files found")
+    cli::cli_warn("No valid VPC objects or LAS/LAZ/COPC files found")
     return(invisible(NULL))
   }
 

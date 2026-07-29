@@ -14,19 +14,27 @@
 #'   is written as a valid `.vpc` JSON.
 #'
 #' @examples
-#' # Merge two VPC files
-#' merged <- merge_vpcs(c("vpc1.vpc", "vpc2.vpc"))
+#' folder <- system.file("extdata", package = "managelidar")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "[.]laz$")
+#'
+#' # create two separate VPC files to merge
+#' vpc_file1 <- tempfile(fileext = ".vpc")
+#' vpc_file2 <- tempfile(fileext = ".vpc")
+#' invisible(lasR::exec(lasR::write_vpc(vpc_file1, absolute_path = TRUE), on = las_files[1:2]))
+#' invisible(lasR::exec(lasR::write_vpc(vpc_file2, absolute_path = TRUE), on = las_files[3:5]))
+#'
+#' merged <- merge_vpcs(c(vpc_file1, vpc_file2))
 #'
 #' @export
 merge_vpcs <- function(vpc_files, out_file = NULL, overwrite = FALSE) {
-  if (length(vpc_files) == 0) stop("No VPC files provided.")
+  if (length(vpc_files) == 0) cli::cli_abort("No VPC files provided.")
   vpc_files <- fs::path_norm(vpc_files)
 
   # ------------------------------------------------------------------
   # Read all VPC files
   # ------------------------------------------------------------------
   vpcs <- lapply(vpc_files, function(f) {
-    if (!file.exists(f)) stop("VPC file not found: ", f)
+    if (!file.exists(f)) cli::cli_abort("VPC file not found: {f}")
     yyjsonr::read_json_file(f)
   })
 
@@ -54,7 +62,7 @@ merge_vpcs <- function(vpc_files, out_file = NULL, overwrite = FALSE) {
   # ------------------------------------------------------------------
   if (!is.null(out_file)) {
     if (file.exists(out_file) && !overwrite) {
-      stop("Output file exists: ", out_file)
+      cli::cli_abort("Output file exists: {out_file}")
     }
     yyjsonr::write_json_file(merged_vpc, out_file, pretty = TRUE, auto_unbox = TRUE)
     message("Wrote merged VPC: ", out_file)

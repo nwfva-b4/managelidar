@@ -21,7 +21,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' las_files |> is_indexed()
 #'
@@ -29,11 +29,24 @@ is_indexed <- function(path, full.names = FALSE) {
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
+    cli::cli_warn("No LAS/LAZ/COPC files found.")
     return(invisible(NULL))
   }
 
-  indexed <- lasR:::is_indexed(files)
+  # lasR has no public equivalent as of the pinned lasR version (checked via
+  # getNamespaceExports("lasR")); if a future lasR release renames/removes
+  # this internal, surface an actionable error instead of "could not find
+  # function". TODO: re-check getNamespaceExports("lasR") on lasR upgrades
+  # and switch to a public API if one becomes available.
+  indexed <- tryCatch(
+    lasR:::is_indexed(files),
+    error = function(e) {
+      cli::cli_abort(
+        "is_indexed() relies on an internal lasR function that changed in your installed lasR ({utils::packageVersion('lasR')}). Please file an issue at the managelidar repo.",
+        parent = e
+      )
+    }
+  )
 
   # adjust filenames
   if (!full.names) files <- basename(files)

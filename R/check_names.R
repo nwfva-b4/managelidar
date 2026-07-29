@@ -47,7 +47,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   }
 
   if (nrow(vpc$features) == 0) {
-    warning("No features in VPC")
+    cli::cli_warn("No features in VPC")
     return(invisible(NULL))
   }
 
@@ -62,7 +62,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
   effective_crs <- if (is_valid_crs(crs_data$crs[1])) crs_data$crs[1] else epsg
 
   # Calculate zone from EPSG (last 2 digits)
-  # Assumes UTM zones like EPSG:25832 → zone 32
+  # Assumes UTM zones like EPSG:25832 -> zone 32
   zone <- effective_crs %% 100
 
   # ------------------------------------------------------------------
@@ -92,7 +92,7 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
     states_sf <- getOption("managelidar.states_sf")
     if (is.null(states_sf)) {
       state_codes <- c(
-        "Baden-Württemberg" = "bw",
+        "Baden-W\u00fcrttemberg" = "bw",
         "Bayern" = "by",
         "Berlin" = "be",
         "Brandenburg" = "bb",
@@ -107,16 +107,24 @@ check_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL,
         "Sachsen" = "sn",
         "Sachsen-Anhalt" = "st",
         "Schleswig-Holstein" = "sh",
-        "Thüringen" = "th"
+        "Th\u00fcringen" = "th"
       )
 
-      states_sf <- arrow::read_parquet(
-        "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-germany-land/exports/parquet?lang=en&timezone=Europe%2FBerlin"
-      ) |>
-        sf::st_as_sf() |>
-        sf::st_set_geometry("geo_shape") |>
-        dplyr::mutate(code = state_codes[lan_name]) |>
-        sf::st_set_crs(4326)
+      states_sf <- tryCatch(
+        arrow::read_parquet(
+          "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-germany-land/exports/parquet?lang=en&timezone=Europe%2FBerlin"
+        ) |>
+          sf::st_as_sf() |>
+          sf::st_set_geometry("geo_shape") |>
+          dplyr::mutate(code = state_codes[lan_name]) |>
+          sf::st_set_crs(4326),
+        error = function(e) {
+          cli::cli_abort(
+            "Could not download federal state boundaries for automatic region detection. Pass {.arg region} explicitly, or check your network connection.",
+            parent = e
+          )
+        }
+      )
 
       options(managelidar.states_sf = states_sf)
     }

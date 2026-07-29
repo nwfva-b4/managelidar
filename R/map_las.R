@@ -43,10 +43,9 @@ map_las <- function(files, FUN, workers = NULL) {
   n_workers <- if (!is.null(workers)) {
     w <- as.integer(workers)
     if (w > max_workers) {
-      warning(sprintf(
-        "Requested %d workers exceeds safe maximum (%d = half of %d logical cores). Clamping.",
-        w, max_workers, parallel::detectCores(logical = TRUE)
-      ))
+      cli::cli_warn(
+        "Requested {w} workers exceeds safe maximum ({max_workers} = half of {parallel::detectCores(logical = TRUE)} logical cores). Clamping."
+      )
     }
     w
   } else if (n >= 20L) {

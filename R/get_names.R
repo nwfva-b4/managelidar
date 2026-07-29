@@ -18,7 +18,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' las_files |> get_names()
 #'
@@ -26,7 +26,7 @@ get_names <- function(path, full.names = FALSE) {
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
+    cli::cli_warn("No LAS/LAZ/COPC files found.")
     return(invisible(NULL))
   }
 

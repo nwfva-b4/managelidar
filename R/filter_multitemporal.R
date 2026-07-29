@@ -84,7 +84,7 @@ filter_multitemporal <- function(path, n = NULL, entire_tiles = TRUE, tolerance 
   n_input <- nrow(vpc$features)
 
   if (n_input == 0) {
-    warning("No features in VPC to filter")
+    cli::cli_warn("No features in VPC to filter")
     return(invisible(NULL))
   }
 
@@ -96,7 +96,7 @@ filter_multitemporal <- function(path, n = NULL, entire_tiles = TRUE, tolerance 
     full.names = TRUE
   )
   if (nrow(tiles) == 0) {
-    warning("No tiles found matching criteria, consider increasing `tolerance` or set `entire_tiles=FALSE`")
+    cli::cli_warn("No tiles found matching criteria, consider increasing {.arg tolerance} or set {.code entire_tiles=FALSE}")
     return(invisible(NULL))
   }
 
@@ -117,9 +117,9 @@ filter_multitemporal <- function(path, n = NULL, entire_tiles = TRUE, tolerance 
 
   if (nrow(tiles_filtered) == 0) {
     if (is.null(n)) {
-      warning("No multi-temporal tiles found")
+      cli::cli_warn("No multi-temporal tiles found")
     } else {
-      warning("No tiles with exactly ", n, " observation(s) found")
+      cli::cli_warn("No tiles with exactly {n} observation(s) found")
     }
     return(invisible(NULL))
   }

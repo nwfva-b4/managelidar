@@ -72,12 +72,11 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic usage with default settings
-#' raw_to_processed(
-#'   path = "raw_data/",
-#'   out_dir = "processed/"
-#' )
+#' folder <- system.file("extdata", package = "managelidar")
+#' out_dir <- tempfile("processed_")
+#' raw_to_processed(path = folder, out_dir = out_dir)
 #' }
 raw_to_processed <- function(path,
                              out_dir = tempdir(),
@@ -119,7 +118,7 @@ raw_to_processed <- function(path,
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
+    cli::cli_warn("No LAS/LAZ/COPC files found.")
     return(invisible(NULL))
   }
 
@@ -131,7 +130,7 @@ raw_to_processed <- function(path,
   # this is a first check which scans all logfiles for input files with the same path (same file processed from other directory is not skipped)
   log_entries <- read_log_entries(dir_logfiles)
 
-  already_processed <- processed_inputs_from_logs(log_entries)
+  already_processed <- processed_inputs_from_logs(dir_logfiles)
   pending <- files[!fs::path_norm(files) %in% already_processed]
 
   n_skip <- length(files) - length(pending)
@@ -248,7 +247,7 @@ raw_to_processed <- function(path,
       summary_original$metrics$t_median > seconds_per_week) {
       # GPS time is seconds since 1980-01-06 00:00:00 UTC
       gps_epoch <- as.POSIXct("1980-01-06 00:00:00", tz = "UTC")
-      date <- gps_epoch + summary_original$metrics$t_median + 1e9
+      date <- gps_epoch + summary_original$metrics$t_median + LAS_ADJUSTED_GPSTIME_OFFSET
       year_from_median <- format(date, "%Y")
 
       # Replace year in expected filename
@@ -416,18 +415,18 @@ raw_to_processed <- function(path,
       "Y", # | 4 bytes | Y coordinate (scaled integer)
       "Z", # | 4 bytes | Z coordinate (scaled integer)
       "Intensity", # | 2 bytes | Return signal strength
-      "ReturnNumber", # | 4 bits  | Which return this point represents (1–15)
-      "NumberOfReturns", # | 4 bits  | Total returns for this pulse (1–15)
+      "ReturnNumber", # | 4 bits  | Which return this point represents (1-15)
+      "NumberOfReturns", # | 4 bits  | Total returns for this pulse (1-15)
       "Synthetic", # | 1 bit   | Point created other than direct LiDAR acquisition
       "Keypoint", # | 1 bit   | Significant point, should not be withheld in thinning
       "Withheld", # | 1 bit   | Point should be excluded from processing
       "Overlap", # | 1 bit   | Point is in overlap region of two or more swaths
-      "ScannerChannel", # | 2 bits  | Channel of the multi-channel system (0–3)
+      "ScannerChannel", # | 2 bits  | Channel of the multi-channel system (0-3)
       "ScanDirectionFlag", # | 1 bit   | Direction of scanner mirror (0 = neg, 1 = pos, where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite)
       "EdgeOfFlightline", # | 1 bit   | 1 = last point on a scan line
-      "Classification", # | 1 byte  | Full ASPRS class code (0–255)
+      "Classification", # | 1 byte  | Full ASPRS class code (0-255)
       "UserData", # | 1 byte  | User-defined field
-      "ScanAngle", # | 2 bytes | Scaled in 0.006° increments (±30,000 = ±180°)
+      "ScanAngle", # | 2 bytes | Scaled in 0.006 deg increments (+/-30,000 = +/-180 deg)
       "PointSourceID", # | 2 bytes | File origin (e.g., flight line ID)
       "gpstime" # | 8 bytes | Standard GPS time
     ))
@@ -487,8 +486,8 @@ raw_to_processed <- function(path,
       max_val <- 2^16 - 1
 
       i <- data$Intensity
-      lower <- quantile(i, probs = lower_pct, na.rm = TRUE)
-      upper <- quantile(i, probs = upper_pct, na.rm = TRUE)
+      lower <- stats::quantile(i, probs = lower_pct, na.rm = TRUE)
+      upper <- stats::quantile(i, probs = upper_pct, na.rm = TRUE)
       i <- (i - lower) / (upper - lower) * (max_val - min_val) + min_val
       i[i < min_val] <- min_val
       i[i > max_val] <- max_val
@@ -544,11 +543,11 @@ raw_to_processed <- function(path,
     pipeline <- pipeline + get_overview
 
     # TIFFs are converted to webp later, this ensures TIFF is cleaned up even if pipeline crashes later
+    # (uses delete_with_retry(), never throws, so this safety net can't itself fail the file)
     on.exit(
       {
-        if (fs::file_exists(overview_file)) fs::file_delete(overview_file)
-        aux_file <- paste0(overview_file, ".aux.xml")
-        if (fs::file_exists(aux_file)) fs::file_delete(aux_file)
+        delete_with_retry(overview_file)
+        delete_with_retry(paste0(overview_file, ".aux.xml"))
       },
       add = TRUE
     )
@@ -616,7 +615,7 @@ raw_to_processed <- function(path,
     # convert overview
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # get imgage statistics
-    ds <- new(gdalraster::GDALRaster, overview_file)
+    ds <- methods::new(gdalraster::GDALRaster, overview_file)
     on.exit(try(ds$close(), silent = TRUE), add = TRUE)
     ds$quiet <- TRUE
     mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
@@ -629,10 +628,10 @@ raw_to_processed <- function(path,
     ))
 
     # apply colour table
-    ds <- new(gdalraster::GDALRaster, tmp_byte, read_only = FALSE)
+    ds <- methods::new(gdalraster::GDALRaster, tmp_byte, read_only = FALSE)
     on.exit(try(ds$close(), silent = TRUE), add = TRUE)
     cols <- viridis::viridis(256)
-    rgb_mat <- col2rgb(cols)
+    rgb_mat <- grDevices::col2rgb(cols)
     colortable <- cbind(0:255, t(rgb_mat), 255L)
     ds$setColorTable(band = 1, col_tbl = colortable, palette_interp = "RGB")
     ds$close()
@@ -643,42 +642,7 @@ raw_to_processed <- function(path,
 
     # delete intermediate data
     gdalraster::vsi_unlink(tmp_byte)
-    fs::file_delete(overview_file)
-
-    created_outputs <- c(created_outputs, overview_img)
-
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # convert overview
-    #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    # get imgage statistics
-    ds <- new(gdalraster::GDALRaster, overview_file)
-    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
-    ds$quiet <- TRUE
-    mm <- ds$getStatistics(band = 1, approx_ok = FALSE, force = TRUE)
-    ds$close()
-
-    # scale image data
-    tmp_byte <- "/vsimem/tmp_byte.tif"
-    gdalraster::translate(overview_file, tmp_byte, quiet = TRUE, cl_arg = c(
-      "-ot", "Byte", "-scale", mm[1], mm[2], "0", "255", "-of", "GTiff"
-    ))
-
-    # apply colour table
-    ds <- new(gdalraster::GDALRaster, tmp_byte, read_only = FALSE)
-    on.exit(try(ds$close(), silent = TRUE), add = TRUE)
-    cols <- viridis::viridis(256)
-    rgb_mat <- col2rgb(cols)
-    colortable <- cbind(0:255, t(rgb_mat), 255L)
-    ds$setColorTable(band = 1, col_tbl = colortable, palette_interp = "RGB")
-    ds$close()
-
-    # convert to webp
-    overview_img <- fs::path(dir_overviews, fs::path_ext_set(generated_filename, ".webp"))
-    gdalraster::translate(tmp_byte, overview_img, cl_arg = c("-of", "WEBP", "-expand", "rgb"), quiet = TRUE)
-
-    # delete intermediate data
-    gdalraster::vsi_unlink(tmp_byte)
-    fs::file_delete(overview_file)
+    delete_with_retry(overview_file)
 
     created_outputs <- c(created_outputs, overview_img)
 
@@ -828,15 +792,12 @@ raw_to_processed <- function(path,
     }, expected_outputs)
 
     if (length(missing_or_empty) > 0) {
-      # rollback: delete any outputs that were created
-      created <- Filter(fs::file_exists, expected_outputs)
-      purrr::walk(created, function(f) try(fs::file_delete(f), silent = TRUE))
-
+      # rollback is handled by the on.exit() handler above (outputs_validated
+      # stays FALSE), so this only needs to report what went wrong
       missing_names <- paste(names(missing_or_empty), collapse = ", ")
-      stop(sprintf(
-        "Output validation failed for %s — missing or empty: %s. All outputs rolled back.",
-        basename(lasfile), missing_names
-      ))
+      cli::cli_abort(
+        "Output validation failed for {basename(lasfile)} \u2014 missing or empty: {missing_names}. All outputs rolled back."
+      )
     }
 
     # signal on.exit to skip rollback
@@ -911,7 +872,7 @@ raw_to_processed <- function(path,
   log_data <- list(
     processing = list(
       function_call = deparse(match.call()),
-      package_version = as.character(packageVersion("managelidar")),
+      package_version = as.character(utils::packageVersion("managelidar")),
       timestamp_start = format(processing_start, "%Y-%m-%dT%H:%M:%S"),
       timestamp_end = format(processing_end, "%Y-%m-%dT%H:%M:%S"),
       duration_seconds = round(processing_duration, 1)
@@ -923,11 +884,11 @@ raw_to_processed <- function(path,
       user = Sys.info()["user"],
       hostname = Sys.info()["nodename"],
       dependencies = list(
-        gdalraster = as.character(packageVersion("gdalraster")),
-        fs = as.character(packageVersion("fs")),
-        lasR = as.character(packageVersion("lasR")),
-        mirai = as.character(packageVersion("mirai")),
-        sf = as.character(packageVersion("sf"))
+        gdalraster = as.character(utils::packageVersion("gdalraster")),
+        fs = as.character(utils::packageVersion("fs")),
+        lasR = as.character(utils::packageVersion("lasR")),
+        mirai = as.character(utils::packageVersion("mirai")),
+        sf = as.character(utils::packageVersion("sf"))
       )
     ),
     parameters = list(

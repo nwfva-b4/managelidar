@@ -188,7 +188,7 @@ lasR handles the point cloud processing
 
 ## License
 
-<!-- Add license info -->
+This package is licensed under the MIT License — see [LICENSE.md](LICENSE.md).
 
 ## Acknowledgments
 

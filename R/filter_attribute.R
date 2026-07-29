@@ -108,7 +108,7 @@
 #'   filter_temporal("2024-03-27") # Better than filter_attribute(datetime == ...)
 #'
 #' folder |>
-#'   filter_spatial(bbox) # Better than filter_attribute with proj:bbox
+#'   filter_spatial(c(547900, 5724900, 548100, 5725100)) # Better than filter_attribute with proj:bbox
 filter_attribute <- function(path, ..., verbose = TRUE) {
   # Resolve to VPC (always as object, never write to file)
   vpc <- resolve_vpc(path, out_file = NULL)
@@ -121,7 +121,7 @@ filter_attribute <- function(path, ..., verbose = TRUE) {
   n_input <- nrow(vpc$features)
 
   if (n_input == 0) {
-    warning("No features in VPC to filter")
+    cli::cli_warn("No features in VPC to filter")
     return(invisible(NULL))
   }
 
@@ -129,7 +129,7 @@ filter_attribute <- function(path, ..., verbose = TRUE) {
   dots <- rlang::enquos(...)
 
   if (length(dots) == 0) {
-    warning("No filter conditions provided")
+    cli::cli_warn("No filter conditions provided")
     return(vpc)
   }
 
@@ -169,7 +169,7 @@ filter_attribute <- function(path, ..., verbose = TRUE) {
 
   # No matches found
   if (sum(keep) == 0) {
-    warning("No features match filter criteria")
+    cli::cli_warn("No features match filter criteria")
     return(invisible(NULL))
   }
 

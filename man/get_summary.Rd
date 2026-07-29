@@ -8,7 +8,7 @@ get_summary(
   path,
   out_dir = NULL,
   full.names = FALSE,
-  samplebased = FALSE,
+  sample_based = FALSE,
   zwbin = 10,
   iwbin = 100,
   metrics = c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max",
@@ -22,7 +22,7 @@ get_summary(
 
 \item{full.names}{Logical. If \code{TRUE}, the returned list is named with full paths; otherwise, basenames are used.}
 
-\item{samplebased}{Logical. If \code{TRUE}, reads only a spatial subsample of each file (faster for large files).}
+\item{sample_based}{Logical. If \code{TRUE}, reads only a spatial subsample of each file (faster for large files).}
 
 \item{zwbin}{Numeric. Bin width (meters) for elevation histogram (\code{z_histogram}). Set \code{0} to skip \code{z_histogram}.}
 
@@ -74,7 +74,7 @@ Parallel processing is used automatically for large numbers of files through \co
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> get_summary()
 

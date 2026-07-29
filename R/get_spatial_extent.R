@@ -27,7 +27,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #' las_files |> get_spatial_extent()
 #'
 get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf = FALSE, verbose = TRUE) {
@@ -44,7 +44,7 @@ get_spatial_extent <- function(path, per_file = TRUE, full.names = FALSE, as_sf 
   n_files <- nrow(vpc$features)
 
   if (n_files == 0) {
-    warning("No features in VPC")
+    cli::cli_warn("No features in VPC")
     return(invisible(NULL))
   }
 

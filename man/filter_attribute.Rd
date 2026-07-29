@@ -114,7 +114,7 @@ folder |>
   filter_temporal("2024-03-27") # Better than filter_attribute(datetime == ...)
 
 folder |>
-  filter_spatial(bbox) # Better than filter_attribute with proj:bbox
+  filter_spatial(c(547900, 5724900, 548100, 5725100)) # Better than filter_attribute with proj:bbox
 }
 \seealso{
 \code{\link{filter_temporal}}, \code{\link{filter_spatial}},

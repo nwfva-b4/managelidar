@@ -14,13 +14,16 @@
 #' @param out_file Path to the output Geopackage (.gpkg) file (default: tempfile).
 #' @param overwrite Logical. If TRUE, overwrite the output file if it exists (default: FALSE).
 #' @param crs Integer. Optional EPSG code to reproject the VPC (default: 25832).
+#' @param metrics `NULL` (default, no metrics), `TRUE` for default summary
+#'   metrics, or a character vector of custom metrics passed to
+#'   [get_summary()].
 #'
 #' @return Invisibly returns an `sf` object representing the tiles written to the Geopackage.
 #' @export
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #' las_files |> write_gpkg()
 #'
 write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite = FALSE, crs = 25832, metrics = NULL) {
@@ -90,7 +93,7 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
   # Optional: add summary metrics
   # ------------------------------------------------------------------
   if (!is.null(metrics)) {
-    if (metrics == TRUE) {
+    if (isTRUE(metrics)) {
       # use default metrcis
       summary <- get_summary(
         vpc_file,
@@ -141,7 +144,7 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
       dplyr::mutate(
         dplyr::across(
           dplyr::starts_with("t_"),
-          ~ gps_epoch + .x + 1e9,
+          ~ gps_epoch + .x + LAS_ADJUSTED_GPSTIME_OFFSET,
           .names = "{.col}"
         )
       )
@@ -156,9 +159,8 @@ write_gpkg <- function(path, out_file = tempfile(fileext = ".gpkg"), overwrite =
   }
 
   if (file.exists(out_file) && !overwrite) {
-    stop(
-      "Output file already exists. Use overwrite = TRUE to replace it: ",
-      out_file
+    cli::cli_abort(
+      "Output file already exists. Use {.code overwrite = TRUE} to replace it: {out_file}"
     )
   }
 

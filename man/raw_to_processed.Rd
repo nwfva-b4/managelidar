@@ -95,11 +95,10 @@ half of available CPU cores. A comprehensive JSON log documents all processing
 steps, timing, and any warnings or errors.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic usage with default settings
-raw_to_processed(
-  path = "raw_data/",
-  out_dir = "processed/"
-)
+folder <- system.file("extdata", package = "managelidar")
+out_dir <- tempfile("processed_")
+raw_to_processed(path = folder, out_dir = out_dir)
 }
 }

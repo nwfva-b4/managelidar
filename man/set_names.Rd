@@ -7,11 +7,12 @@
 set_names(
   path,
   prefix = "3dm",
-  zone = 32,
   region = NULL,
-  year = NULL,
+  from_csv = NULL,
   copc = FALSE,
-  dry_run = FALSE
+  epsg = 25832L,
+  dry_run = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -19,13 +20,14 @@ set_names(
 
 \item{prefix}{Character. Naming prefix (default \code{"3dm"}).}
 
-\item{zone}{Integer. UTM zone (default \code{32}).}
-
 \item{region}{Character. Federal state abbreviation (optional). Automatically determined if \code{NULL}.}
 
-\item{year}{Integer or character. Acquisition year to append to filenames (optional). If \code{NULL}, the year is derived from the file.}
+\item{from_csv}{Character. Path to CSV file containing acquisition dates used for
+year correction in filenames where data does not contain valid GPS time.}
 
 \item{copc}{Logical. Whether files are COPC (\code{.copc.laz}, default \code{FALSE}).}
+
+\item{epsg}{Integer. EPSG code for the coordinate reference system (default \code{25832L}).}
 
 \item{dry_run}{Logical. If \code{TRUE}, only preview renaming without modifying files (default \code{FALSE}).}
 
@@ -43,6 +45,6 @@ Files are expected to follow the schema:
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
-set_names(copy, verbose = TRUE, dry_run = TRUE)
+set_names(f, verbose = TRUE, dry_run = TRUE)
 
 }

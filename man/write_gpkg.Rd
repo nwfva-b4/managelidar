@@ -21,6 +21,10 @@ or a Virtual Point Cloud (.vpc) file.}
 \item{overwrite}{Logical. If TRUE, overwrite the output file if it exists (default: FALSE).}
 
 \item{crs}{Integer. Optional EPSG code to reproject the VPC (default: 25832).}
+
+\item{metrics}{\code{NULL} (default, no metrics), \code{TRUE} for default summary
+metrics, or a character vector of custom metrics passed to
+\code{\link[=get_summary]{get_summary()}}.}
 }
 \value{
 Invisibly returns an \code{sf} object representing the tiles written to the Geopackage.
@@ -38,7 +42,7 @@ und thus can be much slower. See \code{get_summary()} for details.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 las_files |> write_gpkg()
 
 }

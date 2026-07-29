@@ -42,7 +42,7 @@ Can return extent per file or the combined extent of all files.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 las_files |> get_spatial_extent()
 
 }
