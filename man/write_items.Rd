@@ -2,21 +2,23 @@
 % Please edit documentation in R/stac_helpers.R
 \name{write_items}
 \alias{write_items}
-\title{Write STAC items to files}
+\title{Write STAC items to files, but only those that actually changed}
 \usage{
-write_items(items, items_dir, overwrite = FALSE)
+write_items(built)
 }
 \arguments{
-\item{items}{List of STAC item objects}
-
-\item{items_dir}{Path to items directory}
-
-\item{overwrite}{Logical. If FALSE (default), skip existing items}
+\item{built}{List as returned by \code{\link[=vpc_to_stac_items]{vpc_to_stac_items()}}}
 }
 \value{
-Character vector of written item IDs
+Character vector of item IDs that were actually (re)written
 }
 \description{
-Write STAC items to files
+Items already skipped by \code{\link[=vpc_to_stac_items]{vpc_to_stac_items()}} (\code{skipped_existing}) are
+left alone. Of the rest, each is compared against its on-disk version
+(if any) via \code{\link[=write_stac_if_changed]{write_stac_if_changed()}} and only written - with a fresh
+\code{properties$updated} - if it actually differs; an item identical to
+what's already on disk is left untouched, \code{created}/\code{updated} included.
+This is what makes re-running \code{\link[=stac_add_items]{stac_add_items()}} with
+\code{overwrite_items = TRUE} over unchanged input a true no-op.
 }
 \keyword{internal}

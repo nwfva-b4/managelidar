@@ -1,3 +1,31 @@
+# managelidar 0.1.7
+
+## STAC subsystem
+
+* Fixed a real idempotency bug: re-running `stac_add_items(overwrite_items
+  = TRUE)` on unchanged input used to still bump every item's `updated`
+  timestamp, cascading into a full rebuild of the collection's combined
+  VPC and footprints GeoPackage assets even though nothing had changed.
+  Item writes now use the same "only write if content actually changed"
+  guard already used for catalogs, collections, links, and assets.
+* Fixed a related idempotency gap: a collection's `providers` field (or
+  any other JSON array of uniformly-shaped objects) was never compared
+  correctly, since it round-trips through disk as a `data.frame` while
+  the freshly-built version is a plain list - `stac_add_collection()`
+  with `providers` set reported "Updated" on every call regardless of
+  whether anything changed.
+* The combined VPC/GeoPackage assets are now rebuilt incrementally: only
+  items that actually changed are re-read and re-parsed, instead of every
+  item in the collection on every call. This keeps ingesting large
+  collections (thousands of items) in batches from costing O(n^2) total
+  parsing work.
+* Fixed several redundant file reads in the STAC collection/catalog
+  bookkeeping, a `stac_browse()` request for a missing file throwing
+  instead of returning a clean 404, `read_stac()` not validating that a
+  file is a recognizable STAC/VPC object, and `path_to_file_uri()` not
+  percent-encoding spaces or handling UNC paths correctly.
+* Expanded test coverage across the STAC subsystem.
+
 # managelidar 0.1.6
 
 ## Package cleanup

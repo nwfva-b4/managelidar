@@ -35,7 +35,126 @@ strip_fs_path <- function(x) {
   x
 }
 
+#' Recursively collapse the JSON array-of-one vs scalar ambiguity
+#'
+#' [write_stac()] writes with `auto_unbox = TRUE`, so an unnamed length-1
+#' list like `list("data")` (e.g. an asset's `roles`) is written as the
+#' bare JSON string `"data"`, not the array `["data"]`. Reading that file
+#' back via [read_stac()] therefore yields a plain scalar, not a length-1
+#' list - even though nothing about the actual content changed. Every
+#' change-detection comparison in this package runs both sides through
+#' this (alongside [strip_fs_path()]) so a freshly-built object (with
+#' e.g. `roles = list("data")`) compares equal to its round-tripped disk
+#' version (`roles = "data"`).
+#'
+#' @param x Any R object (typically a STAC list structure)
+#' @return The same structure with unnamed length-1 lists of an atomic
+#'   scalar collapsed to that scalar
+#' @keywords internal
+normalize_stac_scalars <- function(x) {
+  if (is.list(x)) {
+    if (length(x) == 1 && is.null(names(x)) && is.atomic(x[[1]]) && length(x[[1]]) == 1) {
+      return(x[[1]])
+    }
+    return(lapply(x, normalize_stac_scalars))
+  }
+  x
+}
+
+#' Recursively convert any data.frame in a STAC-ish object into a plain
+#' list of per-row objects
+#'
+#' yyjsonr represents a JSON array of uniformly-shaped objects (`links`,
+#' `providers`, ...) as a data.frame when read back from disk, while the
+#' same field built fresh in memory is a plain list of named lists (e.g.
+#' `list(list(name = ..., roles = ...), list(name = ..., roles = ...))`).
+#' `links` is normalized back to a plain list explicitly in [read_stac()]
+#' (because the package's own link-handling code iterates over it), but
+#' any *other* uniformly-shaped array field - `providers` being the case
+#' that surfaced this - would otherwise never compare equal to its own
+#' disk-read version, in [write_stac_if_changed()], regardless of which
+#' side happens to be which representation.
+#'
+#' @param x Any R object (typically a STAC list structure)
+#' @return The same structure with every data.frame replaced by an
+#'   equivalent list of per-row objects
+#' @keywords internal
+normalize_stac_dataframes <- function(x) {
+  if (is.data.frame(x)) {
+    rows <- lapply(seq_len(nrow(x)), function(i) lapply(x, function(col) col[[i]]))
+    return(lapply(rows, normalize_stac_dataframes))
+  }
+  if (is.list(x)) {
+    return(lapply(x, normalize_stac_dataframes))
+  }
+  x
+}
+
+#' Write a STAC object only if it actually changed, resolving `created`/`updated`
+#'
+#' Centralizes the "build/update the object, compare against the existing
+#' on-disk version (ignoring `created`/`updated` themselves and `fs_path`
+#' representation), only stamp `updated` and write if content really
+#' changed" pattern used for catalogs, collections, links, assets, and
+#' items throughout this package. Without this, re-running with identical
+#' input would otherwise bump `updated` (and rewrite the file) every time,
+#' since a fresh timestamp is trivially "different" from whatever was
+#' there before - the actual cause of the idempotency bug reported in
+#' `TODO.md` for item writes.
+#'
+#' @param existing The object as read from disk, or `NULL` if this is new.
+#' @param fresh The freshly built/updated object. Its `created`/`updated`
+#'   (wherever `get_ts`/`set_ts` say they live) are ignored for the
+#'   comparison and always overwritten by the result of this function.
+#' @param path Path to write `fresh` to if it changed.
+#' @param get_ts Function `function(obj) -> list(created=, updated=)`.
+#'   Defaults to top-level fields (catalogs/collections); pass a custom
+#'   accessor for objects that nest them elsewhere (e.g. STAC items, under
+#'   `$properties`).
+#' @param set_ts Function `function(obj, created, updated) -> obj`,
+#'   the corresponding setter for `get_ts`.
+#'
+#' @return List with `object` (created/updated resolved either way) and
+#'   `changed` (logical: whether it actually differs from `existing`).
+#' @keywords internal
+write_stac_if_changed <- function(existing, fresh, path,
+                                   get_ts = function(o) list(created = o$created, updated = o$updated),
+                                   set_ts = function(o, created, updated) {
+                                     o$created <- created
+                                     o$updated <- updated
+                                     o
+                                   }) {
+  blank <- function(o) set_ts(o, NULL, NULL)
+  # order matters: normalize_stac_dataframes() must run before
+  # strip_fs_path(), since a data.frame IS a list in R - strip_fs_path()'s
+  # own is.list() check would otherwise recurse into it with lapply()
+  # first, silently flattening it to a column-major plain list (losing
+  # the data.frame class) before normalize_stac_dataframes() ever sees it.
+  normalize <- function(o) normalize_stac_scalars(strip_fs_path(normalize_stac_dataframes(blank(o))))
+
+  changed <- is.null(existing) || !identical(normalize(existing), normalize(fresh))
+
+  if (changed) {
+    created <- (if (!is.null(existing)) get_ts(existing)$created else NULL) %||% stac_timestamp()
+    updated <- stac_timestamp()
+    fresh <- set_ts(fresh, created, updated)
+    write_stac(fresh, path)
+  } else {
+    fresh <- set_ts(fresh, get_ts(existing)$created, get_ts(existing)$updated)
+  }
+
+  list(object = fresh, changed = changed)
+}
+
 # I/O Operations ---------------------------------------------------------------
+
+#' Known values of a STAC/VPC object's top-level `type` field this
+#' package works with: catalogs, collections, items, and the combined-VPC
+#' FeatureCollection asset written by [update_vpc_asset()].
+#' @keywords internal
+known_stac_types <- function() {
+  c("Catalog", "Collection", "Feature", "FeatureCollection")
+}
 
 #' Read a STAC JSON file
 #'
@@ -45,17 +164,29 @@ strip_fs_path <- function(x) {
 #' absent on some links from round-tripping back out as explicit `null`
 #' values when the object is later written with [write_stac()].
 #'
+#' Validates that the parsed JSON has a recognizable STAC/VPC `type`, so a
+#' malformed or foreign JSON file fails here with a clear message instead
+#' of surfacing as a cryptic downstream error (e.g. "argument is of
+#' length zero" from code that assumes `$type` is present).
+#'
 #' @param path Path to STAC JSON file
 #' @return List representing STAC object
 #' @keywords internal
 read_stac <- function(path) {
   if (!fs::file_exists(path)) {
-    stop("STAC file does not exist: ", path)
+    cli::cli_abort("STAC file does not exist: {path}")
   }
   obj <- yyjsonr::read_json_file(
     path,
     opts = yyjsonr::opts_read_json(df_missing_list_elem = "null")
   )
+
+  if (is.null(obj$type) || !obj$type %in% known_stac_types()) {
+    cli::cli_abort(
+      "{.path {path}} does not look like a STAC object (missing or unrecognized {.field type})"
+    )
+  }
+
   if (!is.null(obj$links)) {
     obj$links <- normalize_links(obj$links)
   }
@@ -79,23 +210,52 @@ write_stac <- function(obj, path) {
 
 
 
+#' Convert a local file path to a `file://` URI
+#'
+#' Percent-encodes the path (spaces in particular - common in lidar file
+#' trees on Windows) so the result is a valid URI, and handles UNC paths
+#' (`\\\\server\\share\\...`) as `file://server/share/...` rather than
+#' the malformed `file:////server/...` a naive `"file://" + path` would
+#' produce.
+#'
+#' @param path A local file path (Windows or POSIX style)
+#' @return Character, a `file://` URI (or the path unchanged, if it's
+#'   already relative rather than absolute)
+#' @keywords internal
 path_to_file_uri <- function(path) {
   # normalize separators
   path <- gsub("\\\\", "/", path)
 
+  encode <- function(p) utils::URLencode(p, reserved = FALSE)
+
+  # UNC path (\\server\share\... -> //server/share/...)?
+  if (grepl("^//[^/]", path)) {
+    return(paste0("file://", encode(sub("^//", "", path))))
+  }
+
   # Windows drive letter?
   if (grepl("^[A-Za-z]:/", path)) {
-    paste0("file:///", path)
-  } else if (startsWith(path, "/")) {
-    paste0("file://", path)
-  } else {
-    path
+    return(paste0("file:///", encode(path)))
   }
+
+  if (startsWith(path, "/")) {
+    return(paste0("file://", encode(path)))
+  }
+
+  path
 }
 
 # VPC Processing ---------------------------------------------------------------
 
 #' Convert VPC features to STAC items
+#'
+#' Builds a candidate STAC item per VPC feature. When an item file of the
+#' same id already exists on disk and `overwrite = FALSE`, building is
+#' skipped entirely for that feature (it would never be written anyway -
+#' see [write_items()]). `created`/`updated` are not stamped here; that
+#' happens in [write_items()] via [write_stac_if_changed()], which is also
+#' what decides whether an existing item actually changed.
+#'
 #' @param vpc_obj VPC object (list with $features)
 #' @param collection_dir Path to collection directory
 #' @param items_dir Path to items directory
@@ -103,21 +263,34 @@ path_to_file_uri <- function(path) {
 #' @param collection_id Parent collection ID
 #' @param root_title Title of the root catalog
 #' @param collection_title Title of the owning collection
-#' @return List of STAC item objects
+#' @param overwrite Logical. If `FALSE` (default), existing items are left
+#'   untouched (not even read/compared). If `TRUE`, existing items are
+#'   compared against the freshly built version and only rewritten if
+#'   they actually changed.
+#' @return List with one entry per feature: `item` (built item, or `NULL`
+#'   if skipped), `existing` (the on-disk item, or `NULL`), `path`, and
+#'   `skipped_existing` (logical).
 #' @keywords internal
-vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, collection_id, root_title, collection_title) {
+vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, collection_id, root_title, collection_title, overwrite = FALSE) {
   features <- vpc_obj$features
 
-  items <- lapply(seq_len(nrow(features)), function(i) {
+  lapply(seq_len(nrow(features)), function(i) {
+    item_id <- features$id[i]
+    item_path <- fs::path(items_dir, item_id, ext = "json")
+    already_exists <- fs::file_exists(item_path)
+
+    if (already_exists && !overwrite) {
+      return(list(item = NULL, existing = NULL, path = item_path, skipped_existing = TRUE))
+    }
 
     assets <- features$assets[[i]]
 
     if (is.data.frame(assets)) {
       assets <- lapply(names(assets), function(x) {
-    as.list(assets[[x]])
-  })
-  names(assets) <- names(features$assets[[i]])
-}
+        as.list(assets[[x]])
+      })
+      names(assets) <- names(features$assets[[i]])
+    }
 
     # Convert asset hrefs to file URIs
     for (name in names(assets)) {
@@ -141,34 +314,21 @@ vpc_to_stac_items <- function(vpc_obj, collection_dir, items_dir, root_path, col
       # (e.g. lasR bakes in pointcloud v1.0.0) so items always match the
       # versions this package targets - see required_lidar_stac_extensions().
       stac_extensions = required_lidar_stac_extensions(),
-      # stac_extensions = features$stac_extensions[[i]],
-      id = features$id[i],
+      id = item_id,
       geometry = features$geometry[[i]],
       bbox = features$bbox[[i]],
       properties = features$properties[[i]],
       assets = assets
     )
 
-    # created/updated (STAC Common Metadata). If this item already exists
-    # on disk (e.g. this batch is being written with overwrite_items =
-    # TRUE), keep its original created timestamp rather than resetting it -
-    # only updated should move.
-    item_path <- fs::path(items_dir, item$id, ext = "json")
-    if (fs::file_exists(item_path)) {
-      existing <- tryCatch(read_stac(item_path), error = function(e) NULL)
-      item$properties$created <- existing$properties$created %||% stac_timestamp()
-    } else {
-      item$properties$created <- stac_timestamp()
-    }
-    item$properties$updated <- stac_timestamp()
-
     item$links <- build_item_links(
-      item$id, items_dir, collection_dir, root_path, root_title, collection_title
+      item_id, items_dir, collection_dir, root_path, root_title, collection_title
     )
-    item
-  })
 
-  items
+    existing <- if (already_exists) tryCatch(read_stac(item_path), error = function(e) NULL) else NULL
+
+    list(item = item, existing = existing, path = item_path, skipped_existing = FALSE)
+  })
 }
 
 #' Extract spatial extent from VPC items
@@ -567,12 +727,15 @@ build_item_links <- function(item_id, items_dir, collection_dir, root_path, root
 #' @param collection_dir Path to collection directory
 #' @param parent_path Path to parent STAC file
 #' @param title Title of this collection (used on its own `self` link)
+#' @param parent_obj The parent object, if the caller already read it -
+#'   avoids reading `parent_path` a second time. Read from `parent_path`
+#'   if not supplied.
 #' @return List of link objects
 #' @keywords internal
-build_collection_links <- function(collection_dir, parent_path, title) {
+build_collection_links <- function(collection_dir, parent_path, title, parent_obj = NULL) {
   root_path <- find_root_catalog(parent_path)
   root_obj <- read_stac(root_path)
-  parent_obj <- read_stac(parent_path)
+  parent_obj <- parent_obj %||% read_stac(parent_path)
 
   list(
     list(
@@ -793,6 +956,28 @@ extents_equal <- function(extent1, extent2) {
     identical(normalize_interval(extent1$temporal$interval), normalize_interval(extent2$temporal$interval))
 }
 
+#' Convert a VPC features table into a plain list of per-feature objects
+#'
+#' [build_combined_vpc()]'s in-memory VPCs represent `features` as a
+#' plain list (one element per item); the same combined VPC asset re-read
+#' from disk via [read_stac()] instead has `features` as a data.frame
+#' (yyjsonr's default for a uniform JSON array of objects, the same
+#' representation used for `resolve_vpc()`-produced VPCs elsewhere in the
+#' package). This normalizes either shape to the plain-list form so
+#' callers don't need to branch on it.
+#'
+#' @param features Either shape of a VPC's `$features`
+#' @return List of per-feature objects
+#' @keywords internal
+vpc_features_as_list <- function(features) {
+  if (!is.data.frame(features)) {
+    return(features)
+  }
+  lapply(seq_len(nrow(features)), function(i) {
+    lapply(features, function(col) col[[i]])
+  })
+}
+
 #' Build a combined VPC (Virtual Point Cloud) FeatureCollection from every
 #' item in a collection's items directory
 #'
@@ -803,18 +988,55 @@ extents_equal <- function(extent1, extent2) {
 #' `geometry`/`bbox`/`properties`/`assets`) - so the result is a valid VPC
 #' representing every item currently in the collection.
 #'
+#' When `existing_vpc`/`changed_ids` are supplied, only the items in
+#' `changed_ids` are actually re-read/re-parsed from disk; every other
+#' feature is carried over from `existing_vpc` as-is (just checked for
+#' existence, not re-parsed, so a file deleted outside the package is
+#' still correctly dropped). This avoids re-parsing every item's JSON on
+#' every call, which at collections of thousands of items would otherwise
+#' make ingesting them in K batches cost O(n^2) total parsing work. Falls
+#' back to a full rescan when there's no existing VPC (first build for a
+#' new collection).
+#'
 #' @param items_dir Path to items directory
+#' @param existing_vpc The collection's current combined VPC object (as
+#'   read from its `collection.vpc` asset), or `NULL` to force/require a
+#'   full rescan.
+#' @param changed_ids Character vector of item IDs that were actually
+#'   (re)written this call (see [write_items()]); ignored if
+#'   `existing_vpc` is `NULL`.
 #' @return A list representing a VPC FeatureCollection
 #' @keywords internal
-build_combined_vpc <- function(items_dir) {
-  item_files <- fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)
-
-  features <- lapply(item_files, function(f) {
+build_combined_vpc <- function(items_dir, existing_vpc = NULL, changed_ids = NULL) {
+  read_item_as_feature <- function(f) {
     item_obj <- read_stac(f)
     item_obj$links <- NULL
     item_obj$collection <- NULL
     item_obj
+  }
+
+  if (is.null(existing_vpc)) {
+    item_files <- fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)
+    features <- lapply(item_files, read_item_as_feature)
+    names(features) <- NULL
+    return(list(type = "FeatureCollection", features = features))
+  }
+
+  changed_features <- lapply(changed_ids, function(id) {
+    read_item_as_feature(fs::path(items_dir, id, ext = "json"))
   })
+
+  # cheap self-healing: only checks which item files still exist (a
+  # filename listing), without re-parsing the content of any of them -
+  # so a feature whose item was deleted outside the package is still
+  # dropped, matching the full-rescan behavior this replaces.
+  ids_on_disk <- fs::path_ext_remove(fs::path_file(fs::dir_ls(items_dir, glob = "*.json", fail = FALSE)))
+  kept_existing <- Filter(
+    function(feat) !(feat$id %in% changed_ids) && feat$id %in% ids_on_disk,
+    vpc_features_as_list(existing_vpc$features)
+  )
+
+  features <- c(kept_existing, changed_features)
   names(features) <- NULL
 
   list(type = "FeatureCollection", features = features)
@@ -830,16 +1052,27 @@ build_combined_vpc <- function(items_dir) {
 #' @param collection_obj Collection object (list); `$assets` is updated
 #' @param collection_dir Path to collection directory
 #' @param items_dir Path to items directory
+#' @param changed_ids Character vector of item IDs actually (re)written
+#'   this call - passed through to [build_combined_vpc()] so only those
+#'   items are re-parsed instead of the whole collection. Pass
+#'   `character()` (or omit) to force a full rescan.
 #' @return List with `collection_obj` (updated) and `vpc` (the combined
 #'   VPC object, for reuse by [update_footprints_asset()] without
 #'   re-reading every item file a second time)
 #' @keywords internal
-update_vpc_asset <- function(collection_obj, collection_dir, items_dir) {
-  vpc <- build_combined_vpc(items_dir)
-
+update_vpc_asset <- function(collection_obj, collection_dir, items_dir, changed_ids = character()) {
   assets_dir <- fs::path(collection_dir, "assets")
-  fs::dir_create(assets_dir)
   vpc_file <- fs::path(assets_dir, "collection", ext = "vpc")
+
+  existing_vpc <- if (fs::file_exists(vpc_file)) {
+    tryCatch(read_stac(vpc_file), error = function(e) NULL)
+  } else {
+    NULL
+  }
+
+  vpc <- build_combined_vpc(items_dir, existing_vpc = existing_vpc, changed_ids = changed_ids)
+
+  fs::dir_create(assets_dir)
   write_stac(vpc, vpc_file)
 
   assets <- collection_obj$assets
@@ -964,7 +1197,7 @@ find_root_catalog <- function(stac_path) {
   }
 
   # If no root link and is Collection, error
-  stop("Collection has no root link - malformed STAC structure")
+  cli::cli_abort("Collection has no root link - malformed STAC structure")
 }
 
 #' Get STAC object type
@@ -978,24 +1211,36 @@ get_stac_type <- function(stac_obj) {
 
 # Item Writing -----------------------------------------------------------------
 
-#' Write STAC items to files
-#' @param items List of STAC item objects
-#' @param items_dir Path to items directory
-#' @param overwrite Logical. If FALSE (default), skip existing items
-#' @return Character vector of written item IDs
+#' Write STAC items to files, but only those that actually changed
+#'
+#' Items already skipped by [vpc_to_stac_items()] (`skipped_existing`) are
+#' left alone. Of the rest, each is compared against its on-disk version
+#' (if any) via [write_stac_if_changed()] and only written - with a fresh
+#' `properties$updated` - if it actually differs; an item identical to
+#' what's already on disk is left untouched, `created`/`updated` included.
+#' This is what makes re-running [stac_add_items()] with
+#' `overwrite_items = TRUE` over unchanged input a true no-op.
+#'
+#' @param built List as returned by [vpc_to_stac_items()]
+#' @return Character vector of item IDs that were actually (re)written
 #' @keywords internal
-write_items <- function(items, items_dir, overwrite = FALSE) {
+write_items <- function(built) {
   written_ids <- character()
 
-  for (item in items) {
-    item_path <- fs::path(items_dir, item$id, ext = "json")
-
-    if (fs::file_exists(item_path) && !overwrite) {
-      next # Skip existing
+  item_ts <- list(
+    get_ts = function(o) list(created = o$properties$created, updated = o$properties$updated),
+    set_ts = function(o, created, updated) {
+      o$properties$created <- created
+      o$properties$updated <- updated
+      o
     }
+  )
 
-    write_stac(item, item_path)
-    written_ids <- c(written_ids, item$id)
+  for (b in built) {
+    if (isTRUE(b$skipped_existing) || is.null(b$item)) next
+
+    result <- write_stac_if_changed(b$existing, b$item, b$path, get_ts = item_ts$get_ts, set_ts = item_ts$set_ts)
+    if (result$changed) written_ids <- c(written_ids, result$object$id)
   }
 
   written_ids

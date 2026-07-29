@@ -4,7 +4,12 @@
 \alias{update_vpc_asset}
 \title{Recompute and register a collection's combined VPC asset}
 \usage{
-update_vpc_asset(collection_obj, collection_dir, items_dir)
+update_vpc_asset(
+  collection_obj,
+  collection_dir,
+  items_dir,
+  changed_ids = character()
+)
 }
 \arguments{
 \item{collection_obj}{Collection object (list); \verb{$assets} is updated}
@@ -12,6 +17,11 @@ update_vpc_asset(collection_obj, collection_dir, items_dir)
 \item{collection_dir}{Path to collection directory}
 
 \item{items_dir}{Path to items directory}
+
+\item{changed_ids}{Character vector of item IDs actually (re)written
+this call - passed through to \code{\link[=build_combined_vpc]{build_combined_vpc()}} so only those
+items are re-parsed instead of the whole collection. Pass
+\code{character()} (or omit) to force a full rescan.}
 }
 \value{
 List with \code{collection_obj} (updated) and \code{vpc} (the combined
