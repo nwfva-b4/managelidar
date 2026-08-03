@@ -17,7 +17,7 @@ rebuild_item_links(), called from stac_add_items()."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@ list each item individually via <code>rel: "item"</code> links - see
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build_collection_links</span><span class="op">(</span><span class="va">collection_dir</span>, <span class="va">parent_path</span>, <span class="va">title</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build_collection_links</span><span class="op">(</span><span class="va">collection_dir</span>, <span class="va">parent_path</span>, <span class="va">title</span>, parent_obj <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,6 +75,12 @@ list each item individually via <code>rel: "item"</code> links - see
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
 <dd><p>Title of this collection (used on its own <code>self</code> link)</p></dd>
+
+
+<dt id="arg-parent-obj">parent_obj<a class="anchor" aria-label="anchor" href="#arg-parent-obj"></a></dt>
+<dd><p>The parent object, if the caller already read it -
+avoids reading <code>parent_path</code> a second time. Read from <code>parent_path</code>
+if not supplied.</p></dd>
 
 </dl></div>
     <div class="section level2">

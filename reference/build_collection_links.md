@@ -12,7 +12,7 @@ called from
 ## Usage
 
 ``` r
-build_collection_links(collection_dir, parent_path, title)
+build_collection_links(collection_dir, parent_path, title, parent_obj = NULL)
 ```
 
 ## Arguments
@@ -28,6 +28,11 @@ build_collection_links(collection_dir, parent_path, title)
 - title:
 
   Title of this collection (used on its own `self` link)
+
+- parent_obj:
+
+  The parent object, if the caller already read it - avoids reading
+  `parent_path` a second time. Read from `parent_path` if not supplied.
 
 ## Value
 

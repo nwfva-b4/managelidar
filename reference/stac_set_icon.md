@@ -46,11 +46,11 @@ is a different STAC Browser convention for a different purpose.
 ``` r
 cat <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni")
-#> ✔ Created catalog lidar_ni at /tmp/Rtmpk9Q2Df/stac-managelidar-22367ef504cd/catalog.json
+#> ✔ Created catalog lidar_ni at /tmp/RtmpLDq6dK/stac-managelidar-231548b6ebd5/catalog.json
 col <- cat |>
   stac_add_collection(id = "lidar_ni", title = "Lidar Solling", keywords = c("lidar", "ALS", "Solling", "test")) |> 
   stac_set_icon("https://raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/man/figures/logo.png")
-#> ✔ Created collection lidar_ni at /tmp/Rtmpk9Q2Df/stac-managelidar-22367ef504cd/collections/lidar_ni/collection.json
-#> ✔ Updated parent lidar_ni at /tmp/Rtmpk9Q2Df/stac-managelidar-22367ef504cd/catalog.json
-#> ✔ Set icon on /tmp/Rtmpk9Q2Df/stac-managelidar-22367ef504cd/collections/lidar_ni/collection.json
+#> ✔ Created collection lidar_ni at /tmp/RtmpLDq6dK/stac-managelidar-231548b6ebd5/collections/lidar_ni/collection.json
+#> ✔ Updated parent lidar_ni at /tmp/RtmpLDq6dK/stac-managelidar-231548b6ebd5/catalog.json
+#> ✔ Set icon on /tmp/RtmpLDq6dK/stac-managelidar-231548b6ebd5/collections/lidar_ni/collection.json
 ```

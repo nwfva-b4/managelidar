@@ -17,7 +17,7 @@ representing every item currently in the collection."><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@ representing every item currently in the collection.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build_combined_vpc</span><span class="op">(</span><span class="va">items_dir</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">build_combined_vpc</span><span class="op">(</span><span class="va">items_dir</span>, existing_vpc <span class="op">=</span> <span class="cn">NULL</span>, changed_ids <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,10 +68,34 @@ representing every item currently in the collection.</p>
 <dl><dt id="arg-items-dir">items_dir<a class="anchor" aria-label="anchor" href="#arg-items-dir"></a></dt>
 <dd><p>Path to items directory</p></dd>
 
+
+<dt id="arg-existing-vpc">existing_vpc<a class="anchor" aria-label="anchor" href="#arg-existing-vpc"></a></dt>
+<dd><p>The collection's current combined VPC object (as
+read from its <code>collection.vpc</code> asset), or <code>NULL</code> to force/require a
+full rescan.</p></dd>
+
+
+<dt id="arg-changed-ids">changed_ids<a class="anchor" aria-label="anchor" href="#arg-changed-ids"></a></dt>
+<dd><p>Character vector of item IDs that were actually
+(re)written this call (see <code><a href="write_items.html">write_items()</a></code>); ignored if
+<code>existing_vpc</code> is <code>NULL</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list representing a VPC FeatureCollection</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>When <code>existing_vpc</code>/<code>changed_ids</code> are supplied, only the items in
+<code>changed_ids</code> are actually re-read/re-parsed from disk; every other
+feature is carried over from <code>existing_vpc</code> as-is (just checked for
+existence, not re-parsed, so a file deleted outside the package is
+still correctly dropped). This avoids re-parsing every item's JSON on
+every call, which at collections of thousands of items would otherwise
+make ingesting them in K batches cost O(n^2) total parsing work. Falls
+back to a full rescan when there's no existing VPC (first build for a
+new collection).</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

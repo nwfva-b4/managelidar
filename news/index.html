@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,17 @@
       <small>Source: <a href="https://github.com/wiesehahn/managelidar/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.7" id="managelidar-017">managelidar 0.1.7<a class="anchor" aria-label="anchor" href="#managelidar-017"></a></h2>
+<div class="section level3">
+<h3 id="stac-subsystem-0-1-7">STAC subsystem<a class="anchor" aria-label="anchor" href="#stac-subsystem-0-1-7"></a></h3>
+<ul><li>Fixed a real idempotency bug: re-running <code>stac_add_items(overwrite_items = TRUE)</code> on unchanged input used to still bump every item’s <code>updated</code> timestamp, cascading into a full rebuild of the collection’s combined VPC and footprints GeoPackage assets even though nothing had changed. Item writes now use the same “only write if content actually changed” guard already used for catalogs, collections, links, and assets.</li>
+<li>Fixed a related idempotency gap: a collection’s <code>providers</code> field (or any other JSON array of uniformly-shaped objects) was never compared correctly, since it round-trips through disk as a <code>data.frame</code> while the freshly-built version is a plain list - <code><a href="../reference/stac_add_collection.html">stac_add_collection()</a></code> with <code>providers</code> set reported “Updated” on every call regardless of whether anything changed.</li>
+<li>The combined VPC/GeoPackage assets are now rebuilt incrementally: only items that actually changed are re-read and re-parsed, instead of every item in the collection on every call. This keeps ingesting large collections (thousands of items) in batches from costing O(n^2) total parsing work.</li>
+<li>Fixed several redundant file reads in the STAC collection/catalog bookkeeping, a <code><a href="../reference/stac_browse.html">stac_browse()</a></code> request for a missing file throwing instead of returning a clean 404, <code><a href="../reference/read_stac.html">read_stac()</a></code> not validating that a file is a recognizable STAC/VPC object, and <code><a href="../reference/path_to_file_uri.html">path_to_file_uri()</a></code> not percent-encoding spaces or handling UNC paths correctly.</li>
+<li>Expanded test coverage across the STAC subsystem.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.6" id="managelidar-016">managelidar 0.1.6<a class="anchor" aria-label="anchor" href="#managelidar-016"></a></h2>
 <div class="section level3">

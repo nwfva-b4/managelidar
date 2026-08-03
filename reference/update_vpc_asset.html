@@ -13,7 +13,7 @@ whenever items change (see stac_add_items())."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,12 @@ whenever items change (see <code><a href="stac_add_items.html">stac_add_items()<
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">update_vpc_asset</span><span class="op">(</span><span class="va">collection_obj</span>, <span class="va">collection_dir</span>, <span class="va">items_dir</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">update_vpc_asset</span><span class="op">(</span></span>
+<span>  <span class="va">collection_obj</span>,</span>
+<span>  <span class="va">collection_dir</span>,</span>
+<span>  <span class="va">items_dir</span>,</span>
+<span>  changed_ids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,6 +74,13 @@ whenever items change (see <code><a href="stac_add_items.html">stac_add_items()<
 
 <dt id="arg-items-dir">items_dir<a class="anchor" aria-label="anchor" href="#arg-items-dir"></a></dt>
 <dd><p>Path to items directory</p></dd>
+
+
+<dt id="arg-changed-ids">changed_ids<a class="anchor" aria-label="anchor" href="#arg-changed-ids"></a></dt>
+<dd><p>Character vector of item IDs actually (re)written
+this call - passed through to <code><a href="build_combined_vpc.html">build_combined_vpc()</a></code> so only those
+items are re-parsed instead of the whole collection. Pass
+<code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code> (or omit) to force a full rescan.</p></dd>
 
 </dl></div>
     <div class="section level2">

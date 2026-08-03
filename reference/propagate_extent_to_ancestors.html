@@ -13,7 +13,7 @@ no extent field) or runs out of parent links."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,12 @@ no <code>extent</code> field) or runs out of <code>parent</code> links.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">propagate_extent_to_ancestors</span><span class="op">(</span><span class="va">collection_path</span>, <span class="va">spatial_extent</span>, <span class="va">temporal_extent</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">propagate_extent_to_ancestors</span><span class="op">(</span></span>
+<span>  <span class="va">collection_path</span>,</span>
+<span>  <span class="va">spatial_extent</span>,</span>
+<span>  <span class="va">temporal_extent</span>,</span>
+<span>  collection_obj <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,6 +77,12 @@ updated (typically the collection items were just added to).</p></dd>
 <dt id="arg-temporal-extent">temporal_extent<a class="anchor" aria-label="anchor" href="#arg-temporal-extent"></a></dt>
 <dd><p>Temporal extent of the newly added items
 (list format, as returned by <code><a href="extract_temporal_extent.html">extract_temporal_extent()</a></code>).</p></dd>
+
+
+<dt id="arg-collection-obj">collection_obj<a class="anchor" aria-label="anchor" href="#arg-collection-obj"></a></dt>
+<dd><p>The object at <code>collection_path</code>, if the caller
+already has it in memory - avoids reading it again. Read from
+<code>collection_path</code> if not supplied.</p></dd>
 
 </dl></div>
     <div class="section level2">

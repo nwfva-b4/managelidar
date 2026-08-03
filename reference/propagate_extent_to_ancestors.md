@@ -8,7 +8,12 @@ no `extent` field) or runs out of `parent` links.
 ## Usage
 
 ``` r
-propagate_extent_to_ancestors(collection_path, spatial_extent, temporal_extent)
+propagate_extent_to_ancestors(
+  collection_path,
+  spatial_extent,
+  temporal_extent,
+  collection_obj = NULL
+)
 ```
 
 ## Arguments
@@ -27,6 +32,12 @@ propagate_extent_to_ancestors(collection_path, spatial_extent, temporal_extent)
 
   Temporal extent of the newly added items (list format, as returned by
   [`extract_temporal_extent()`](https://wiesehahn.github.io/managelidar/reference/extract_temporal_extent.md)).
+
+- collection_obj:
+
+  The object at `collection_path`, if the caller already has it in
+  memory - avoids reading it again. Read from `collection_path` if not
+  supplied.
 
 ## Value
 

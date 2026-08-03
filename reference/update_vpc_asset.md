@@ -9,7 +9,12 @@ whenever items change (see
 ## Usage
 
 ``` r
-update_vpc_asset(collection_obj, collection_dir, items_dir)
+update_vpc_asset(
+  collection_obj,
+  collection_dir,
+  items_dir,
+  changed_ids = character()
+)
 ```
 
 ## Arguments
@@ -25,6 +30,15 @@ update_vpc_asset(collection_obj, collection_dir, items_dir)
 - items_dir:
 
   Path to items directory
+
+- changed_ids:
+
+  Character vector of item IDs actually (re)written this call - passed
+  through to
+  [`build_combined_vpc()`](https://wiesehahn.github.io/managelidar/reference/build_combined_vpc.md)
+  so only those items are re-parsed instead of the whole collection.
+  Pass [`character()`](https://rdrr.io/r/base/character.html) (or omit)
+  to force a full rescan.
 
 ## Value
 

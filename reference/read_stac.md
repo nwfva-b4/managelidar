@@ -23,3 +23,10 @@ read_stac(path)
 ## Value
 
 List representing STAC object
+
+## Details
+
+Validates that the parsed JSON has a recognizable STAC/VPC `type`, so a
+malformed or foreign JSON file fails here with a clear message instead
+of surfacing as a cryptic downstream error (e.g. "argument is of length
+zero" from code that assumes `$type` is present).

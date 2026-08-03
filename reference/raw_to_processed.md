@@ -151,17 +151,17 @@ folder <- system.file("extdata", package = "managelidar")
 out_dir <- tempfile("processed_")
 raw_to_processed(path = folder, out_dir = out_dir)
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/processed_22364b8459f9/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/processed_22364b8459f9/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/processed_22364b8459f9/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/processed_22364b8459f9/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/processed_22364b8459f9/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/Rtmpk9Q2Df/logfiles/processing_log_2026-08-03_07-03-48.json
+#> Processing log written to: /tmp/RtmpLDq6dK/logfiles/processing_log_2026-08-03_07-39-54.json
 # }
 ```

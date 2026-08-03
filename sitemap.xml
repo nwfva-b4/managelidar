@@ -56,6 +56,7 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/is_indexed.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/is_multitemporal.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/is_valid_crs.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/known_stac_types.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/laz_files.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/managelidar-package.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/map_las.html</loc></url>
@@ -64,9 +65,12 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/merge_vpcs.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_extent_to_sf.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_links.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_stac_dataframes.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_stac_scalars.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_temporal_range.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/null-coalesce.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/parse_datetime_input.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/path_to_file_uri.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/processed_inputs_from_logs.html</loc></url>
@@ -96,9 +100,11 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/strip_fs_path.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/update_footprints_asset.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/update_vpc_asset.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/vpc_features_as_list.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/vpc_to_stac_items.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/write_gpkg.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/write_items.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/write_stac.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/write_stac_if_changed.html</loc></url>
 </urlset>
 
