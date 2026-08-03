@@ -189,6 +189,9 @@ lasR handles the point cloud processing
 
 ## License
 
+This package is licensed under the MIT License — see
+[LICENSE.md](https://wiesehahn.github.io/managelidar/LICENSE.md).
+
 ## Acknowledgments
 
 Built on the excellent work of the [r-lidar](https://github.com/r-lidar)

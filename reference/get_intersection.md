@@ -63,8 +63,8 @@ might be the best choice.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
-las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
+las_file <- list.files(folder, full.names = TRUE, pattern = "*20230904.laz")
 get_intersection(las_files, las_file)
 #> $path1
 #>                            filename

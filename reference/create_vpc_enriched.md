@@ -93,5 +93,19 @@ folder <- system.file("extdata", package = "managelidar")
 vpc_enriched <- folder |>
   raw_to_processed() |>
   create_vpc_enriched()
-#> Error in read_log_entries(dir_logfiles): could not find function "read_log_entries"
+#> Process 5 LASfiles
+#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpk9Q2Df/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> 
+#> Processing log written to: /tmp/Rtmpk9Q2Df/logfiles/processing_log_2026-08-03_07-03-31.json
+#> Warning: No valid VPC objects or LAS/LAZ/COPC files found
+#> Warning: No valid VPC features found
 ```

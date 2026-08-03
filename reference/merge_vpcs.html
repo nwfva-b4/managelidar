@@ -11,7 +11,7 @@ VPC can be written to a file."><meta property="og:image" content="https://wieseh
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,7 +23,9 @@ VPC can be written to a file."><meta property="og:image" content="https://wieseh
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/how-to-use-the-functions.html">How to use the functions</a></li>
+    <li><a class="dropdown-item" href="../articles/raw-to-processed.html">Processing raw ALS data with raw_to_processed</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/wiesehahn/managelidar/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -35,7 +37,7 @@ VPC can be written to a file."><meta property="og:image" content="https://wieseh
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Merge multiple Virtual Point Cloud (VPC) files</h1>
-      <small class="dont-index">Source: <a href="https://github.com/wiesehahn/managelidar/blob/main/R/merge_vpcs.r" class="external-link"><code>R/merge_vpcs.r</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/wiesehahn/managelidar/blob/main/R/merge_vpcs.R" class="external-link"><code>R/merge_vpcs.R</code></a></small>
       <div class="d-none name"><code>merge_vpcs.Rd</code></div>
     </div>
 
@@ -76,9 +78,16 @@ is written as a valid <code>.vpc</code> JSON.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Merge two VPC files</span></span></span>
-<span class="r-in"><span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu">merge_vpcs</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vpc1.vpc"</span>, <span class="st">"vpc2.vpc"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in FUN(X[[i]], ...):</span> VPC file not found: vpc1.vpc</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"[.]laz$"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create two separate VPC files to merge</span></span></span>
+<span class="r-in"><span><span class="va">vpc_file1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".vpc"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">vpc_file2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".vpc"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu">lasR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lasR/man/exec.html" class="external-link">exec</a></span><span class="op">(</span><span class="fu">lasR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lasR/man/write_vpc.html" class="external-link">write_vpc</a></span><span class="op">(</span><span class="va">vpc_file1</span>, absolute_path <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, on <span class="op">=</span> <span class="va">las_files</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu">lasR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lasR/man/exec.html" class="external-link">exec</a></span><span class="op">(</span><span class="fu">lasR</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lasR/man/write_vpc.html" class="external-link">write_vpc</a></span><span class="op">(</span><span class="va">vpc_file2</span>, absolute_path <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, on <span class="op">=</span> <span class="va">las_files</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">merged</span> <span class="op">&lt;-</span> <span class="fu">merge_vpcs</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">vpc_file1</span>, <span class="va">vpc_file2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

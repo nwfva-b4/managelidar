@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +19,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/how-to-use-the-functions.html">How to use the functions</a></li>
+    <li><a class="dropdown-item" href="../articles/raw-to-processed.html">Processing raw ALS data with raw_to_processed</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/wiesehahn/managelidar/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -90,20 +92,18 @@ the full point cloud.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">folder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, package <span class="op">=</span> <span class="st">"managelidar"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">T</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">las_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">folder</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, pattern <span class="op">=</span> <span class="st">"*20240327.laz"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">las_files</span> <span class="op">|&gt;</span> <span class="fu">get_density</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                             filename npoints npulses     area pointdensity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                               &lt;char&gt;   &lt;int&gt;   &lt;int&gt;    &lt;num&gt;        &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: 3dm_32_547_5724_1_ni_20240327.laz    2936    2606 309656.1  0.009481486</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: 3dm_32_547_5725_1_ni_20240327.laz    3369    1340 347095.0  0.009706277</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: 3dm_32_548_5724_1_ni_20240327.laz   10000    3426 988760.1  0.010113677</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: 3dm_32_548_5725_1_ni_20240327.laz   10000    4247 987443.7  0.010127160</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    pulsedensity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           &lt;num&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:  0.008415787</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:  0.003860615</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  0.003464946</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:  0.004301005</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            filename npoints npulses     area pointdensity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 3dm_32_547_5724_1_ni_20240327.laz    2936    2606 309656.1  0.009481486</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 3dm_32_547_5725_1_ni_20240327.laz    3369    1340 347095.0  0.009706277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 3dm_32_548_5724_1_ni_20240327.laz   10000    3426 988760.1  0.010113677</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 3dm_32_548_5725_1_ni_20240327.laz   10000    4247 987443.7  0.010127160</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   pulsedensity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  0.008415787</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.003860615</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.003464946</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.004301005</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

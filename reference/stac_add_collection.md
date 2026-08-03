@@ -158,15 +158,15 @@ col <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni") |>
   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
-#> ✔ Created catalog lidar_ni at /tmp/RtmpHOVQJs/stac-managelidar-2c3f377fc06a/catalog.json
-#> ✔ Created collection lidar_ni_2023 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f377fc06a/collections/lidar_ni_2023/collection.json
-#> ✔ Updated parent lidar_ni at /tmp/RtmpHOVQJs/stac-managelidar-2c3f377fc06a/catalog.json
-#> ✔ Created collection 2023_q3 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f377fc06a/collections/lidar_ni_2023/2023_q3/collection.json
-#> ✔ Updated parent lidar_ni_2023 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f377fc06a/collections/lidar_ni_2023/collection.json
+#> ✔ Created catalog lidar_ni at /tmp/Rtmpk9Q2Df/stac-managelidar-22362c2e25ab/catalog.json
+#> ✔ Created collection lidar_ni_2023 at /tmp/Rtmpk9Q2Df/stac-managelidar-22362c2e25ab/collections/lidar_ni_2023/collection.json
+#> ✔ Updated parent lidar_ni at /tmp/Rtmpk9Q2Df/stac-managelidar-22362c2e25ab/catalog.json
+#> ✔ Created collection 2023_q3 at /tmp/Rtmpk9Q2Df/stac-managelidar-22362c2e25ab/collections/lidar_ni_2023/2023_q3/collection.json
+#> ✔ Updated parent lidar_ni_2023 at /tmp/Rtmpk9Q2Df/stac-managelidar-22362c2e25ab/collections/lidar_ni_2023/collection.json
 
 # Update later using just the path - no need to know/retype its id
 col |> stac_add_collection(providers = list(
   list(name = "NW-FVA", roles = c("host", "processor"), url = "https://www.nw-fva.de/")
 ))
-#> ✔ Updated collection 2023_q3 at /tmp/RtmpHOVQJs/stac-managelidar-2c3f377fc06a/collections/lidar_ni_2023/2023_q3/collection.json
+#> ✔ Updated collection 2023_q3 at /tmp/Rtmpk9Q2Df/stac-managelidar-22362c2e25ab/collections/lidar_ni_2023/2023_q3/collection.json
 ```

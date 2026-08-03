@@ -39,6 +39,12 @@ write_gpkg(
 
   Integer. Optional EPSG code to reproject the VPC (default: 25832).
 
+- metrics:
+
+  `NULL` (default, no metrics), `TRUE` for default summary metrics, or a
+  character vector of custom metrics passed to
+  [`get_summary()`](https://wiesehahn.github.io/managelidar/reference/get_summary.md).
+
 ## Value
 
 Invisibly returns an `sf` object representing the tiles written to the
@@ -57,7 +63,7 @@ for details.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 las_files |> write_gpkg()
-#> Wrote Geopackage: /tmp/RtmpHOVQJs/file2c3f31dbb11d.gpkg
+#> Wrote Geopackage: /tmp/Rtmpk9Q2Df/file22363f3d32e2.gpkg
 ```

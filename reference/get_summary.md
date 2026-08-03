@@ -25,7 +25,7 @@ get_summary(
   path,
   out_dir = NULL,
   full.names = FALSE,
-  samplebased = FALSE,
+  sample_based = FALSE,
   zwbin = 10,
   iwbin = 100,
   metrics = c("t_min", "t_median", "t_max", "i_min", "i_mean", "i_median", "i_max",
@@ -50,7 +50,7 @@ get_summary(
   Logical. If `TRUE`, the returned list is named with full paths;
   otherwise, basenames are used.
 
-- samplebased:
+- sample_based:
 
   Logical. If `TRUE`, reads only a spatial subsample of each file
   (faster for large files).
@@ -143,7 +143,7 @@ through
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> get_summary()
 #> $`3dm_32_547_5724_1_ni_20240327.laz`

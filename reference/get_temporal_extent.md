@@ -145,7 +145,7 @@ las_files |> get_temporal_extent(return_referenceyear = TRUE)
 #> 5 3dm_32_548_5725_1_ni_20240327.laz 2024    TRUE gpstime_first_point
 
 # Using CSV for reference dates
-csv_path <- system.file("extdata", "acquisition_dates.csv", package = "managelidar")
+csv_path <- system.file("extdata", "acquisition_dates_lgln.csv", package = "managelidar")
 get_temporal_extent(folder, from_csv = csv_path)
 #> Get temporal extent
 #>   ▼ 5 LASfiles

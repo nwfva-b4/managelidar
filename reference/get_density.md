@@ -60,18 +60,16 @@ approximate and faster to compute than reading the full point cloud.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 las_files |> get_density()
-#>                             filename npoints npulses     area pointdensity
-#>                               <char>   <int>   <int>    <num>        <num>
-#> 1: 3dm_32_547_5724_1_ni_20240327.laz    2936    2606 309656.1  0.009481486
-#> 2: 3dm_32_547_5725_1_ni_20240327.laz    3369    1340 347095.0  0.009706277
-#> 3: 3dm_32_548_5724_1_ni_20240327.laz   10000    3426 988760.1  0.010113677
-#> 4: 3dm_32_548_5725_1_ni_20240327.laz   10000    4247 987443.7  0.010127160
-#>    pulsedensity
-#>           <num>
-#> 1:  0.008415787
-#> 2:  0.003860615
-#> 3:  0.003464946
-#> 4:  0.004301005
+#>                            filename npoints npulses     area pointdensity
+#> 1 3dm_32_547_5724_1_ni_20240327.laz    2936    2606 309656.1  0.009481486
+#> 2 3dm_32_547_5725_1_ni_20240327.laz    3369    1340 347095.0  0.009706277
+#> 3 3dm_32_548_5724_1_ni_20240327.laz   10000    3426 988760.1  0.010113677
+#> 4 3dm_32_548_5725_1_ni_20240327.laz   10000    4247 987443.7  0.010127160
+#>   pulsedensity
+#> 1  0.008415787
+#> 2  0.003860615
+#> 3  0.003464946
+#> 4  0.004301005
 ```

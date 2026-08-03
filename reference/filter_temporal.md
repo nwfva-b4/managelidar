@@ -58,7 +58,7 @@ Returns NULL invisibly if no features match the filter.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 
 # Filter by single day (all features from that day)
 vpc <- las_files |> filter_temporal("2024-03-27")

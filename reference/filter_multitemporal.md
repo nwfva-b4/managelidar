@@ -124,7 +124,8 @@ vpc_mono <- filter_multitemporal(f, entire_tiles = FALSE, tolerance = 10, n = 1)
 
 # Get tiles with exactly 3 observations (entire tiles only, with 10m tolerance)
 vpc_three <- filter_multitemporal(f, n = 3)
-#> Warning: No tiles found matching criteria, consider increasing `tolerance` or set `entire_tiles=FALSE`
+#> Warning: No tiles found matching criteria, consider increasing `tolerance` or set
+#> `entire_tiles=FALSE`
 
 # Chain filters for specific workflows:
 vpc <- f |>

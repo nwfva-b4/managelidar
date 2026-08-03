@@ -76,8 +76,8 @@ The function performs the following steps:
 f <- system.file("extdata", package = "managelidar")
 
 # get latest acquisition per tile (entire tiles only, with 10m tolerance)
-vpc <- filter_earliest(f, tolerance = 10)
-#> Filter first acquisition
+vpc <- filter_latest(f, tolerance = 10)
+#> Filter latest acquisition
 #>   ▼ 5 LASfiles in 2 tiles (1 multi-temporal)
 #>   ▼ 2 LASfiles retained
 ```

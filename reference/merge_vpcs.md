@@ -34,7 +34,14 @@ as a valid `.vpc` JSON.
 ## Examples
 
 ``` r
-# Merge two VPC files
-merged <- merge_vpcs(c("vpc1.vpc", "vpc2.vpc"))
-#> Error in FUN(X[[i]], ...): VPC file not found: vpc1.vpc
+folder <- system.file("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = TRUE, pattern = "[.]laz$")
+
+# create two separate VPC files to merge
+vpc_file1 <- tempfile(fileext = ".vpc")
+vpc_file2 <- tempfile(fileext = ".vpc")
+invisible(lasR::exec(lasR::write_vpc(vpc_file1, absolute_path = TRUE), on = las_files[1:2]))
+invisible(lasR::exec(lasR::write_vpc(vpc_file2, absolute_path = TRUE), on = las_files[3:5]))
+
+merged <- merge_vpcs(c(vpc_file1, vpc_file2))
 ```

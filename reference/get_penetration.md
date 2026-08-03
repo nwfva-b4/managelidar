@@ -81,19 +81,17 @@ values should be interpreted as indicative rather than exact.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> get_penetration()
-#>                             filename single    two three  four  five   six
-#>                               <char>  <num>  <num> <num> <num> <num> <num>
-#> 1: 3dm_32_547_5724_1_ni_20240327.laz  0.951  0.000 0.025 0.020 0.004 0.000
-#> 2: 3dm_32_547_5725_1_ni_20240327.laz  0.601 -0.160 0.122 0.315 0.120 0.001
-#> 3: 3dm_32_548_5724_1_ni_20240327.laz  0.417 -0.067 0.138 0.349 0.153 0.009
-#> 4: 3dm_32_548_5725_1_ni_20240327.laz  0.610 -0.105 0.147 0.234 0.111 0.004
-#>    multiple
-#>       <num>
-#> 1:    0.049
-#> 2:    0.399
-#> 3:    0.583
-#> 4:    0.390
+#>                            filename single    two three  four  five   six
+#> 1 3dm_32_547_5724_1_ni_20240327.laz  0.951  0.000 0.025 0.020 0.004 0.000
+#> 2 3dm_32_547_5725_1_ni_20240327.laz  0.601 -0.160 0.122 0.315 0.120 0.001
+#> 3 3dm_32_548_5724_1_ni_20240327.laz  0.417 -0.067 0.138 0.349 0.153 0.009
+#> 4 3dm_32_548_5725_1_ni_20240327.laz  0.610 -0.105 0.147 0.234 0.111 0.004
+#>   multiple
+#> 1    0.049
+#> 2    0.399
+#> 3    0.583
+#> 4    0.390
 ```

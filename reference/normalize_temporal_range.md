@@ -1,6 +1,8 @@
 # Internal helper to normalize temporal range
 
-Internal helper to normalize temporal range
+If `end` is not provided, it is derived from the granularity of `start`
+(e.g. a bare year expands to the end of that year) via
+[`parse_datetime_input()`](https://wiesehahn.github.io/managelidar/reference/parse_datetime_input.md).
 
 ## Usage
 

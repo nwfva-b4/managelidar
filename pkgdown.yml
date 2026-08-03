@@ -3,7 +3,8 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   how-to-use-the-functions: how-to-use-the-functions.html
-last_built: 2026-07-28T11:37Z
+  raw-to-processed: raw-to-processed.html
+last_built: 2026-08-03T07:03Z
 urls:
   reference: https://wiesehahn.github.io/managelidar/reference
   article: https://wiesehahn.github.io/managelidar/articles

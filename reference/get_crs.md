@@ -43,7 +43,7 @@ multiple LAS/LAZ/COPC files.
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> get_crs()
 #>                            filename   crs

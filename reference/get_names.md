@@ -36,7 +36,7 @@ file paths are resolved using
 
 ``` r
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> get_names()
 #> [1] "3dm_32_547_5724_1_ni_20240327.laz" "3dm_32_547_5725_1_ni_20240327.laz"

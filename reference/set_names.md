@@ -9,11 +9,12 @@ standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/S
 set_names(
   path,
   prefix = "3dm",
-  zone = 32,
   region = NULL,
-  year = NULL,
+  from_csv = NULL,
   copc = FALSE,
-  dry_run = FALSE
+  epsg = 25832L,
+  dry_run = FALSE,
+  verbose = FALSE
 )
 ```
 
@@ -28,23 +29,24 @@ set_names(
 
   Character. Naming prefix (default `"3dm"`).
 
-- zone:
-
-  Integer. UTM zone (default `32`).
-
 - region:
 
   Character. Federal state abbreviation (optional). Automatically
   determined if `NULL`.
 
-- year:
+- from_csv:
 
-  Integer or character. Acquisition year to append to filenames
-  (optional). If `NULL`, the year is derived from the file.
+  Character. Path to CSV file containing acquisition dates used for year
+  correction in filenames where data does not contain valid GPS time.
 
 - copc:
 
   Logical. Whether files are COPC (`.copc.laz`, default `FALSE`).
+
+- epsg:
+
+  Integer. EPSG code for the coordinate reference system (default
+  `25832L`).
 
 - dry_run:
 
@@ -69,6 +71,13 @@ Files are expected to follow the schema:
 
 ``` r
 f <- system.file("extdata", package = "managelidar")
-set_names(copy, verbose = TRUE, dry_run = TRUE)
-#> Error in set_names(copy, verbose = TRUE, dry_run = TRUE): unused argument (verbose = TRUE)
+set_names(f, verbose = TRUE, dry_run = TRUE)
+#> Files to be renamed (from → to):
+#>                               from                            to
+#>  3dm_32_547_5724_1_ni_20240327.laz 3dm_32_547_5724_1_ni_2024.laz
+#>  3dm_32_547_5725_1_ni_20240327.laz 3dm_32_547_5725_1_ni_2024.laz
+#>  3dm_32_548_5724_1_ni_20240327.laz 3dm_32_548_5724_1_ni_2024.laz
+#>  3dm_32_548_5725_1_ni_20230904.laz 3dm_32_548_5725_1_ni_2023.laz
+#>  3dm_32_548_5725_1_ni_20240327.laz 3dm_32_548_5725_1_ni_2024.laz
+#> Dry run enabled: no files were renamed.
 ```
