@@ -65,13 +65,16 @@ stac_browse_handle_request <- function(req, root_dir) {
 
   file_path <- fs::path(root_dir, rel_path)
 
+  # fs::path_real() errors on a nonexistent path, so the existence check
+  # must come first - otherwise a request for any missing/mistyped path
+  # (a legitimate 404) throws inside the httpuv handler instead.
+  if (!fs::file_exists(file_path) || fs::is_dir(file_path)) {
+    return(list(status = 404L, headers = stac_browse_cors_headers(), body = "Not found"))
+  }
+
   # Guard against escaping root_dir via ../
   if (!startsWith(fs::path_real(file_path), fs::path_real(root_dir))) {
     return(list(status = 403L, headers = stac_browse_cors_headers(), body = "Forbidden"))
-  }
-
-  if (!fs::file_exists(file_path) || fs::is_dir(file_path)) {
-    return(list(status = 404L, headers = stac_browse_cors_headers(), body = "Not found"))
   }
 
   list(

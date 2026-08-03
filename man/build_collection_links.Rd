@@ -4,7 +4,7 @@
 \alias{build_collection_links}
 \title{Build links for a collection}
 \usage{
-build_collection_links(collection_dir, parent_path, title)
+build_collection_links(collection_dir, parent_path, title, parent_obj = NULL)
 }
 \arguments{
 \item{collection_dir}{Path to collection directory}
@@ -12,6 +12,10 @@ build_collection_links(collection_dir, parent_path, title)
 \item{parent_path}{Path to parent STAC file}
 
 \item{title}{Title of this collection (used on its own \code{self} link)}
+
+\item{parent_obj}{The parent object, if the caller already read it -
+avoids reading \code{parent_path} a second time. Read from \code{parent_path}
+if not supplied.}
 }
 \value{
 List of link objects

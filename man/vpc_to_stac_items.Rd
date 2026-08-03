@@ -11,7 +11,8 @@ vpc_to_stac_items(
   root_path,
   collection_id,
   root_title,
-  collection_title
+  collection_title,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -28,11 +29,23 @@ vpc_to_stac_items(
 \item{root_title}{Title of the root catalog}
 
 \item{collection_title}{Title of the owning collection}
+
+\item{overwrite}{Logical. If \code{FALSE} (default), existing items are left
+untouched (not even read/compared). If \code{TRUE}, existing items are
+compared against the freshly built version and only rewritten if
+they actually changed.}
 }
 \value{
-List of STAC item objects
+List with one entry per feature: \code{item} (built item, or \code{NULL}
+if skipped), \code{existing} (the on-disk item, or \code{NULL}), \code{path}, and
+\code{skipped_existing} (logical).
 }
 \description{
-Convert VPC features to STAC items
+Builds a candidate STAC item per VPC feature. When an item file of the
+same id already exists on disk and \code{overwrite = FALSE}, building is
+skipped entirely for that feature (it would never be written anyway -
+see \code{\link[=write_items]{write_items()}}). \code{created}/\code{updated} are not stamped here; that
+happens in \code{\link[=write_items]{write_items()}} via \code{\link[=write_stac_if_changed]{write_stac_if_changed()}}, which is also
+what decides whether an existing item actually changed.
 }
 \keyword{internal}

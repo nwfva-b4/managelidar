@@ -5,10 +5,18 @@
 \title{Build a combined VPC (Virtual Point Cloud) FeatureCollection from every
 item in a collection's items directory}
 \usage{
-build_combined_vpc(items_dir)
+build_combined_vpc(items_dir, existing_vpc = NULL, changed_ids = NULL)
 }
 \arguments{
 \item{items_dir}{Path to items directory}
+
+\item{existing_vpc}{The collection's current combined VPC object (as
+read from its \code{collection.vpc} asset), or \code{NULL} to force/require a
+full rescan.}
+
+\item{changed_ids}{Character vector of item IDs that were actually
+(re)written this call (see \code{\link[=write_items]{write_items()}}); ignored if
+\code{existing_vpc} is \code{NULL}.}
 }
 \value{
 A list representing a VPC FeatureCollection
@@ -20,5 +28,16 @@ reverses that: strips those two fields back off, leaving the original
 VPC feature shape (\code{type}/\code{stac_version}/\code{stac_extensions}/\code{id}/
 \code{geometry}/\code{bbox}/\code{properties}/\code{assets}) - so the result is a valid VPC
 representing every item currently in the collection.
+}
+\details{
+When \code{existing_vpc}/\code{changed_ids} are supplied, only the items in
+\code{changed_ids} are actually re-read/re-parsed from disk; every other
+feature is carried over from \code{existing_vpc} as-is (just checked for
+existence, not re-parsed, so a file deleted outside the package is
+still correctly dropped). This avoids re-parsing every item's JSON on
+every call, which at collections of thousands of items would otherwise
+make ingesting them in K batches cost O(n^2) total parsing work. Falls
+back to a full rescan when there's no existing VPC (first build for a
+new collection).
 }
 \keyword{internal}

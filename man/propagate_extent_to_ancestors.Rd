@@ -4,7 +4,12 @@
 \alias{propagate_extent_to_ancestors}
 \title{Propagate a new extent up the STAC tree}
 \usage{
-propagate_extent_to_ancestors(collection_path, spatial_extent, temporal_extent)
+propagate_extent_to_ancestors(
+  collection_path,
+  spatial_extent,
+  temporal_extent,
+  collection_obj = NULL
+)
 }
 \arguments{
 \item{collection_path}{Path to the collection whose ancestors should be
@@ -15,6 +20,10 @@ updated (typically the collection items were just added to).}
 
 \item{temporal_extent}{Temporal extent of the newly added items
 (list format, as returned by \code{\link[=extract_temporal_extent]{extract_temporal_extent()}}).}
+
+\item{collection_obj}{The object at \code{collection_path}, if the caller
+already has it in memory - avoids reading it again. Read from
+\code{collection_path} if not supplied.}
 }
 \value{
 Invisible NULL

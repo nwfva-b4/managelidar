@@ -19,4 +19,10 @@ representation. This prevents optional fields (like \code{title}) that are
 absent on some links from round-tripping back out as explicit \code{null}
 values when the object is later written with \code{\link[=write_stac]{write_stac()}}.
 }
+\details{
+Validates that the parsed JSON has a recognizable STAC/VPC \code{type}, so a
+malformed or foreign JSON file fails here with a clear message instead
+of surfacing as a cryptic downstream error (e.g. "argument is of
+length zero" from code that assumes \verb{$type} is present).
+}
 \keyword{internal}
