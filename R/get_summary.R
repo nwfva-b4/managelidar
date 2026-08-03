@@ -13,7 +13,7 @@
 #' @param path Path to a LAS/LAZ/COPC file, a directory, or a Virtual Point Cloud (.vpc) file.
 #' @param out_dir Optional directory to save JSON summaries. If not set, the function returns a named list instead.
 #' @param full.names Logical. If `TRUE`, the returned list is named with full paths; otherwise, basenames are used.
-#' @param samplebased Logical. If `TRUE`, reads only a spatial subsample of each file (faster for large files).
+#' @param sample_based Logical. If `TRUE`, reads only a spatial subsample of each file (faster for large files).
 #' @param zwbin Numeric. Bin width (meters) for elevation histogram (`z_histogram`). Set `0` to skip `z_histogram`.
 #' @param iwbin Numeric. Bin width (intensity units) for intensity histogram (`i_histogram`). Set `0` to skip `i_histogram`.
 #' @param metrics Character vector of metrics to compute. Defaults to:
@@ -50,7 +50,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' las_files |> get_summary()
 #'
@@ -58,7 +58,7 @@ get_summary <- function(
   path,
   out_dir = NULL,
   full.names = FALSE,
-  samplebased = FALSE,
+  sample_based = FALSE,
   zwbin = 10,
   iwbin = 100,
   metrics = c(
@@ -74,7 +74,7 @@ get_summary <- function(
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
+    cli::cli_warn("No LAS/LAZ/COPC files found.")
     return(invisible(NULL))
   }
 
@@ -102,7 +102,7 @@ get_summary <- function(
     tryCatch(
       {
         # ---- Reader selection ----
-        reader <- if (samplebased) {
+        reader <- if (sample_based) {
           if (endsWith(file, ".copc.laz")) {
             lasR::reader(copc_depth = 1)
           } else {

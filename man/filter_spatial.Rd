@@ -32,7 +32,7 @@ Filter LASfiles by spatial extent
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 vpc <- las_files |> filter_spatial(c(548700, 5725010))
 

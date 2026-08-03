@@ -27,7 +27,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 #'
 #' # Filter by single day (all features from that day)
 #' vpc <- las_files |> filter_temporal("2024-03-27")
@@ -59,7 +59,7 @@ filter_temporal <- function(path, start, end = NULL, verbose = TRUE) {
   n_input <- nrow(vpc$features)
 
   if (n_input == 0) {
-    warning("No features in VPC to filter")
+    cli::cli_warn("No features in VPC to filter")
     return(invisible(NULL))
   }
 
@@ -80,7 +80,7 @@ filter_temporal <- function(path, start, end = NULL, verbose = TRUE) {
   # Check if any features are missing datetime
   missing_dt <- is.na(feature_times)
   if (any(missing_dt)) {
-    warning(sum(missing_dt), " feature(s) missing datetime property, excluding from filter")
+    cli::cli_warn("{sum(missing_dt)} feature(s) missing datetime property, excluding from filter")
   }
 
   # Parse feature datetimes
@@ -93,7 +93,7 @@ filter_temporal <- function(path, start, end = NULL, verbose = TRUE) {
 
   # No intersections found
   if (sum(keep) == 0) {
-    warning("No features within the specified temporal range")
+    cli::cli_warn("No features within the specified temporal range")
     return(invisible(NULL))
   }
 
@@ -134,6 +134,9 @@ filter_temporal <- function(path, start, end = NULL, verbose = TRUE) {
 
 #' Internal helper to normalize temporal range
 #'
+#' If `end` is not provided, it is derived from the granularity of `start`
+#' (e.g. a bare year expands to the end of that year) via [parse_datetime_input()].
+#'
 #' @param start Start datetime (various formats)
 #' @param end End datetime (various formats) or NULL
 #'
@@ -141,75 +144,14 @@ filter_temporal <- function(path, start, end = NULL, verbose = TRUE) {
 #'
 #' @keywords internal
 normalize_temporal_range <- function(start, end = NULL) {
-  # Parse start first (always parse fully to get start time)
   start_parsed <- parse_datetime_input(start, position = "start")
-
-  # If end is provided, parse it
-  if (!is.null(end)) {
-    end_parsed <- parse_datetime_input(end, position = "end")
-    return(list(start = start_parsed, end = end_parsed))
+  end_parsed <- if (!is.null(end)) {
+    parse_datetime_input(end, position = "end")
+  } else {
+    parse_datetime_input(start, position = "end")
   }
 
-  # End is NULL - determine based on start granularity
-  # We need to re-examine the original start to determine granularity
-
-  # Handle POSIXct
-  if (inherits(start, "POSIXct")) {
-    return(list(start = start, end = start))
-  }
-
-  # Handle Date
-  if (inherits(start, "Date")) {
-    start_time <- as.POSIXct(paste0(as.character(start), " 00:00:00"), tz = "UTC")
-    end_time <- as.POSIXct(paste0(as.character(start), " 23:59:59"), tz = "UTC")
-    return(list(start = start_time, end = end_time))
-  }
-
-  # Handle character strings
-  if (is.character(start)) {
-    # Check for year only (YYYY)
-    if (grepl("^\\d{4}$", start)) {
-      year <- as.integer(start)
-      start_time <- as.POSIXct(paste0(year, "-01-01 00:00:00"), tz = "UTC")
-      end_time <- as.POSIXct(paste0(year, "-12-31 23:59:59"), tz = "UTC")
-      return(list(start = start_time, end = end_time))
-    }
-
-    # Check for year-month (YYYY-MM)
-    if (grepl("^\\d{4}-\\d{2}$", start)) {
-      start_time <- as.POSIXct(paste0(start, "-01 00:00:00"), tz = "UTC")
-      # Calculate last day of month
-      next_month <- as.POSIXct(paste0(start, "-01 00:00:00"), tz = "UTC") +
-        as.difftime(31, units = "days")
-      last_day <- as.POSIXct(format(next_month, "%Y-%m-01"), tz = "UTC") -
-        as.difftime(1, units = "secs")
-      return(list(start = start_time, end = last_day))
-    }
-
-    # Check for full datetime (YYYY-MM-DDTHH:MM:SSZ)
-    if (grepl("T", start)) {
-      parsed <- as.POSIXct(start, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-      if (!is.na(parsed)) {
-        return(list(start = parsed, end = parsed))
-      }
-    }
-
-    # Check for date only (YYYY-MM-DD)
-    if (grepl("^\\d{4}-\\d{2}-\\d{2}$", start)) {
-      start_time <- as.POSIXct(paste0(start, " 00:00:00"), tz = "UTC")
-      end_time <- as.POSIXct(paste0(start, " 23:59:59"), tz = "UTC")
-      if (!is.na(start_time)) {
-        return(list(start = start_time, end = end_time))
-      }
-    }
-
-    stop(
-      "Could not parse datetime string: ", start,
-      "\nExpected format: 'YYYY', 'YYYY-MM', 'YYYY-MM-DD', or 'YYYY-MM-DDTHH:MM:SSZ'"
-    )
-  }
-
-  stop("Unsupported datetime type for start. Use POSIXct, Date, or character string.")
+  list(start = start_parsed, end = end_parsed)
 }
 
 #' Internal helper to parse datetime input
@@ -280,23 +222,11 @@ parse_datetime_input <- function(dt, position = "start") {
       }
     }
 
-    stop(
-      "Could not parse datetime string: ", dt,
-      "\nExpected format: 'YYYY', 'YYYY-MM', 'YYYY-MM-DD', or 'YYYY-MM-DDTHH:MM:SSZ'"
-    )
+    cli::cli_abort(c(
+      "Could not parse datetime string: {dt}",
+      "i" = "Expected format: 'YYYY', 'YYYY-MM', 'YYYY-MM-DD', or 'YYYY-MM-DDTHH:MM:SSZ'"
+    ))
   }
 
-  stop("Unsupported datetime type. Use POSIXct, Date, or character string.")
-}
-
-#' Internal helper to normalize datetime inputs (for explicit end dates) - DEPRECATED
-#'
-#' @param dt POSIXct, Date, or character datetime
-#'
-#' @return POSIXct object in UTC
-#'
-#' @keywords internal
-normalize_datetime <- function(dt) {
-  # This function is kept for backwards compatibility but now just calls parse_datetime_input
-  parse_datetime_input(dt, position = "end")
+  cli::cli_abort("Unsupported datetime type. Use POSIXct, Date, or character string.")
 }

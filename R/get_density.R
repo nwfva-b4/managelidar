@@ -24,12 +24,24 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #' las_files |> get_density()
 #'
 get_density <- function(path, full.names = FALSE) {
-  get_density_per_file <- function(file) {
-    header <- lidR::readLASheader(file)
+  # ------------------------------------------------------------------
+  # Read headers (single I/O layer)
+  # ------------------------------------------------------------------
+  headers <- get_header(path, full.names = full.names)
+
+  if (is.null(headers)) {
+    return(invisible(NULL))
+  }
+
+  # ------------------------------------------------------------------
+  # Compute density per file
+  # ------------------------------------------------------------------
+  results <- lapply(seq_along(headers), function(i) {
+    header <- headers[[i]]
 
     minx <- header$`Min X`
     miny <- header$`Min Y`
@@ -45,11 +57,8 @@ get_density <- function(path, full.names = FALSE) {
     pointdensity <- points / area
     pulsedensity <- pulses / area
 
-    # adjust filenames
-    if (!full.names) file <- basename(file)
-
     data.frame(
-      filename = file,
+      filename = names(headers)[i],
       npoints = points,
       npulses = pulses,
       area = as.numeric(area),
@@ -58,17 +67,7 @@ get_density <- function(path, full.names = FALSE) {
       stringsAsFactors = FALSE,
       row.names = NULL
     )
-  }
+  })
 
-  # ------------------------------------------------------------------
-  # apply function
-  # ------------------------------------------------------------------
-  files <- resolve_las_paths(path)
-
-  if (length(files) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
-    return(invisible(NULL))
-  }
-
-  data.table::rbindlist(map_las(files, get_density_per_file))
+  combine_file_results(results)
 }

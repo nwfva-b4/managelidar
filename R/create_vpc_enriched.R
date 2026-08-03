@@ -60,8 +60,8 @@ create_vpc_enriched <- function(path, outlines = NULL, metadata = NULL, out_file
   # Create/resolve VPC
   vpc <- resolve_vpc(path, out_file = NULL)
 
-  if (is.null(vpc) || length(vpc$features) == 0) {
-    warning("No valid VPC features found")
+  if (is.null(vpc) || nrow(vpc$features) == 0) {
+    cli::cli_warn("No valid VPC features found")
     return(invisible(NULL))
   }
 
@@ -108,7 +108,7 @@ create_vpc_enriched <- function(path, outlines = NULL, metadata = NULL, out_file
   enrich_metadata <- !isFALSE(metadata)
 
   if (!enrich_geometry && !enrich_metadata) {
-    warning("Both outlines and metadata are FALSE - nothing to enrich")
+    cli::cli_warn("Both outlines and metadata are FALSE - nothing to enrich")
     return(vpc)
   }
 

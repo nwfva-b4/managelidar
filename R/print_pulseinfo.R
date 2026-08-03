@@ -23,7 +23,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' las_files |> print_pulseinfo()
 #'
@@ -57,12 +57,12 @@ print_pulseinfo <- function(path) {
   # Print
   # ------------------------------------------------------------------
   cat(glue::glue("
-Density (⌀):
+Density (\u2300):
 ----------------
-Pulse Density : {avg_pulse} pulses/m²
-Point Density : {avg_point} points/m²
+Pulse Density : {avg_pulse} pulses/m\u00b2
+Point Density : {avg_point} points/m\u00b2
 
-Pulse Penetration Rate (⌀):
+Pulse Penetration Rate (\u2300):
 ----------------
 Single Returns   : {avg_single} %
 Multiple Returns : {avg_multiple} %

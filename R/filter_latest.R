@@ -31,7 +31,7 @@
 #' f <- system.file("extdata", package = "managelidar")
 #'
 #' # get latest acquisition per tile (entire tiles only, with 10m tolerance)
-#' vpc <- filter_earliest(f, tolerance = 10)
+#' vpc <- filter_latest(f, tolerance = 10)
 #'
 #' @seealso \code{\link{filter_earliest}}, \code{\link{filter_spatial}},
 #'   \code{\link{filter_multitemporal}}, \code{\link{resolve_vpc}}
@@ -50,7 +50,7 @@ filter_latest <- function(path, entire_tiles = TRUE, tolerance = 1, multitempora
   n_input <- nrow(vpc$features)
 
   if (n_input == 0) {
-    warning("No features in VPC to filter")
+    cli::cli_warn("No features in VPC to filter")
     return(invisible(NULL))
   }
 
@@ -63,7 +63,7 @@ filter_latest <- function(path, entire_tiles = TRUE, tolerance = 1, multitempora
   )
 
   if (nrow(tiles) == 0) {
-    warning("No tiles found matching criteria, consider increasing `tolerance` or set `entire_tiles=FALSE`")
+    cli::cli_warn("No tiles found matching criteria, consider increasing {.arg tolerance} or set {.code entire_tiles=FALSE}")
     return(invisible(NULL))
   }
 
@@ -84,7 +84,7 @@ filter_latest <- function(path, entire_tiles = TRUE, tolerance = 1, multitempora
 
   # No files selected
   if (length(files_to_keep) == 0) {
-    warning("No latest acquisitions found")
+    cli::cli_warn("No latest acquisitions found")
     return(invisible(NULL))
   }
 

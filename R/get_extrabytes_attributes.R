@@ -18,7 +18,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' folder |> get_extrabytes_attributes()
 #'
@@ -28,17 +28,22 @@ get_extrabytes_attributes <- function(path, full.names = FALSE) {
   # ------------------------------------------------------------------
   headers <- get_header(path, full.names = full.names)
 
+  if (is.null(headers)) {
+    return(invisible(NULL))
+  }
+
   # ------------------------------------------------------------------
-  # Extract LAS version
+  # Extract extrabytes attribute names
   # ------------------------------------------------------------------
-  df <- dplyr::bind_rows(lapply(seq_along(headers), function(i) {
+  results <- lapply(seq_along(headers), function(i) {
     hdr <- headers[[i]]
 
-    tibble::tibble(
+    data.frame(
       filename = names(headers)[i],
-      extrabytes_attributes = list(names(hdr@VLR$Extra_Bytes$`Extra Bytes Description`))
+      extrabytes_attributes = I(list(names(hdr@VLR$Extra_Bytes$`Extra Bytes Description`))),
+      stringsAsFactors = FALSE
     )
-  }))
+  })
 
-  df
+  combine_file_results(results)
 }

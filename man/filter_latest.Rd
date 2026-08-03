@@ -50,7 +50,7 @@ The function performs the following steps:
 f <- system.file("extdata", package = "managelidar")
 
 # get latest acquisition per tile (entire tiles only, with 10m tolerance)
-vpc <- filter_earliest(f, tolerance = 10)
+vpc <- filter_latest(f, tolerance = 10)
 
 }
 \seealso{

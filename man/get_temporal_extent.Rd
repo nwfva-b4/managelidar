@@ -86,7 +86,7 @@ las_files |> get_temporal_extent(per_file = FALSE)
 las_files |> get_temporal_extent(return_referenceyear = TRUE)
 
 # Using CSV for reference dates
-csv_path <- system.file("extdata", "acquisition_dates.csv", package = "managelidar")
+csv_path <- system.file("extdata", "acquisition_dates_lgln.csv", package = "managelidar")
 get_temporal_extent(folder, from_csv = csv_path)
 
 }

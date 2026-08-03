@@ -36,7 +36,7 @@ coordinates that are genuinely misaligned.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 # check tiling scheme with 10m tolerance
 las_files |> check_tiling(tolerance = 10)

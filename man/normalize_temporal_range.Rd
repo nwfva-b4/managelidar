@@ -15,6 +15,7 @@ normalize_temporal_range(start, end = NULL)
 List with start and end POSIXct objects
 }
 \description{
-Internal helper to normalize temporal range
+If \code{end} is not provided, it is derived from the granularity of \code{start}
+(e.g. a bare year expands to the end of that year) via \code{\link[=parse_datetime_input]{parse_datetime_input()}}.
 }
 \keyword{internal}

@@ -17,7 +17,7 @@
 #'
 #' @param path Character. Path to a LAS/LAZ/COPC file, a directory containing
 #'   such files, or a Virtual Point Cloud (`.vpc`).
-#' @param samplebased Logical. If `TRUE` (default), reads only a spatial subsample of each file.
+#' @param sample_based Logical. If `TRUE` (default), reads only a spatial subsample of each file.
 #' @param full.names Logical. If `TRUE`, return full file paths; otherwise
 #'   return base filenames only (default).
 #' @param add_classes Logical. If `TRUE`, include a list-column with the
@@ -37,18 +37,18 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' las_files |> is_classified(add_classes = TRUE)
 #'
-is_classified <- function(path, samplebased = TRUE, full.names = FALSE, add_classes = FALSE) {
+is_classified <- function(path, sample_based = TRUE, full.names = FALSE, add_classes = FALSE) {
   # -------------------------------
   # Resolve all LASfiles
   # -------------------------------
   files <- resolve_las_paths(path)
 
   if (length(files) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
+    cli::cli_warn("No LAS/LAZ/COPC files found.")
     return(invisible(NULL))
   }
 
@@ -59,7 +59,7 @@ is_classified <- function(path, samplebased = TRUE, full.names = FALSE, add_clas
     tryCatch(
       {
         # ---- Reader selection ----
-        reader <- if (samplebased) {
+        reader <- if (sample_based) {
           if (endsWith(file, ".copc.laz")) {
             lasR::reader(copc_depth = 1)
           } else {
@@ -98,9 +98,21 @@ is_classified <- function(path, samplebased = TRUE, full.names = FALSE, add_clas
       error = function(e) {
         filename <- if (full.names) file else basename(file)
         message("ERROR processing ", filename, ": ", conditionMessage(e))
-        out <- list(list(error = conditionMessage(e)))
-        names(out) <- filename
-        out
+
+        if (add_classes) {
+          data.frame(
+            file = filename,
+            classified = NA,
+            classes = I(list(integer(0))),
+            error = conditionMessage(e)
+          )
+        } else {
+          data.frame(
+            file = filename,
+            classified = NA,
+            error = conditionMessage(e)
+          )
+        }
       }
     )
   }
@@ -108,5 +120,5 @@ is_classified <- function(path, samplebased = TRUE, full.names = FALSE, add_clas
   # -------------------------------
   # Map over files
   # -------------------------------
-  data.table::rbindlist(map_las(files, is_classified_per_file))
+  combine_file_results(map_las(files, is_classified_per_file))
 }

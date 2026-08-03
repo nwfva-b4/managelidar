@@ -50,7 +50,7 @@ filter_earliest <- function(path, entire_tiles = TRUE, tolerance = 1, multitempo
   n_input <- nrow(vpc$features)
 
   if (n_input == 0) {
-    warning("No features in VPC to filter")
+    cli::cli_warn("No features in VPC to filter")
     return(invisible(NULL))
   }
 
@@ -63,7 +63,7 @@ filter_earliest <- function(path, entire_tiles = TRUE, tolerance = 1, multitempo
   )
 
   if (nrow(tiles) == 0) {
-    warning("No tiles found matching criteria, consider increasing `tolerance` or set `entire_tiles=FALSE`")
+    cli::cli_warn("No tiles found matching criteria, consider increasing {.arg tolerance} or set {.code entire_tiles=FALSE}")
     return(invisible(NULL))
   }
 
@@ -84,7 +84,7 @@ filter_earliest <- function(path, entire_tiles = TRUE, tolerance = 1, multitempo
 
   # No files selected
   if (length(files_to_keep) == 0) {
-    warning("No first acquisitions found")
+    cli::cli_warn("No first acquisitions found")
     return(invisible(NULL))
   }
 

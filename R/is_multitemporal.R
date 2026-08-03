@@ -35,7 +35,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 #'
 #' las_files |> is_multitemporal(tolerance = 10)
 #'
@@ -80,9 +80,8 @@ is_multitemporal <- function(path, entire_tiles = TRUE, tolerance = 1, full.name
   # Check if CRS is consistent across all files
   unique_crs <- unique(extents$crs)
   if (length(unique_crs) > 1) {
-    stop(
-      "Multiple CRS detected in files: ", paste(unique_crs, collapse = ", "),
-      ". All files must have the same CRS."
+    cli::cli_abort(
+      "Multiple CRS detected in files: {paste(unique_crs, collapse = ', ')}. All files must have the same CRS."
     )
   }
 

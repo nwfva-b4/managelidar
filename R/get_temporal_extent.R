@@ -65,7 +65,7 @@
 #' las_files |> get_temporal_extent(return_referenceyear = TRUE)
 #'
 #' # Using CSV for reference dates
-#' csv_path <- system.file("extdata", "acquisition_dates.csv", package = "managelidar")
+#' csv_path <- system.file("extdata", "acquisition_dates_lgln.csv", package = "managelidar")
 #' get_temporal_extent(folder, from_csv = csv_path)
 #'
 get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
@@ -161,7 +161,7 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
 
   # Override non-GPS dates with CSV if provided
   if (!is.null(from_csv) && file.exists(from_csv) && nrow(dates_gpstime_false) > 0) {
-    acquisitions <- read.csv(from_csv) |>
+    acquisitions <- utils::read.csv(from_csv) |>
       dplyr::mutate(
         date_from_file = lubridate::ymd(date),
         minx = minx * 1000,
@@ -191,14 +191,14 @@ get_temporal_extent <- function(path, per_file = TRUE, full.names = FALSE,
   # Check for missing dates
   missing_dates <- is.na(dates$date)
   if (any(missing_dates)) {
-    warning(sum(missing_dates), " file(s) missing valid date")
+    cli::cli_warn("{sum(missing_dates)} file(s) missing valid date")
     dates <- dates[!missing_dates, ]
   }
 
   n_files <- nrow(dates)
 
   if (n_files == 0) {
-    warning("No files with valid dates")
+    cli::cli_warn("No files with valid dates")
     return(invisible(NULL))
   }
 

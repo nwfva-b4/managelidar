@@ -23,7 +23,7 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 #'
 #' vpc <- las_files |> filter_spatial(c(548700, 5725010))
 #'
@@ -39,7 +39,7 @@ filter_spatial <- function(path, extent, crs = NULL, verbose = TRUE) {
   n_input <- nrow(vpc$features)
 
   if (n_input == 0) {
-    warning("No features in VPC to filter")
+    cli::cli_warn("No features in VPC to filter")
     return(invisible(NULL))
   }
 
@@ -47,7 +47,7 @@ filter_spatial <- function(path, extent, crs = NULL, verbose = TRUE) {
   target_epsg <- vpc$features$properties[[1]]$`proj:epsg`
 
   if (is.null(target_epsg)) {
-    stop("VPC features missing proj:epsg")
+    cli::cli_abort("VPC features missing {.field proj:epsg}")
   }
 
   # If crs is NULL and extent is numeric, use VPC's CRS
@@ -59,7 +59,11 @@ filter_spatial <- function(path, extent, crs = NULL, verbose = TRUE) {
   extent_sf <- normalize_extent_to_sf(extent, crs)
 
   # Transform extent to VPC's CRS if needed
-  if (sf::st_crs(extent_sf)$epsg != target_epsg) {
+  extent_epsg <- sf::st_crs(extent_sf)$epsg
+  if (is.na(extent_epsg)) {
+    cli::cli_abort("Could not determine an EPSG code for the supplied {.arg extent}/{.arg crs}. Provide a value with a resolvable EPSG-coded CRS.")
+  }
+  if (extent_epsg != target_epsg) {
     extent_sf <- sf::st_transform(extent_sf, target_epsg)
   }
 
@@ -86,7 +90,7 @@ filter_spatial <- function(path, extent, crs = NULL, verbose = TRUE) {
   vpc_bboxes <- vpc_bboxes[valid_idx]
 
   if (length(vpc_bboxes) == 0) {
-    warning("No valid bounding boxes in VPC features")
+    cli::cli_warn("No valid bounding boxes in VPC features")
     return(invisible(NULL))
   }
 
@@ -100,7 +104,7 @@ filter_spatial <- function(path, extent, crs = NULL, verbose = TRUE) {
 
   # No intersections found
   if (length(keep_indices) == 0) {
-    warning("No features intersect the specified extent")
+    cli::cli_warn("No features intersect the specified extent")
     return(invisible(NULL))
   }
 
@@ -155,15 +159,15 @@ normalize_extent_to_sf <- function(extent, crs = NULL) {
         extent[1], extent[2]
       ), ncol = 2, byrow = TRUE)))
     } else {
-      stop("Numeric extent must be length 2 (x, y) or 4 (xmin, ymin, xmax, ymax)")
+      cli::cli_abort("Numeric extent must be length 2 (x, y) or 4 (xmin, ymin, xmax, ymax)")
     }
 
     if (is.null(crs)) {
-      stop("Must provide 'crs' when extent is a numeric vector")
+      cli::cli_abort("Must provide {.arg crs} when extent is a numeric vector")
     }
 
     return(sf::st_sf(geometry = sf::st_sfc(geom, crs = crs)))
   }
 
-  stop("Unsupported extent type. Use numeric vector or sf object.")
+  cli::cli_abort("Unsupported extent type. Use numeric vector or sf object.")
 }

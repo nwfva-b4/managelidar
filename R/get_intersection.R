@@ -27,8 +27,8 @@
 #'
 #' @examples
 #' folder <- system.file("extdata", package = "managelidar")
-#' las_files <- list.files(folder, full.names = T, pattern = "*20240327.laz")
-#' las_file <- list.files(folder, full.names = T, pattern = "*20230904.laz")
+#' las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
+#' las_file <- list.files(folder, full.names = TRUE, pattern = "*20230904.laz")
 #' get_intersection(las_files, las_file)
 get_intersection <- function(path1, path2, mode = "intersects", as_sf = FALSE, full.names = FALSE) {
   # ------------------------------------------------------------------
@@ -43,7 +43,7 @@ get_intersection <- function(path1, path2, mode = "intersects", as_sf = FALSE, f
   ext2 <- get_spatial_extent(path2, as_sf = TRUE, full.names = full.names, verbose = FALSE)
 
   if (nrow(ext1) == 0 || nrow(ext2) == 0) {
-    warning("No LAS/LAZ/COPC files found.")
+    cli::cli_warn("No LAS/LAZ/COPC files found.")
     return(invisible(NULL))
   }
 

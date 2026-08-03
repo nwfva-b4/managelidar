@@ -45,8 +45,8 @@ col <- cat |>
   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
 
-folder <- system.file("extdata", package = "managelidar")
-las_files <- list.files(folder, full.names = T, pattern = "*.laz")
+folder <- fs::path_package("extdata", package = "managelidar")
+las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 items <- col |>
   stac_add_items(path = las_files)
 
