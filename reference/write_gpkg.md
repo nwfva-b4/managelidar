@@ -65,5 +65,5 @@ for details.
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 las_files |> write_gpkg()
-#> Wrote Geopackage: /tmp/RtmpLDq6dK/file23156491d53d.gpkg
+#> Wrote Geopackage: /tmp/Rtmpatnzrr/file229650d86137.gpkg
 ```

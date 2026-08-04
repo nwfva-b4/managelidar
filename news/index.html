@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,20 @@
       <small>Source: <a href="https://github.com/wiesehahn/managelidar/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.8" id="managelidar-018">managelidar 0.1.8<a class="anchor" aria-label="anchor" href="#managelidar-018"></a></h2>
+<div class="section level3">
+<h3 id="nwfva-naming-convention-0-1-8">NWFVA naming convention<a class="anchor" aria-label="anchor" href="#nwfva-naming-convention-0-1-8"></a></h3>
+<ul><li>Added support for the NWFVA filename/path convention (<code>{region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz</code>, nested under a <code>region/platform/year/campaign/product/{daten,doku/vpc,doku/overview}</code> directory tree) alongside the existing AdV convention:
+<ul><li>
+<code><a href="../reference/check_names.html">check_names()</a></code>/<code><a href="../reference/set_names.html">set_names()</a></code> gain a <code>standard = c("adv", "nwfva")</code> parameter (default <code>"adv"</code>, unchanged behavior for existing callers).</li>
+<li>
+<code><a href="../reference/raw_to_processed.html">raw_to_processed()</a></code> gains the same <code>standard</code> parameter plus <code>campaign</code>/<code>platform</code>/<code>product</code>, and a new companion function, <code><a href="../reference/process_nwfva.html">process_nwfva()</a></code>, wraps it with a simpler NWFVA-only call signature.</li>
+</ul></li>
+<li>Fixed a bug where <code><a href="../reference/raw_to_processed.html">raw_to_processed()</a></code>’s own <code>region</code> parameter was never forwarded to filename generation (hardcoded to <code>NULL</code>), so a user-supplied <code>region</code> silently had no effect on output filenames.</li>
+<li>The AdV-specific year-correction step (rewriting the filename’s year token after computing it from median GPS time) previously used a regex assuming the year was the filename’s trailing token; it’s now a re-call of the same filename builder used for initial name generation, which works for either naming standard.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.7" id="managelidar-017">managelidar 0.1.7<a class="anchor" aria-label="anchor" href="#managelidar-017"></a></h2>
 <div class="section level3">

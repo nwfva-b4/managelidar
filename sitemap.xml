@@ -10,6 +10,7 @@
 <url><loc>https://wiesehahn.github.io/managelidar/news/index.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/LAS_ADJUSTED_GPSTIME_OFFSET.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/add_child_link.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/adv_filename.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/build_catalog.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/build_catalog_links.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/build_collection.html</loc></url>
@@ -21,6 +22,7 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/combine_file_results.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/create_vpc_enriched.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/delete_with_retry.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/detect_region.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/empty_extent.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/exec_write_vpc.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/extent_is_placeholder.html</loc></url>
@@ -69,13 +71,17 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_stac_scalars.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/normalize_temporal_range.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/null-coalesce.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/nwfva_filename.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/nwfva_output_dir.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/parse_datetime_input.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/path_to_file_uri.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/plot_extent.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/process_nwfva.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/processed_inputs_from_logs.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/propagate_extent_to_ancestors.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/propagate_title_to_children.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/prune_empty_dirs.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/raw_to_processed.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/read_log_entries.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/read_log_file_entries.html</loc></url>
@@ -85,6 +91,7 @@
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_collection_dir.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_image_asset.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_las_paths.html</loc></url>
+<url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_naming_components.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/resolve_vpc.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/run_pipeline.html</loc></url>
 <url><loc>https://wiesehahn.github.io/managelidar/reference/set_link.html</loc></url>

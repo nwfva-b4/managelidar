@@ -1,23 +1,23 @@
-# Validate LASfile names according to the ADV standard
+# Validate LASfile names according to a naming standard
 
-`check_names()` verifies whether LAS/LAZ/COPC file names conform to the
-German AdV standard for tiled LiDAR data. File names are expected to
-follow the schema: `prefix_utmzone_minx_miny_tilesize_region_year.laz`.
-Example: `3dm_32_547_5724_1_ni_2024.laz`. See the [ADV
-standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
-for details.
+`check_names()` verifies whether LAS/LAZ/COPC file names conform to
+either the German AdV standard or the NWFVA standard for tiled LiDAR
+data.
 
 ## Usage
 
 ``` r
 check_names(
   path,
-  prefix = "3dm",
+  standard = c("adv", "nwfva"),
   region = NULL,
   from_csv = NULL,
-  copc = FALSE,
+  epsg = 25832L,
   full.names = FALSE,
-  epsg = 25832L
+  product = NULL,
+  copc = FALSE,
+  campaign = NULL,
+  platform = "als"
 )
 ```
 
@@ -28,9 +28,10 @@ check_names(
   Character vector. Paths to LAS/LAZ/COPC files, directories containing
   such files, or a VPC object already loaded in R.
 
-- prefix:
+- standard:
 
-  Character scalar. Naming prefix (default: `"3dm"`).
+  Character. Naming standard to check against: `"adv"` (default) or
+  `"nwfva"`.
 
 - region:
 
@@ -42,19 +43,37 @@ check_names(
   Optional path to CSV file for year determination. If provided, used to
   match acquisition dates for tiles without GPStime.
 
-- copc:
+- epsg:
 
-  Logical. Whether the files are expected to be COPC (`.copc.laz`).
+  Integer. EPSG code used as fallback CRS when a file does not contain a
+  valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
 
 - full.names:
 
   Logical. If `TRUE`, returns full file paths in `name_is` and
   `name_should`; otherwise, only the base file names.
 
-- epsg:
+- product:
 
-  Integer. EPSG code used as fallback CRS when a file does not contain a
-  valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).
+  Character. Data-product token embedded in the filename (the AdV
+  standard calls this a "prefix"). Defaults to `"3dm"` for
+  `standard = "adv"` and `"punktwolke"` for `standard = "nwfva"`.
+
+- copc:
+
+  Logical. Whether the files are expected to be COPC (`.copc.laz`). Only
+  relevant for `standard = "adv"`.
+
+- campaign:
+
+  Character. Required when `standard = "nwfva"`: a single
+  `surveyarea_contractor` label (e.g. `"solling_sgb4"`); cannot be
+  derived from the data.
+
+- platform:
+
+  Character. Platform token, only used for `standard = "nwfva"` (default
+  `"als"`).
 
 ## Value
 
@@ -66,7 +85,7 @@ A `data.frame` with one row per file and columns:
 
 - name_should:
 
-  Expected file name according to AdV standard
+  Expected file name according to the chosen standard
 
 - correct:
 
@@ -75,6 +94,21 @@ A `data.frame` with one row per file and columns:
 - date_source:
 
   How the date (year) was extracted
+
+## Details
+
+AdV file names follow the schema:
+`product_utmzone_minx_miny_tilesize_region_year.laz`. Example:
+`3dm_32_547_5724_1_ni_2024.laz`. See the [ADV
+standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
+for details.
+
+NWFVA file names follow the schema:
+`region_platform_year_campaign_product_x_y.laz`. Example:
+`ni_als_2024_solling_sgb4_punktwolke_550000_5730000.laz`, where `x`/`y`
+are the lower-left corner of the containing standard 1000x1000m tile
+(full meters, grid-snapped) and `campaign` is a manually supplied
+`surveyarea_contractor` label.
 
 ## Examples
 
@@ -88,6 +122,23 @@ las_files |> check_names()
 #> 2 3dm_32_547_5725_1_ni_20240327.laz 3dm_32_547_5725_1_ni_2024.laz   FALSE
 #> 3 3dm_32_548_5724_1_ni_20240327.laz 3dm_32_548_5724_1_ni_2024.laz   FALSE
 #> 4 3dm_32_548_5725_1_ni_20240327.laz 3dm_32_548_5725_1_ni_2024.laz   FALSE
+#>           date_source
+#> 1 gpstime_first_point
+#> 2 gpstime_first_point
+#> 3 gpstime_first_point
+#> 4 gpstime_first_point
+
+las_files |> check_names(standard = "nwfva", region = "ni", campaign = "solling_sgb4")
+#>                             name_is
+#> 1 3dm_32_547_5724_1_ni_20240327.laz
+#> 2 3dm_32_547_5725_1_ni_20240327.laz
+#> 3 3dm_32_548_5724_1_ni_20240327.laz
+#> 4 3dm_32_548_5725_1_ni_20240327.laz
+#>                                              name_should correct
+#> 1 ni_als_2024_solling_sgb4_punktwolke_547000_5724000.laz   FALSE
+#> 2 ni_als_2024_solling_sgb4_punktwolke_547000_5725000.laz   FALSE
+#> 3 ni_als_2024_solling_sgb4_punktwolke_548000_5724000.laz   FALSE
+#> 4 ni_als_2024_solling_sgb4_punktwolke_548000_5725000.laz   FALSE
 #>           date_source
 #> 1 gpstime_first_point
 #> 2 gpstime_first_point

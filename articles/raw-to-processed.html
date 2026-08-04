@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">managelidar</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,10 +66,10 @@
     
     
 <p><code><a href="../reference/raw_to_processed.html">raw_to_processed()</a></code> converts raw ALS point cloud files
-into quality-controlled, standardised outputs following the German AdV
-naming convention. It handles a full processing pipeline — CRS
-validation, reclassification, noise filtering, intensity normalisation,
-spatial indexing, and metadata generation — with optional
+into quality-controlled, standardised outputs following either the
+German AdV or the NWFVA naming convention. It handles a full processing
+pipeline — CRS validation, reclassification, noise filtering, intensity
+normalisation, spatial indexing, and metadata generation — with optional
 parallelisation for large datasets.</p>
 <div class="section level2">
 <h2 id="basic-usage">Basic usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
@@ -77,9 +77,19 @@ parallelisation for large datasets.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/wiesehahn/managelidar" class="external-link">managelidar</a></span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># AdV naming convention (default)</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
 <span>  path    <span class="op">=</span> <span class="st">"path/to/raw/"</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># NWFVA naming convention - a dedicated wrapper, process_nwfva(), also</span></span>
+<span><span class="co"># exists for this, hiding the standard/platform/product parameters below</span></span>
+<span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
+<span>  path     <span class="op">=</span> <span class="st">"path/to/raw/"</span>,</span>
+<span>  out_dir  <span class="op">=</span> <span class="st">"J:/lidar"</span>,</span>
+<span>  standard <span class="op">=</span> <span class="st">"nwfva"</span>,</span>
+<span>  campaign <span class="op">=</span> <span class="st">"solling_sgb4"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><code>path</code> accepts a single file, a directory, a character
 vector of file paths, or a VPC file. All LAS, LAZ, and COPC formats are
@@ -122,16 +132,42 @@ supported.</p>
 <td>Fallback EPSG when CRS is missing or invalid</td>
 </tr>
 <tr class="odd">
+<td><code>standard</code></td>
+<td><code>"adv"</code></td>
+<td>Output naming/path convention: <code>"adv"</code> or
+<code>"nwfva"</code>
+</td>
+</tr>
+<tr class="even">
 <td><code>region</code></td>
 <td><code>NULL</code></td>
 <td>Two-letter state code (e.g. <code>"ni"</code>); auto-detected if
 <code>NULL</code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>from_csv</code></td>
 <td><code>NULL</code></td>
 <td>CSV with acquisition dates for files without valid GPS time</td>
+</tr>
+<tr class="even">
+<td><code>campaign</code></td>
+<td><code>NULL</code></td>
+<td>Required for <code>standard = "nwfva"</code>: a
+<code>surveyarea_contractor</code> label
+(e.g. <code>"solling_sgb4"</code>)</td>
+</tr>
+<tr class="odd">
+<td><code>platform</code></td>
+<td><code>"als"</code></td>
+<td>Platform token, only used for <code>standard = "nwfva"</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>product</code></td>
+<td><code>NULL</code></td>
+<td>Data-product/prefix token; defaults to <code>"3dm"</code> (AdV) or
+<code>"punktwolke"</code> (NWFVA)</td>
 </tr>
 <tr class="odd">
 <td><code>workers</code></td>
@@ -150,26 +186,49 @@ supported.</p>
 <div class="section level2">
 <h2 id="output-structure">Output structure<a class="anchor" aria-label="anchor" href="#output-structure"></a>
 </h2>
-<p>Point cloud outputs are written under <code>out_dir/</code>, while
-logfiles and data summaries are written under the independent
-<code>log_dir/</code> (both default to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, but can
-point to different locations):</p>
-<pre><code>out_dir/
-├── pointcloud/
-│   └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz
-├── metadata/
-│   └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.vpc
-└── overviews/
-    └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.webp
-
-log_dir/
+<p>Logfiles and data summaries are always written under the independent
+<code>log_dir/</code> (defaults to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, can point to
+a different location than <code>out_dir</code>):</p>
+<pre><code>log_dir/
 └── logfiles/
     ├── processing_log_YYYY-MM-DD_HH-MM-SS.json
     └── summaries_YYYY-MM-DD_HH-MM-SS/
         ├── files_in/
         │   └── {original_input_name}.json
         └── files_out/
-            └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.json</code></pre>
+            └── {generated_filename}.json</code></pre>
+<table class="table">
+<colgroup>
+<col width="62%">
+<col width="37%">
+</colgroup>
+<thead><tr class="header">
+<th>Directory</th>
+<th>Contents</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td><code>logfiles/</code></td>
+<td>JSON processing log per run, plus a timestamped
+<code>summaries_.../</code> subfolder of per-file summaries</td>
+</tr></tbody>
+</table>
+<p>Each run gets its own timestamped
+<code>summaries_YYYY-MM-DD_HH-MM-SS/</code> subfolder.
+<code>files_in/</code> uses the <strong>original input filename</strong>
+before renaming. <code>files_out/</code> uses the <strong>generated,
+standard-compliant filename</strong>.</p>
+<div class="section level3">
+<h3 id="adv-output-structure-standard-adv-default">AdV output structure (<code>standard = "adv"</code>, default)<a class="anchor" aria-label="anchor" href="#adv-output-structure-standard-adv-default"></a>
+</h3>
+<p>Point cloud outputs are written under a flat structure in
+<code>out_dir/</code>:</p>
+<pre><code>out_dir/
+├── pointcloud/
+│   └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz
+├── metadata/
+│   └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.vpc
+└── overviews/
+    └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.webp</code></pre>
 <table class="table">
 <colgroup>
 <col width="62%">
@@ -194,30 +253,53 @@ log_dir/
 <td>WEBP images of maximum elevation, coloured with the viridis
 palette</td>
 </tr>
-<tr class="even">
-<td><code>logfiles/</code></td>
-<td>JSON processing log per run, plus a timestamped
-<code>summaries_.../</code> subfolder of per-file summaries</td>
-</tr>
 </tbody>
 </table>
-<p>Each run gets its own timestamped
-<code>summaries_YYYY-MM-DD_HH-MM-SS/</code> subfolder.
-<code>files_in/</code> uses the <strong>original input filename</strong>
-before AdV renaming. <code>files_out/</code> uses the <strong>generated
-AdV-compliant filename</strong>.</p>
+</div>
+<div class="section level3">
+<h3 id="nwfva-output-structure-standard-nwfva">NWFVA output structure (<code>standard = "nwfva"</code>)<a class="anchor" aria-label="anchor" href="#nwfva-output-structure-standard-nwfva"></a>
+</h3>
+<p>Outputs instead nest under <code>out_dir</code> by
+region/platform/year/campaign/product, since NWFVA encodes the on-disk
+location as part of the convention:</p>
+<pre><code>out_dir/
+└── {region}/{platform}/{year}/{campaign}/{product}/
+    ├── daten/
+    │   └── {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz
+    └── doku/
+        ├── vpc/
+        │   └── {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.vpc
+        └── overview/
+            └── {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.webp</code></pre>
+<p>For example, with <code>out_dir = "J:/lidar"</code>,
+<code>region = "ni"</code>, <code>campaign = "solling_sgb4"</code>:
+<code>J:/lidar/ni/als/2024/solling_sgb4/punktwolke/daten/ni_als_2024_solling_sgb4_punktwolke_550000_5730000.laz</code>.</p>
+<p>Since year (and therefore the whole path) can differ per file in a
+multi-temporal batch, these directories are created per file rather than
+once up front.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="filename-convention">Filename convention<a class="anchor" aria-label="anchor" href="#filename-convention"></a>
 </h2>
-<p>Output files follow the AdV standard:</p>
+<p>Output files follow either the AdV standard:</p>
 <pre><code>3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz</code></pre>
 <p>For example: <code>3dm_32_547_5724_1_ni_2023.laz</code></p>
+<p>or the NWFVA standard:</p>
+<pre><code>{region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz</code></pre>
+<p>For example:
+<code>ni_als_2024_solling_sgb4_punktwolke_550000_5730000.laz</code>,
+where <code>x</code>/<code>y</code> are the lower-left corner of the
+containing standard 1000x1000m tile (full meters, grid-snapped) -
+e.g. <code>550000</code> even if the actual data extent’s min corner is
+<code>550011</code>.</p>
 <p>The year is derived from the GPStime of the first point in the point
 cloud if possible, and from median GPStime or header information
 otherwise. The <code>region</code> code is either supplied via the
 <code>region</code> parameter or auto-detected by intersecting tile
-centroids with federal state boundaries.</p>
+centroids with federal state boundaries. <code>campaign</code> (NWFVA
+only) is always manually supplied, since it cannot be derived from the
+data.</p>
 <p>If GPS time is unavailable or invalid, a <code>from_csv</code> table
 of acquisition dates can also be used as a fallback. The source of the
 date is recorded in the VPC metadata under <code>date_source</code>
@@ -233,7 +315,7 @@ is considered invalid if it is missing (<code>0</code>), unrecognised
 <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">sf::st_crs()</a></code>. When an invalid CRS is detected,
 <code><a href="https://rdrr.io/pkg/lasR/man/set_crs.html" class="external-link">lasR::set_crs()</a></code> is prepended to the pipeline using the
 <code>epsg</code> fallback.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Files from a campaign stored without CRS — set explicitly (default)</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
 <span>  path <span class="op">=</span> <span class="st">"path/to/raw/"</span>,</span>
@@ -268,7 +350,7 @@ only undefined classes above 22 are collapsed to unclassified (1)</li>
 for 20 or more, using half of available logical CPU cores by default.
 The number of workers is always capped at half the available cores to
 leave headroom for memory and system processes.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Force sequential processing regardless of file count</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"path/to/raw/"</span>, out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span>, workers <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span></span>
@@ -290,7 +372,7 @@ recorded in the log without affecting other files.</p>
 were already processed successfully. This means interrupted runs can be
 resumed simply by calling the function again with the same arguments —
 only failed or unprocessed files will be re-attempted.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First run — processes all 50 files; 3 fail</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">files</span>, out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span><span class="op">)</span></span>
 <span></span>
@@ -305,17 +387,16 @@ only failed or unprocessed files will be re-attempted.</p>
 is recorded. This prevents partial results from accumulating across runs
 and ensures that a file listed as failed in the log truly has no outputs
 on disk.</p>
-<p>Expected outputs checked per file:</p>
+<p>Expected outputs checked per file (in the pointcloud/vpc/overview
+directories for whichever <code>standard</code> was used - see
+<strong>Output structure</strong>):</p>
 <ul>
 <li>
-<code>.laz</code> in <code>pointcloud/</code>
-</li>
+<code>.laz</code> pointcloud file</li>
 <li>
-<code>.vpc</code> in <code>metadata/</code>
-</li>
+<code>.vpc</code> metadata file</li>
 <li>
-<code>.webp</code> in <code>overviews/</code>
-</li>
+<code>.webp</code> overview image</li>
 <li>
 <code>.json</code> in
 <code>logfiles/summaries_.../files_in/</code>
@@ -333,23 +414,23 @@ on disk.</p>
 log records the function call, package and dependency versions, all
 parameters, and a per-file entry with status, duration, and any error
 messages.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="dt">"processing"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"timestamp_start"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">123.4</span> <span class="fu">},</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="dt">"parameters"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"out_dir"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"epsg"</span><span class="fu">:</span> <span class="dv">25832</span> <span class="fu">},</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="dt">"files"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="fu">{</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>      <span class="dt">"input"</span><span class="fu">:</span> <span class="st">"path/to/raw/tile.laz"</span><span class="fu">,</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>      <span class="dt">"output"</span><span class="fu">:</span> <span class="st">"path/to/output/pointcloud/3dm_32_547_5724_1_ni_2023.laz"</span><span class="fu">,</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>      <span class="dt">"status"</span><span class="fu">:</span> <span class="st">"success"</span><span class="fu">,</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>      <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">45.2</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="dt">"summary"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>    <span class="dt">"files_total"</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">,</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>    <span class="dt">"files_processed"</span><span class="fu">:</span> <span class="dv">19</span><span class="fu">,</span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>    <span class="dt">"files_failed"</span><span class="fu">:</span> <span class="dv">1</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="dt">"processing"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"timestamp_start"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">123.4</span> <span class="fu">},</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="dt">"parameters"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"out_dir"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"epsg"</span><span class="fu">:</span> <span class="dv">25832</span> <span class="fu">},</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="dt">"files"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>      <span class="dt">"input"</span><span class="fu">:</span> <span class="st">"path/to/raw/tile.laz"</span><span class="fu">,</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>      <span class="dt">"output"</span><span class="fu">:</span> <span class="st">"path/to/output/pointcloud/3dm_32_547_5724_1_ni_2023.laz"</span><span class="fu">,</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>      <span class="dt">"status"</span><span class="fu">:</span> <span class="st">"success"</span><span class="fu">,</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>      <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">45.2</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="dt">"summary"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    <span class="dt">"files_total"</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">,</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    <span class="dt">"files_processed"</span><span class="fu">:</span> <span class="dv">19</span><span class="fu">,</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    <span class="dt">"files_failed"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>Possible status values:</p>
 <table class="table">
 <colgroup>
@@ -390,7 +471,7 @@ messages.</p>
 <p><code><a href="../reference/raw_to_processed.html">raw_to_processed()</a></code> returns a list of output file paths
 (one per input file) invisibly. Failed files return <code>NULL</code> in
 the corresponding position.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
 <span>  path    <span class="op">=</span> <span class="st">"path/to/raw/"</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span></span>

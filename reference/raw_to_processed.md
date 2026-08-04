@@ -11,8 +11,12 @@ raw_to_processed(
   out_dir = tempdir(),
   log_dir = tempdir(),
   epsg = 25832L,
+  standard = c("adv", "nwfva"),
   region = NULL,
   from_csv = NULL,
+  campaign = NULL,
+  platform = "als",
+  product = NULL,
   workers = NULL,
   verbose = TRUE
 )
@@ -39,6 +43,19 @@ raw_to_processed(
   Integer. EPSG code for the coordinate reference system. Default is
   25832 (ETRS89 / UTM zone 32N).
 
+- standard:
+
+  Character. Output naming/path convention: `"adv"` (default) or
+  `"nwfva"`. See
+  [`check_names()`](https://wiesehahn.github.io/managelidar/reference/check_names.md)
+  for the exact filename schemas. For `"nwfva"`, output files are
+  additionally organised into a nested
+  `region/platform/year/campaign/product/` directory tree rather than
+  `out_dir`'s flat `pointcloud/`/`overviews/`/`metadata/` folders - see
+  **Output structure**.
+  [`process_nwfva()`](https://wiesehahn.github.io/managelidar/reference/process_nwfva.md)
+  wraps this standard with a simpler, NWFVA-only call signature.
+
 - region:
 
   Character. Two-letter region code (federal states of Germany) for
@@ -49,6 +66,23 @@ raw_to_processed(
 
   Character. Path to CSV file containing acquisition dates used for year
   correction in filenames where data does not contain valid GPS time.
+
+- campaign:
+
+  Character. Required when `standard = "nwfva"`: a single
+  `surveyarea_contractor` label (e.g. `"solling_sgb4"`); cannot be
+  derived from the data.
+
+- platform:
+
+  Character. Platform token, only used for `standard = "nwfva"` (default
+  `"als"`).
+
+- product:
+
+  Character. Data-product token embedded in the filename (the AdV
+  standard calls this a "prefix"). Defaults to `"3dm"` for
+  `standard = "adv"` and `"punktwolke"` for `standard = "nwfva"`.
 
 - workers:
 
@@ -72,7 +106,7 @@ This function performs a comprehensive quality assurance pipeline:
 
 **Processing steps:**
 
-- Generate AdV-compliant filenames
+- Generate standard-compliant filenames
 
 - Set CRS (if not present)
 
@@ -104,8 +138,8 @@ This function performs a comprehensive quality assurance pipeline:
 
 - Create log file
 
-**Output structure:** The function creates the following directory
-structure in `out_dir` if not otherwise defined:
+**Output structure:** For `standard = "adv"` (default), the function
+creates the following flat directory structure in `out_dir`:
 
 - `pointcloud/`:
 
@@ -119,6 +153,23 @@ structure in `out_dir` if not otherwise defined:
 
   WEBP overview images (max elevation)
 
+For `standard = "nwfva"`, outputs instead nest under `out_dir` as:
+
+- `{region}/{platform}/{year}/{campaign}/{product}/daten/`:
+
+  Processed LAZ files
+
+- `{region}/{platform}/{year}/{campaign}/{product}/doku/vpc/`:
+
+  VPC metadata
+
+- `{region}/{platform}/{year}/{campaign}/{product}/doku/overview/`:
+
+  WEBP overview images
+
+For both standards, `log_dir` (independent of `out_dir`) gets the same
+flat structure:
+
 - `logfiles/`:
 
   Processing logs with timing and status information
@@ -131,8 +182,11 @@ structure in `out_dir` if not otherwise defined:
 
   Data summaries of output LASfiles
 
-**Filename generation:** Output files follow the German AdV naming
-convention: `3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz`
+**Filename generation:** Output files follow either the German AdV
+naming convention
+(`3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz`) or the NWFVA
+convention
+(`{region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz`).
 
 The year is extracted from median GPS time to avoid errors from
 individual erroneous points. Region can be specified or auto-detected
@@ -146,22 +200,42 @@ log documents all processing steps, timing, and any warnings or errors.
 
 ``` r
 # \donttest{
-# Basic usage with default settings
+# Basic usage with default settings (AdV naming convention)
 folder <- system.file("extdata", package = "managelidar")
 out_dir <- tempfile("processed_")
 raw_to_processed(path = folder, out_dir = out_dir)
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpLDq6dK/processed_231535dd9ae8/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/RtmpLDq6dK/logfiles/processing_log_2026-08-03_07-39-54.json
+#> Processing log written to: /tmp/Rtmpatnzrr/logfiles/processing_log_2026-08-04_06-46-44.json
+
+# NWFVA naming convention
+out_dir_nwfva <- tempfile("processed_nwfva_")
+raw_to_processed(
+  path = folder, out_dir = out_dir_nwfva,
+  standard = "nwfva", region = "ni", campaign = "solling_sgb4"
+)
+#> Process 5 LASfiles
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 6: Too many command options '0'
+#> 
+#> Processing log written to: /tmp/Rtmpatnzrr/logfiles/processing_log_2026-08-04_06-46-46.json
 # }
 ```

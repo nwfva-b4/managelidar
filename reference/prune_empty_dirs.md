@@ -1,0 +1,35 @@
+# Remove now-empty directories along a path, stopping at (not including) `stop_at`
+
+NWFVA's per-file directory nesting
+(`region/platform/year/campaign/product/...`) can leave an empty subtree
+behind: the initial guess of `year` (from first-point or header GPS
+time) may later be corrected from the median GPS time once the point
+cloud is actually read, or a file's outputs may be rolled back entirely
+after a failure - either way the directories created for that attempt
+are never populated. This walks upward from `path`, deleting each
+directory only while it is currently empty, so genuinely populated
+directories (this file's own successful output, or another concurrent
+worker's) are never touched.
+
+## Usage
+
+``` r
+prune_empty_dirs(path, stop_at)
+```
+
+## Arguments
+
+- path:
+
+  Character. Leaf directory to start pruning from.
+
+- stop_at:
+
+  Character. Ancestor directory to stop at (never removed, even if
+  empty - typically the shared `region/platform` level).
+
+## Value
+
+`NULL`, invisibly. Best-effort: any failure to delete (e.g. a concurrent
+worker populated the directory between the emptiness check and the
+delete) simply stops the walk early.

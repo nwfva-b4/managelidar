@@ -2,10 +2,11 @@
 
 [`raw_to_processed()`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)
 converts raw ALS point cloud files into quality-controlled, standardised
-outputs following the German AdV naming convention. It handles a full
-processing pipeline — CRS validation, reclassification, noise filtering,
-intensity normalisation, spatial indexing, and metadata generation —
-with optional parallelisation for large datasets.
+outputs following either the German AdV or the NWFVA naming convention.
+It handles a full processing pipeline — CRS validation,
+reclassification, noise filtering, intensity normalisation, spatial
+indexing, and metadata generation — with optional parallelisation for
+large datasets.
 
 ## Basic usage
 
@@ -13,9 +14,19 @@ with optional parallelisation for large datasets.
 
 library(managelidar)
 
+# AdV naming convention (default)
 raw_to_processed(
   path    = "path/to/raw/",
   out_dir = "path/to/output/"
+)
+
+# NWFVA naming convention - a dedicated wrapper, process_nwfva(), also
+# exists for this, hiding the standard/platform/product parameters below
+raw_to_processed(
+  path     = "path/to/raw/",
+  out_dir  = "J:/lidar",
+  standard = "nwfva",
+  campaign = "solling_sgb4"
 )
 ```
 
@@ -30,17 +41,43 @@ paths, or a VPC file. All LAS, LAZ, and COPC formats are supported.
 | `out_dir` | [`tempdir()`](https://rdrr.io/r/base/tempfile.html) | Root directory for point cloud/overview/metadata outputs |
 | `log_dir` | [`tempdir()`](https://rdrr.io/r/base/tempfile.html) | Root directory for logfiles and data summaries (independent of `out_dir`) |
 | `epsg` | `25832L` | Fallback EPSG when CRS is missing or invalid |
+| `standard` | `"adv"` | Output naming/path convention: `"adv"` or `"nwfva"` |
 | `region` | `NULL` | Two-letter state code (e.g. `"ni"`); auto-detected if `NULL` |
 | `from_csv` | `NULL` | CSV with acquisition dates for files without valid GPS time |
+| `campaign` | `NULL` | Required for `standard = "nwfva"`: a `surveyarea_contractor` label (e.g. `"solling_sgb4"`) |
+| `platform` | `"als"` | Platform token, only used for `standard = "nwfva"` |
+| `product` | `NULL` | Data-product/prefix token; defaults to `"3dm"` (AdV) or `"punktwolke"` (NWFVA) |
 | `workers` | `NULL` | Number of parallel workers; see [Parallelisation](#parallelisation) |
 | `verbose` | `TRUE` | Print progress messages |
 
 ## Output structure
 
-Point cloud outputs are written under `out_dir/`, while logfiles and
-data summaries are written under the independent `log_dir/` (both
-default to [`tempdir()`](https://rdrr.io/r/base/tempfile.html), but can
-point to different locations):
+Logfiles and data summaries are always written under the independent
+`log_dir/` (defaults to
+[`tempdir()`](https://rdrr.io/r/base/tempfile.html), can point to a
+different location than `out_dir`):
+
+    log_dir/
+    └── logfiles/
+        ├── processing_log_YYYY-MM-DD_HH-MM-SS.json
+        └── summaries_YYYY-MM-DD_HH-MM-SS/
+            ├── files_in/
+            │   └── {original_input_name}.json
+            └── files_out/
+                └── {generated_filename}.json
+
+| Directory | Contents |
+|----|----|
+| `logfiles/` | JSON processing log per run, plus a timestamped `summaries_.../` subfolder of per-file summaries |
+
+Each run gets its own timestamped `summaries_YYYY-MM-DD_HH-MM-SS/`
+subfolder. `files_in/` uses the **original input filename** before
+renaming. `files_out/` uses the **generated, standard-compliant
+filename**.
+
+### AdV output structure (`standard = "adv"`, default)
+
+Point cloud outputs are written under a flat structure in `out_dir/`:
 
     out_dir/
     ├── pointcloud/
@@ -50,39 +87,59 @@ point to different locations):
     └── overviews/
         └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.webp
 
-    log_dir/
-    └── logfiles/
-        ├── processing_log_YYYY-MM-DD_HH-MM-SS.json
-        └── summaries_YYYY-MM-DD_HH-MM-SS/
-            ├── files_in/
-            │   └── {original_input_name}.json
-            └── files_out/
-                └── 3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.json
-
 | Directory | Contents |
 |----|----|
 | `pointcloud/` | Processed LAZ files with embedded spatial index (`.lax`) |
 | `metadata/` | Per-file VPC files with extended STAC-compatible metadata |
 | `overviews/` | WEBP images of maximum elevation, coloured with the viridis palette |
-| `logfiles/` | JSON processing log per run, plus a timestamped `summaries_.../` subfolder of per-file summaries |
 
-Each run gets its own timestamped `summaries_YYYY-MM-DD_HH-MM-SS/`
-subfolder. `files_in/` uses the **original input filename** before AdV
-renaming. `files_out/` uses the **generated AdV-compliant filename**.
+### NWFVA output structure (`standard = "nwfva"`)
+
+Outputs instead nest under `out_dir` by
+region/platform/year/campaign/product, since NWFVA encodes the on-disk
+location as part of the convention:
+
+    out_dir/
+    └── {region}/{platform}/{year}/{campaign}/{product}/
+        ├── daten/
+        │   └── {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz
+        └── doku/
+            ├── vpc/
+            │   └── {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.vpc
+            └── overview/
+                └── {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.webp
+
+For example, with `out_dir = "J:/lidar"`, `region = "ni"`,
+`campaign = "solling_sgb4"`:
+`J:/lidar/ni/als/2024/solling_sgb4/punktwolke/daten/ni_als_2024_solling_sgb4_punktwolke_550000_5730000.laz`.
+
+Since year (and therefore the whole path) can differ per file in a
+multi-temporal batch, these directories are created per file rather than
+once up front.
 
 ## Filename convention
 
-Output files follow the AdV standard:
+Output files follow either the AdV standard:
 
     3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz
 
 For example: `3dm_32_547_5724_1_ni_2023.laz`
 
+or the NWFVA standard:
+
+    {region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz
+
+For example: `ni_als_2024_solling_sgb4_punktwolke_550000_5730000.laz`,
+where `x`/`y` are the lower-left corner of the containing standard
+1000x1000m tile (full meters, grid-snapped) - e.g. `550000` even if the
+actual data extent’s min corner is `550011`.
+
 The year is derived from the GPStime of the first point in the point
 cloud if possible, and from median GPStime or header information
 otherwise. The `region` code is either supplied via the `region`
 parameter or auto-detected by intersecting tile centroids with federal
-state boundaries.
+state boundaries. `campaign` (NWFVA only) is always manually supplied,
+since it cannot be derived from the data.
 
 If GPS time is unavailable or invalid, a `from_csv` table of acquisition
 dates can also be used as a fallback. The source of the date is recorded
@@ -171,11 +228,13 @@ outputs for that file are deleted** before the error is recorded. This
 prevents partial results from accumulating across runs and ensures that
 a file listed as failed in the log truly has no outputs on disk.
 
-Expected outputs checked per file:
+Expected outputs checked per file (in the pointcloud/vpc/overview
+directories for whichever `standard` was used - see **Output
+structure**):
 
-- `.laz` in `pointcloud/`
-- `.vpc` in `metadata/`
-- `.webp` in `overviews/`
+- `.laz` pointcloud file
+- `.vpc` metadata file
+- `.webp` overview image
 - `.json` in `logfiles/summaries_.../files_in/`
 - `.json` in `logfiles/summaries_.../files_out/`
 

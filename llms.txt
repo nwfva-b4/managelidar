@@ -202,7 +202,7 @@ ecosystem.
 ## All functions
 
 - [`check_names()`](https://wiesehahn.github.io/managelidar/reference/check_names.md)
-  : Validate LASfile names according to the ADV standard
+  : Validate LASfile names according to a naming standard
 - [`check_tiling()`](https://wiesehahn.github.io/managelidar/reference/check_tiling.md)
   : Check if tiles are valid (correct size and aligned to grid)
 - [`create_vpc_enriched()`](https://wiesehahn.github.io/managelidar/reference/create_vpc_enriched.md)
@@ -256,12 +256,15 @@ ecosystem.
   : Plot the spatial extent of LASfiles
 - [`print_pulseinfo()`](https://wiesehahn.github.io/managelidar/reference/print_pulseinfo.md)
   : Print summary information about pulse density and penetration ratio
+- [`process_nwfva()`](https://wiesehahn.github.io/managelidar/reference/process_nwfva.md)
+  : Process LiDAR data to standardized format using the NWFVA naming
+  convention
 - [`raw_to_processed()`](https://wiesehahn.github.io/managelidar/reference/raw_to_processed.md)
   : Process LiDAR data to standardized format
 - [`run_pipeline()`](https://wiesehahn.github.io/managelidar/reference/run_pipeline.md)
   : Execute lasR pipeline on catalog
 - [`set_names()`](https://wiesehahn.github.io/managelidar/reference/set_names.md)
-  : Set LASfile names according to ADV standard
+  : Set LASfile names according to a naming standard
 - [`stac_add_collection()`](https://wiesehahn.github.io/managelidar/reference/stac_add_collection.md)
   : Add (or update) a collection on a STAC catalog or collection
 - [`stac_add_collection_asset()`](https://wiesehahn.github.io/managelidar/reference/stac_add_collection_asset.md)

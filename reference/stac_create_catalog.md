@@ -73,5 +73,5 @@ collections added since) are preserved.
 ``` r
 tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni", title = "Sample Catalog")
-#> ✔ Created catalog lidar_ni at /tmp/RtmpLDq6dK/stac-managelidar-23151c54f579/catalog.json
+#> ✔ Created catalog lidar_ni at /tmp/Rtmpatnzrr/stac-managelidar-229637069090/catalog.json
 ```
