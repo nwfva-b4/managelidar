@@ -1,17 +1,11 @@
-#' Set LASfile names according to ADV standard
+#' Set LASfile names according to a naming standard
 #'
-#' `set_names()` renames LAS/LAZ/COPC files to match the [ADV naming standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111).
+#' `set_names()` renames LAS/LAZ/COPC files to match either the
+#' [ADV naming standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111)
+#' or the NWFVA naming standard. See [check_names()] for the exact filename
+#' schemas.
 #'
-#' Files are expected to follow the schema:
-#' `prefix_utmzone_minx_miny_tilesize_region_year.laz`
-#'
-#' @param path Character. Path to a LAS/LAZ/COPC file or a directory containing LASfiles.
-#' @param prefix Character. Naming prefix (default `"3dm"`).
-#' @param region Character. Federal state abbreviation (optional). Automatically determined if `NULL`.
-#' @param from_csv Character. Path to CSV file containing acquisition dates used for
-#'   year correction in filenames where data does not contain valid GPS time.
-#' @param copc Logical. Whether files are COPC (`.copc.laz`, default `FALSE`).
-#' @param epsg Integer. EPSG code for the coordinate reference system (default `25832L`).
+#' @inheritParams check_names
 #' @param dry_run Logical. If `TRUE`, only preview renaming without modifying files (default `FALSE`).
 #' @param verbose Logical. Print messages and a preview of renaming (default `FALSE`).
 #'
@@ -21,15 +15,24 @@
 #' f <- system.file("extdata", package = "managelidar")
 #' set_names(f, verbose = TRUE, dry_run = TRUE)
 #'
+#' set_names(f,
+#'   standard = "nwfva", region = "ni", campaign = "solling_sgb4",
+#'   dry_run = TRUE, verbose = TRUE
+#' )
+#'
 #' @export
-set_names <- function(path, prefix = "3dm", region = NULL, from_csv = NULL, copc = FALSE,
-                      epsg = 25832L, dry_run = FALSE, verbose = FALSE) {
+set_names <- function(path, standard = c("adv", "nwfva"), region = NULL, from_csv = NULL,
+                       epsg = 25832L, product = NULL, copc = FALSE, campaign = NULL,
+                       platform = "als", dry_run = FALSE, verbose = FALSE) {
+  standard <- match.arg(standard)
+
   # ------------------------------------------------------------------
   # Check filenames
   # ------------------------------------------------------------------
   df <- check_names(path,
-    prefix = prefix, region = region, from_csv = from_csv,
-    copc = copc, full.names = TRUE, epsg = epsg
+    standard = standard, region = region, from_csv = from_csv, epsg = epsg,
+    product = product, copc = copc, campaign = campaign, platform = platform,
+    full.names = TRUE
   )
   df <- subset(df, correct == FALSE)
 

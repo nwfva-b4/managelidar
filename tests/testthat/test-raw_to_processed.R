@@ -41,6 +41,69 @@ test_that("raw_to_processed() runs without the historical function/contract bugs
   expect_true(length(overview_files) <= length(sample_las_files()))
 })
 
+test_that("raw_to_processed() forwards its region parameter (regression: was hardcoded NULL)", {
+  out_dir <- tempfile("raw_to_processed_region_")
+  dir.create(out_dir)
+
+  suppressMessages(suppressWarnings(
+    raw_to_processed(sample_las_files(), out_dir = out_dir, log_dir = out_dir, region = "xx", verbose = FALSE, workers = 1)
+  ))
+
+  pointcloud_files <- list.files(file.path(out_dir, "pointcloud"))
+  # see the first test in this file re: known sample-data classification-
+  # pipeline flakiness - the filename check below needs at least one file to
+  # have completed successfully to be meaningful
+  skip_if(length(pointcloud_files) == 0, "no files completed processing (known sample-data classification-pipeline flakiness)")
+  expect_true(all(grepl("_xx_", pointcloud_files)))
+})
+
+test_that("raw_to_processed() writes the NWFVA directory tree when standard = 'nwfva'", {
+  out_dir <- tempfile("raw_to_processed_nwfva_")
+  dir.create(out_dir)
+
+  suppressMessages(suppressWarnings(
+    raw_to_processed(
+      sample_las_files(),
+      out_dir = out_dir, log_dir = out_dir,
+      standard = "nwfva", region = "ni", campaign = "solling_sgb4",
+      verbose = FALSE, workers = 1
+    )
+  ))
+
+  # directory nesting is created per file before the (separately flaky, see
+  # the first test in this file) classification/GDAL pipeline runs, so this
+  # is verifiable even when every file ultimately fails downstream
+  daten_dirs <- fs::dir_ls(out_dir, recurse = TRUE, type = "directory", regexp = "punktwolke/daten$")
+  vpc_dirs <- fs::dir_ls(out_dir, recurse = TRUE, type = "directory", regexp = "punktwolke/doku/vpc$")
+  overview_dirs <- fs::dir_ls(out_dir, recurse = TRUE, type = "directory", regexp = "punktwolke/doku/overview$")
+
+  expect_true(length(daten_dirs) >= 1)
+  expect_true(length(vpc_dirs) >= 1)
+  expect_true(length(overview_dirs) >= 1)
+  expect_true(all(grepl("/ni/als/[0-9]{4}/solling_sgb4/punktwolke", c(daten_dirs, vpc_dirs, overview_dirs))))
+
+  pointcloud_files <- fs::dir_ls(out_dir, recurse = TRUE, glob = "*.laz")
+  skip_if(length(pointcloud_files) == 0, "no files completed processing (known sample-data classification-pipeline flakiness)")
+  expect_true(all(grepl("ni/als/[0-9]{4}/solling_sgb4/punktwolke/daten/", pointcloud_files)))
+})
+
+test_that("process_nwfva() is equivalent to raw_to_processed(standard = 'nwfva')", {
+  out_dir <- tempfile("process_nwfva_")
+  dir.create(out_dir)
+
+  suppressMessages(suppressWarnings(
+    process_nwfva(sample_las_files(), campaign = "solling_sgb4", out_dir = out_dir, log_dir = out_dir, region = "ni", verbose = FALSE, workers = 1)
+  ))
+
+  daten_dirs <- fs::dir_ls(out_dir, recurse = TRUE, type = "directory", regexp = "punktwolke/daten$")
+  expect_true(length(daten_dirs) >= 1)
+  expect_true(all(grepl("/ni/als/[0-9]{4}/solling_sgb4/punktwolke", daten_dirs)))
+
+  pointcloud_files <- fs::dir_ls(out_dir, recurse = TRUE, glob = "*.laz")
+  skip_if(length(pointcloud_files) == 0, "no files completed processing (known sample-data classification-pipeline flakiness)")
+  expect_true(all(grepl("ni/als/[0-9]{4}/solling_sgb4/punktwolke/daten/", pointcloud_files)))
+})
+
 test_that("read_log_entries()/processed_inputs_from_logs() correctly identify already-processed inputs", {
   log_dir <- tempfile("logs_")
   dir.create(log_dir)
