@@ -2,23 +2,27 @@
 % Please edit documentation in R/check_names.R
 \name{check_names}
 \alias{check_names}
-\title{Validate LASfile names according to the ADV standard}
+\title{Validate LASfile names according to a naming standard}
 \usage{
 check_names(
   path,
-  prefix = "3dm",
+  standard = c("adv", "nwfva"),
   region = NULL,
   from_csv = NULL,
-  copc = FALSE,
+  epsg = 25832L,
   full.names = FALSE,
-  epsg = 25832L
+  product = NULL,
+  copc = FALSE,
+  campaign = NULL,
+  platform = "als"
 )
 }
 \arguments{
 \item{path}{Character vector. Paths to LAS/LAZ/COPC files, directories
 containing such files, or a VPC object already loaded in R.}
 
-\item{prefix}{Character scalar. Naming prefix (default: \code{"3dm"}).}
+\item{standard}{Character. Naming standard to check against: \code{"adv"}
+(default) or \code{"nwfva"}.}
 
 \item{region}{Optional character vector of two-letter region codes. If
 \code{NULL}, the region is automatically inferred from file bounding boxes.}
@@ -26,33 +30,56 @@ containing such files, or a VPC object already loaded in R.}
 \item{from_csv}{Optional path to CSV file for year determination. If provided,
 used to match acquisition dates for tiles without GPStime.}
 
-\item{copc}{Logical. Whether the files are expected to be COPC (\code{.copc.laz}).}
+\item{epsg}{Integer. EPSG code used as fallback CRS when a file does not
+contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).}
 
 \item{full.names}{Logical. If \code{TRUE}, returns full file paths in \code{name_is}
 and \code{name_should}; otherwise, only the base file names.}
 
-\item{epsg}{Integer. EPSG code used as fallback CRS when a file does not
-contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).}
+\item{product}{Character. Data-product token embedded in the filename
+(the AdV standard calls this a "prefix"). Defaults to \code{"3dm"} for
+\code{standard = "adv"} and \code{"punktwolke"} for \code{standard = "nwfva"}.}
+
+\item{copc}{Logical. Whether the files are expected to be COPC (\code{.copc.laz}).
+Only relevant for \code{standard = "adv"}.}
+
+\item{campaign}{Character. Required when \code{standard = "nwfva"}: a single
+\code{surveyarea_contractor} label (e.g. \code{"solling_sgb4"}); cannot be derived
+from the data.}
+
+\item{platform}{Character. Platform token, only used for \code{standard = "nwfva"} (default \code{"als"}).}
 }
 \value{
 A \code{data.frame} with one row per file and columns:
 \describe{
 \item{name_is}{Existing file name or path}
-\item{name_should}{Expected file name according to AdV standard}
+\item{name_should}{Expected file name according to the chosen standard}
 \item{correct}{Logical indicating whether the existing name matches the standard}
 \item{date_source}{How the date (year) was extracted}
 }
 }
 \description{
-\code{check_names()} verifies whether LAS/LAZ/COPC file names conform to the
-German AdV standard for tiled LiDAR data. File names are expected to
-follow the schema: \code{prefix_utmzone_minx_miny_tilesize_region_year.laz}.
+\code{check_names()} verifies whether LAS/LAZ/COPC file names conform to either
+the German AdV standard or the NWFVA standard for tiled LiDAR data.
+}
+\details{
+AdV file names follow the schema:
+\code{product_utmzone_minx_miny_tilesize_region_year.laz}.
 Example: \code{3dm_32_547_5724_1_ni_2024.laz}.
 See the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV standard} for details.
+
+NWFVA file names follow the schema:
+\code{region_platform_year_campaign_product_x_y.laz}.
+Example: \code{ni_als_2024_solling_sgb4_punktwolke_550000_5730000.laz}, where
+\code{x}/\code{y} are the lower-left corner of the containing standard 1000x1000m
+tile (full meters, grid-snapped) and \code{campaign} is a manually supplied
+\code{surveyarea_contractor} label.
 }
 \examples{
 folder <- system.file("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = TRUE, pattern = "*20240327.laz")
 
 las_files |> check_names()
+
+las_files |> check_names(standard = "nwfva", region = "ni", campaign = "solling_sgb4")
 }

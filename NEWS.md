@@ -1,5 +1,25 @@
 # managelidar 0.1.8
 
+## NWFVA naming convention
+
+* Added support for the NWFVA filename/path convention
+  (`{region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz`, nested
+  under a `region/platform/year/campaign/product/{daten,doku/vpc,doku/overview}`
+  directory tree) alongside the existing AdV convention:
+  * `check_names()`/`set_names()` gain a `standard = c("adv", "nwfva")`
+    parameter (default `"adv"`, unchanged behavior for existing callers).
+  * `raw_to_processed()` gains the same `standard` parameter plus
+    `campaign`/`platform`/`product`, and a new companion function,
+    `process_nwfva()`, wraps it with a simpler NWFVA-only call signature.
+* Fixed a bug where `raw_to_processed()`'s own `region` parameter was never
+  forwarded to filename generation (hardcoded to `NULL`), so a user-supplied
+  `region` silently had no effect on output filenames.
+* The AdV-specific year-correction step (rewriting the filename's year token
+  after computing it from median GPS time) previously used a regex assuming
+  the year was the filename's trailing token; it's now a re-call of the same
+  filename builder used for initial name generation, which works for either
+  naming standard.
+
 ## raw_to_processed()
 
 * Added `reclassify`/`classify_noise`/`classify_ground`/`normalize_intensity`

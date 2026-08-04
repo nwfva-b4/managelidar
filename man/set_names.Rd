@@ -2,32 +2,50 @@
 % Please edit documentation in R/set_names.R
 \name{set_names}
 \alias{set_names}
-\title{Set LASfile names according to ADV standard}
+\title{Set LASfile names according to a naming standard}
 \usage{
 set_names(
   path,
-  prefix = "3dm",
+  standard = c("adv", "nwfva"),
   region = NULL,
   from_csv = NULL,
-  copc = FALSE,
   epsg = 25832L,
+  product = NULL,
+  copc = FALSE,
+  campaign = NULL,
+  platform = "als",
   dry_run = FALSE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{path}{Character. Path to a LAS/LAZ/COPC file or a directory containing LASfiles.}
+\item{path}{Character vector. Paths to LAS/LAZ/COPC files, directories
+containing such files, or a VPC object already loaded in R.}
 
-\item{prefix}{Character. Naming prefix (default \code{"3dm"}).}
+\item{standard}{Character. Naming standard to check against: \code{"adv"}
+(default) or \code{"nwfva"}.}
 
-\item{region}{Character. Federal state abbreviation (optional). Automatically determined if \code{NULL}.}
+\item{region}{Optional character vector of two-letter region codes. If
+\code{NULL}, the region is automatically inferred from file bounding boxes.}
 
-\item{from_csv}{Character. Path to CSV file containing acquisition dates used for
-year correction in filenames where data does not contain valid GPS time.}
+\item{from_csv}{Optional path to CSV file for year determination. If provided,
+used to match acquisition dates for tiles without GPStime.}
 
-\item{copc}{Logical. Whether files are COPC (\code{.copc.laz}, default \code{FALSE}).}
+\item{epsg}{Integer. EPSG code used as fallback CRS when a file does not
+contain a valid CRS. Default is 25832 (ETRS89 / UTM zone 32N).}
 
-\item{epsg}{Integer. EPSG code for the coordinate reference system (default \code{25832L}).}
+\item{product}{Character. Data-product token embedded in the filename
+(the AdV standard calls this a "prefix"). Defaults to \code{"3dm"} for
+\code{standard = "adv"} and \code{"punktwolke"} for \code{standard = "nwfva"}.}
+
+\item{copc}{Logical. Whether the files are expected to be COPC (\code{.copc.laz}).
+Only relevant for \code{standard = "adv"}.}
+
+\item{campaign}{Character. Required when \code{standard = "nwfva"}: a single
+\code{surveyarea_contractor} label (e.g. \code{"solling_sgb4"}); cannot be derived
+from the data.}
+
+\item{platform}{Character. Platform token, only used for \code{standard = "nwfva"} (default \code{"als"}).}
 
 \item{dry_run}{Logical. If \code{TRUE}, only preview renaming without modifying files (default \code{FALSE}).}
 
@@ -37,14 +55,18 @@ year correction in filenames where data does not contain valid GPS time.}
 Invisibly returns a \code{data.frame} with columns \code{from} and \code{to} showing original and new filenames.
 }
 \description{
-\code{set_names()} renames LAS/LAZ/COPC files to match the \href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV naming standard}.
-}
-\details{
-Files are expected to follow the schema:
-\code{prefix_utmzone_minx_miny_tilesize_region_year.laz}
+\code{set_names()} renames LAS/LAZ/COPC files to match either the
+\href{https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/Standards-der-Geotopographie/binarywriterservlet?imgUid=6b510f6e-a708-d081-505a-20954cd298e1&uBasVariant=11111111-1111-1111-1111-111111111111}{ADV naming standard}
+or the NWFVA naming standard. See \code{\link[=check_names]{check_names()}} for the exact filename
+schemas.
 }
 \examples{
 f <- system.file("extdata", package = "managelidar")
 set_names(f, verbose = TRUE, dry_run = TRUE)
+
+set_names(f,
+  standard = "nwfva", region = "ni", campaign = "solling_sgb4",
+  dry_run = TRUE, verbose = TRUE
+)
 
 }

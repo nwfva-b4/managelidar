@@ -10,10 +10,25 @@
 #'   will be saved.
 #' @param epsg Integer. EPSG code for the coordinate reference system.
 #'   Default is 25832 (ETRS89 / UTM zone 32N).
+#' @param standard Character. Output naming/path convention: `"adv"` (default)
+#'   or `"nwfva"`. See [check_names()] for the exact filename schemas. For
+#'   `"nwfva"`, output files are additionally organised into a nested
+#'   `region/platform/year/campaign/product/` directory tree rather than
+#'   `out_dir`'s flat `pointcloud/`/`overviews/`/`metadata/` folders - see
+#'   **Output structure**. [process_nwfva()] wraps this standard with a
+#'   simpler, NWFVA-only call signature.
 #' @param region Character. Two-letter region code (federal states of Germany) for filename generation
 #'   (e.g., "ni"). If NULL (default) region is automatically inferred from file bounding boxes.
 #' @param from_csv Character. Path to CSV file containing acquisition dates used for
 #'   year correction in filenames where data does not contain valid GPS time.
+#' @param campaign Character. Required when `standard = "nwfva"`: a single
+#'   `surveyarea_contractor` label (e.g. `"solling_sgb4"`); cannot be derived
+#'   from the data.
+#' @param platform Character. Platform token, only used for `standard =
+#'   "nwfva"` (default `"als"`).
+#' @param product Character. Data-product token embedded in the filename
+#'   (the AdV standard calls this a "prefix"). Defaults to `"3dm"` for
+#'   `standard = "adv"` and `"punktwolke"` for `standard = "nwfva"`.
 #' @param workers Integer or `NULL`. Number of parallel workers.
 #'   If `NULL` (default), workers are set to half of available logical cores
 #'   when 20 or more files are detected, and sequential processing is used
@@ -38,7 +53,7 @@
 #'
 #' **Processing steps:**
 #' \itemize{
-#'   \item Generate AdV-compliant filenames
+#'   \item Generate standard-compliant filenames
 #'   \item Set CRS (if not present)
 #'   \item Reclassify (AdV/LGLN to ASPRS scheme) - `reclassify`
 #'   \item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
@@ -60,19 +75,30 @@
 #' individually (all default `TRUE`, i.e. current behavior).
 #'
 #' **Output structure:**
-#' The function creates the following directory structure in `out_dir` if not otherwise defined:
+#' For `standard = "adv"` (default), the function creates the following flat
+#' directory structure in `out_dir`:
 #' \describe{
 #'   \item{`pointcloud/`}{Processed LAZ files with embedded spatial index}
 #'   \item{`metadata/`}{Individual VPC files with additional metadata}
 #'   \item{`overviews/`}{WEBP overview images (max elevation)}
+#' }
+#' For `standard = "nwfva"`, outputs instead nest under `out_dir` as:
+#' \describe{
+#'   \item{`{region}/{platform}/{year}/{campaign}/{product}/daten/`}{Processed LAZ files}
+#'   \item{`{region}/{platform}/{year}/{campaign}/{product}/doku/vpc/`}{VPC metadata}
+#'   \item{`{region}/{platform}/{year}/{campaign}/{product}/doku/overview/`}{WEBP overview images}
+#' }
+#' For both standards, `log_dir` (independent of `out_dir`) gets the same flat structure:
+#' \describe{
 #'   \item{`logfiles/`}{Processing logs with timing and status information}
 #'   \item{`logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_in`}{Data summaries of input LASfiles}
 #'   \item{`logfiles/summaries_%Y-%m-%d_%H-%M-%S/files_out`}{Data summaries of output LASfiles}
 #' }
 #'
 #' **Filename generation:**
-#' Output files follow the German AdV naming convention:
-#' `3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz`
+#' Output files follow either the German AdV naming convention
+#' (`3dm_{zone}_{minx}_{miny}_{tilesize}_{region}_{year}.laz`) or the NWFVA
+#' convention (`{region}_{platform}_{year}_{campaign}_{product}_{x}_{y}.laz`).
 #'
 #' The year is extracted from median GPS time to avoid errors from individual
 #' erroneous points. Region can be specified or auto-detected from input filenames.
@@ -86,23 +112,44 @@
 #'
 #' @examples
 #' \donttest{
-#' # Basic usage with default settings
+#' # Basic usage with default settings (AdV naming convention)
 #' folder <- system.file("extdata", package = "managelidar")
 #' out_dir <- tempfile("processed_")
 #' raw_to_processed(path = folder, out_dir = out_dir)
+#'
+#' # NWFVA naming convention
+#' out_dir_nwfva <- tempfile("processed_nwfva_")
+#' raw_to_processed(
+#'   path = folder, out_dir = out_dir_nwfva,
+#'   standard = "nwfva", region = "ni", campaign = "solling_sgb4"
+#' )
 #' }
 raw_to_processed <- function(path,
                              out_dir = tempdir(),
                              log_dir = tempdir(),
                              epsg = 25832L,
+                             standard = c("adv", "nwfva"),
                              region = NULL,
                              from_csv = NULL,
+                             campaign = NULL,
+                             platform = "als",
+                             product = NULL,
                              workers = NULL,
                              reclassify = TRUE,
                              classify_noise = TRUE,
                              classify_ground = TRUE,
                              normalize_intensity = TRUE,
                              verbose = TRUE) {
+  standard <- match.arg(standard)
+
+  if (standard == "nwfva" && is.null(campaign)) {
+    cli::cli_abort(
+      "{.arg campaign} must be supplied when {.code standard = \"nwfva\"} (e.g. {.val solling_sgb4})."
+    )
+  }
+
+  product <- product %||% if (standard == "adv") "3dm" else "punktwolke"
+
   # Initialize processing log
   processing_start <- Sys.time()
 
@@ -125,9 +172,15 @@ raw_to_processed <- function(path,
   dir_summaries <- fs::dir_create(dir_logfiles, paste0("summaries_", format(processing_start, "%Y-%m-%d_%H-%M-%S")))
   dir_summary_original <- fs::dir_create(dir_summaries, "files_in")
   dir_summary_processed <- fs::dir_create(dir_summaries, "files_out")
-  dir_pointcloud <- fs::dir_create(out_dir, "pointcloud")
-  dir_overviews <- fs::dir_create(out_dir, "overviews")
-  dir_vpc <- fs::dir_create(out_dir, "metadata")
+
+  # For "adv", output paths never vary by file, so these are created once up
+  # front. For "nwfva", the path depends on each file's own region/year, so
+  # directories are instead created per-file inside raw_to_processed_per_file().
+  if (standard == "adv") {
+    dir_pointcloud <- fs::dir_create(out_dir, "pointcloud")
+    dir_overviews <- fs::dir_create(out_dir, "overviews")
+    dir_vpc <- fs::dir_create(out_dir, "metadata")
+  }
 
   # ------------------------------------------------------------------
   # Resolve input files
@@ -190,10 +243,29 @@ raw_to_processed <- function(path,
     # Get original filename (for summary_original)
     original_filename <- fs::path_ext_remove(fs::path_file(lasfile))
 
-    # Use check_names to get expected filename
-    filenames <- check_names(lasfile, prefix = "3dm", region = NULL, from_csv = from_csv, epsg = epsg, full.names = TRUE)
-    expected_filename <- fs::path_ext_remove(fs::path_file(filenames$name_should))
-    date_source <- filenames$date_source %||% NA_character_
+    # Resolve naming components (region/year/zone/extent) and build the
+    # expected filename from them, so the median-year correction below can
+    # simply re-call the same builder with an updated year instead of
+    # regex-splicing the assembled string.
+    vpc_in <- resolve_vpc(lasfile, out_file = NULL)
+    comp <- resolve_naming_components(vpc_in, region = region, from_csv = from_csv, epsg = epsg)
+    date_source <- comp$date_source[1] %||% NA_character_
+
+    build_filename <- function(year) {
+      if (standard == "adv") {
+        adv_filename(product, comp$zone, comp$minx, comp$miny, comp$tilesize, comp$region, year, comp$ext_suffix)
+      } else {
+        nwfva_filename(comp$region, platform, year, campaign, product, comp$minx * 1000L, comp$miny * 1000L, comp$ext_suffix)
+      }
+    }
+
+    expected_filename <- fs::path_ext_remove(build_filename(comp$year))
+
+    if (standard == "nwfva") {
+      dir_pointcloud <- fs::dir_create(nwfva_output_dir(out_dir, comp$region, platform, comp$year, campaign, product, "pointcloud"))
+      dir_overviews <- fs::dir_create(nwfva_output_dir(out_dir, comp$region, platform, comp$year, campaign, product, "overview"))
+      dir_vpc <- fs::dir_create(nwfva_output_dir(out_dir, comp$region, platform, comp$year, campaign, product, "vpc"))
+    }
 
     # Define output file path
     pointcloud_file <- fs::path(dir_pointcloud, fs::path_ext_set(expected_filename, ".laz"))
@@ -267,13 +339,29 @@ raw_to_processed <- function(path,
       date <- gps_epoch + summary_original$metrics$t_median + LAS_ADJUSTED_GPSTIME_OFFSET
       year_from_median <- format(date, "%Y")
 
-      # Replace year in expected filename
-      # Pattern: 3dm_32_547_5724_1_ni_YYYY.laz -> replace YYYY with year_from_median
-      new_filename <- sub("_([0-9]{4})$", paste0("_", year_from_median), expected_filename)
+      if (year_from_median != comp$year) {
+        stale_dirs <- if (standard == "nwfva") c(dir_pointcloud, dir_overviews, dir_vpc) else NULL
 
-      if (new_filename != expected_filename) {
-        generated_filename <- new_filename
+        comp$year <- year_from_median
+        generated_filename <- fs::path_ext_remove(build_filename(comp$year))
         date_source <- "gpstime_median"
+
+        if (standard == "nwfva") {
+          dir_pointcloud <- fs::dir_create(nwfva_output_dir(out_dir, comp$region, platform, comp$year, campaign, product, "pointcloud"))
+          dir_overviews <- fs::dir_create(nwfva_output_dir(out_dir, comp$region, platform, comp$year, campaign, product, "overview"))
+          dir_vpc <- fs::dir_create(nwfva_output_dir(out_dir, comp$region, platform, comp$year, campaign, product, "vpc"))
+
+          # the first-pass guess directory (based on first-point/header GPS
+          # time, before this median-GPS-time correction) is now never
+          # written to - prune it back up to (not including) region/platform
+          # while each level is actually empty. The stale pointcloud
+          # directory still holds this file's own .lock file at this point
+          # (only removed at function exit, registered above), so it won't
+          # be empty yet - retry once more at exit, after that deletion.
+          stale_stop_at <- fs::path(out_dir, comp$region, platform)
+          for (d in unique(stale_dirs)) prune_empty_dirs(d, stale_stop_at)
+          on.exit(for (d in unique(stale_dirs)) prune_empty_dirs(d, stale_stop_at), add = TRUE)
+        }
       }
     }
 
@@ -916,15 +1004,21 @@ raw_to_processed <- function(path,
         sf = as.character(utils::packageVersion("sf"))
       )
     ),
-    parameters = list(
-      out_dir = normalizePath(out_dir, winslash = "/", mustWork = FALSE),
-      epsg = epsg,
-      region = region,
-      from_csv = if (!is.null(from_csv)) normalizePath(from_csv, winslash = "/", mustWork = FALSE) else NULL,
-      reclassify = reclassify,
-      classify_noise = classify_noise,
-      classify_ground = classify_ground,
-      normalize_intensity = normalize_intensity
+    parameters = c(
+      list(
+        out_dir = normalizePath(out_dir, winslash = "/", mustWork = FALSE),
+        epsg = epsg,
+        standard = standard,
+        region = region
+      ),
+      if (standard == "nwfva") list(campaign = campaign, platform = platform, product = product),
+      list(
+        from_csv = if (!is.null(from_csv)) normalizePath(from_csv, winslash = "/", mustWork = FALSE) else NULL,
+        reclassify = reclassify,
+        classify_noise = classify_noise,
+        classify_ground = classify_ground,
+        normalize_intensity = normalize_intensity
+      )
     ),
     files = file_logs
   )

@@ -9,8 +9,12 @@ raw_to_processed(
   out_dir = tempdir(),
   log_dir = tempdir(),
   epsg = 25832L,
+  standard = c("adv", "nwfva"),
   region = NULL,
   from_csv = NULL,
+  campaign = NULL,
+  platform = "als",
+  product = NULL,
   workers = NULL,
   reclassify = TRUE,
   classify_noise = TRUE,
@@ -31,11 +35,29 @@ will be saved.}
 \item{epsg}{Integer. EPSG code for the coordinate reference system.
 Default is 25832 (ETRS89 / UTM zone 32N).}
 
+\item{standard}{Character. Output naming/path convention: \code{"adv"} (default)
+or \code{"nwfva"}. See \code{\link[=check_names]{check_names()}} for the exact filename schemas. For
+\code{"nwfva"}, output files are additionally organised into a nested
+\verb{region/platform/year/campaign/product/} directory tree rather than
+\code{out_dir}'s flat \verb{pointcloud/}/\verb{overviews/}/\verb{metadata/} folders - see
+\strong{Output structure}. \code{\link[=process_nwfva]{process_nwfva()}} wraps this standard with a
+simpler, NWFVA-only call signature.}
+
 \item{region}{Character. Two-letter region code (federal states of Germany) for filename generation
 (e.g., "ni"). If NULL (default) region is automatically inferred from file bounding boxes.}
 
 \item{from_csv}{Character. Path to CSV file containing acquisition dates used for
 year correction in filenames where data does not contain valid GPS time.}
+
+\item{campaign}{Character. Required when \code{standard = "nwfva"}: a single
+\code{surveyarea_contractor} label (e.g. \code{"solling_sgb4"}); cannot be derived
+from the data.}
+
+\item{platform}{Character. Platform token, only used for \code{standard = "nwfva"} (default \code{"als"}).}
+
+\item{product}{Character. Data-product token embedded in the filename
+(the AdV standard calls this a "prefix"). Defaults to \code{"3dm"} for
+\code{standard = "adv"} and \code{"punktwolke"} for \code{standard = "nwfva"}.}
 
 \item{workers}{Integer or \code{NULL}. Number of parallel workers.
 If \code{NULL} (default), workers are set to half of available logical cores
@@ -71,7 +93,7 @@ This function performs a comprehensive quality assurance pipeline:
 
 \strong{Processing steps:}
 \itemize{
-\item Generate AdV-compliant filenames
+\item Generate standard-compliant filenames
 \item Set CRS (if not present)
 \item Reclassify (AdV/LGLN to ASPRS scheme) - \code{reclassify}
 \item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
@@ -93,19 +115,30 @@ The four steps marked above are density-dependent and can be turned off
 individually (all default \code{TRUE}, i.e. current behavior).
 
 \strong{Output structure:}
-The function creates the following directory structure in \code{out_dir} if not otherwise defined:
+For \code{standard = "adv"} (default), the function creates the following flat
+directory structure in \code{out_dir}:
 \describe{
 \item{\verb{pointcloud/}}{Processed LAZ files with embedded spatial index}
 \item{\verb{metadata/}}{Individual VPC files with additional metadata}
 \item{\verb{overviews/}}{WEBP overview images (max elevation)}
+}
+For \code{standard = "nwfva"}, outputs instead nest under \code{out_dir} as:
+\describe{
+\item{\verb{\{region\}/\{platform\}/\{year\}/\{campaign\}/\{product\}/daten/}}{Processed LAZ files}
+\item{\verb{\{region\}/\{platform\}/\{year\}/\{campaign\}/\{product\}/doku/vpc/}}{VPC metadata}
+\item{\verb{\{region\}/\{platform\}/\{year\}/\{campaign\}/\{product\}/doku/overview/}}{WEBP overview images}
+}
+For both standards, \code{log_dir} (independent of \code{out_dir}) gets the same flat structure:
+\describe{
 \item{\verb{logfiles/}}{Processing logs with timing and status information}
 \item{\verb{logfiles/summaries_\%Y-\%m-\%d_\%H-\%M-\%S/files_in}}{Data summaries of input LASfiles}
 \item{\verb{logfiles/summaries_\%Y-\%m-\%d_\%H-\%M-\%S/files_out}}{Data summaries of output LASfiles}
 }
 
 \strong{Filename generation:}
-Output files follow the German AdV naming convention:
-\verb{3dm_\{zone\}_\{minx\}_\{miny\}_\{tilesize\}_\{region\}_\{year\}.laz}
+Output files follow either the German AdV naming convention
+(\verb{3dm_\{zone\}_\{minx\}_\{miny\}_\{tilesize\}_\{region\}_\{year\}.laz}) or the NWFVA
+convention (\verb{\{region\}_\{platform\}_\{year\}_\{campaign\}_\{product\}_\{x\}_\{y\}.laz}).
 
 The year is extracted from median GPS time to avoid errors from individual
 erroneous points. Region can be specified or auto-detected from input filenames.
@@ -117,9 +150,16 @@ steps, timing, and any warnings or errors.
 }
 \examples{
 \donttest{
-# Basic usage with default settings
+# Basic usage with default settings (AdV naming convention)
 folder <- system.file("extdata", package = "managelidar")
 out_dir <- tempfile("processed_")
 raw_to_processed(path = folder, out_dir = out_dir)
+
+# NWFVA naming convention
+out_dir_nwfva <- tempfile("processed_nwfva_")
+raw_to_processed(
+  path = folder, out_dir = out_dir_nwfva,
+  standard = "nwfva", region = "ni", campaign = "solling_sgb4"
+)
 }
 }
