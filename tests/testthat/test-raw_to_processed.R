@@ -41,6 +41,34 @@ test_that("raw_to_processed() runs without the historical function/contract bugs
   expect_true(length(overview_files) <= length(sample_las_files()))
 })
 
+test_that("raw_to_processed() succeeds deterministically with density-dependent stages disabled", {
+  # the bundled sample data is too sparse/small to reliably survive noise and
+  # ground classification (both density-dependent - see the first test in
+  # this file), which is why that test can only assert ">= 1" overview
+  # rather than an exact count. Disabling those stages here removes that
+  # flakiness entirely, letting the rest of the pipeline (naming, VPC,
+  # overview generation, logging) be verified with an exact, reliable count.
+  out_dir <- tempfile("raw_to_processed_notoggle_")
+  dir.create(out_dir)
+
+  results <- suppressMessages(suppressWarnings(
+    raw_to_processed(
+      sample_las_files(), out_dir = out_dir, log_dir = out_dir, region = "ni",
+      classify_noise = FALSE, classify_ground = FALSE,
+      verbose = FALSE, workers = 1
+    )
+  ))
+
+  expect_equal(sum(!vapply(results, is.null, logical(1))), length(sample_las_files()))
+
+  pointcloud_files <- list.files(file.path(out_dir, "pointcloud"))
+  overview_files <- list.files(file.path(out_dir, "overviews"))
+  vpc_files <- list.files(file.path(out_dir, "metadata"))
+  expect_equal(length(pointcloud_files), length(sample_las_files()))
+  expect_equal(length(overview_files), length(sample_las_files()))
+  expect_equal(length(vpc_files), length(sample_las_files()))
+})
+
 test_that("read_log_entries()/processed_inputs_from_logs() correctly identify already-processed inputs", {
   log_dir <- tempfile("logs_")
   dir.create(log_dir)

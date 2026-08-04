@@ -19,6 +19,16 @@
 #'   when 20 or more files are detected, and sequential processing is used
 #'   otherwise. Set to `1` to force sequential processing regardless of file
 #'   count. Set to a positive integer to force that number of workers.
+#' @param reclassify Logical. Remap AdV/LGLN classification schemes to ASPRS
+#'   (default `TRUE`). If `FALSE`, output classes may stay non-ASPRS, and
+#'   ground classification (below) becomes slightly less precise. See
+#'   **Processing steps**.
+#' @param classify_noise Logical. Classify noise points (default `TRUE`).
+#'   See **Processing steps**.
+#' @param classify_ground Logical. Classify ground points (default `TRUE`).
+#'   Density-dependent like `classify_noise`. See **Processing steps**.
+#' @param normalize_intensity Logical. Normalize intensity range (default
+#'   `TRUE`). See **Processing steps**.
 #' @param verbose Logical. Print progress messages. Default is TRUE.
 #'
 #' @return Invisibly returns a list of output file paths (NULL for failed files).
@@ -30,14 +40,14 @@
 #' \itemize{
 #'   \item Generate AdV-compliant filenames
 #'   \item Set CRS (if not present)
-#'   \item Reclassify (AdV/LGLN to ASPRS scheme)
+#'   \item Reclassify (AdV/LGLN to ASPRS scheme) - `reclassify`
 #'   \item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
 #'   \item Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)
 #'   \item Drop unused attributes
 #'   \item Correct overlap points
-#'   \item Classify noise points
-#'   \item Classify ground points
-#'   \item Normalize intensity range
+#'   \item Classify noise points - `classify_noise`
+#'   \item Classify ground points - `classify_ground`
+#'   \item Normalize intensity range - `normalize_intensity`
 #'   \item Sort (optimize) point cloud
 #'   \item Append spatial index
 #'   \item Create overview image
@@ -45,6 +55,9 @@
 #'   \item Create point cloud summaries
 #'   \item Create log file
 #' }
+#'
+#' The four steps marked above are density-dependent and can be turned off
+#' individually (all default `TRUE`, i.e. current behavior).
 #'
 #' **Output structure:**
 #' The function creates the following directory structure in `out_dir` if not otherwise defined:
@@ -85,6 +98,10 @@ raw_to_processed <- function(path,
                              region = NULL,
                              from_csv = NULL,
                              workers = NULL,
+                             reclassify = TRUE,
+                             classify_noise = TRUE,
+                             classify_ground = TRUE,
+                             normalize_intensity = TRUE,
                              verbose = TRUE) {
   # Initialize processing log
   processing_start <- Sys.time()
@@ -322,47 +339,49 @@ raw_to_processed <- function(path,
         lasR::add_extrabytes("uchar", "Overlap", "Overlap flag")
     }
 
-    if (classification_likely_legacy) {
-      pipeline <- pipeline +
-        lasR::edit_attribute(filter = "Classification %in% 20 22 23 25 26 27", attribute = "Overlap", value = TRUE) + # Overlap points -> Overlap flag
-        lasR::edit_attribute(filter = "Classification %in% 20 22 23 25 26 27", attribute = "Classification", value = 1) + # Overlap points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 11", attribute = "Synthetic", value = TRUE) + # Synthetic water points -> Synthetic_flag
-        lasR::edit_attribute(filter = "Classification == 8", attribute = "Classification", value = 9) + # 	Measured water points -> Water
-        lasR::edit_attribute(filter = "Classification == 11", attribute = "Classification", value = 9) + # Synthetic water points -> Water
-        lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 20) + # Subsurface/basement points -> Ignored Ground
-        lasR::edit_attribute(filter = "Classification == 13", attribute = "Classification", value = 1) + # Non-ground points, DSM-relevant -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 15", attribute = "Classification", value = 22) + # Other/unclassified points -> Temporal Exclusion
-        lasR::edit_attribute(filter = "Classification > 27", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
-    } else if (classification_likely_adv) {
-      pipeline <- pipeline +
-        lasR::edit_attribute(filter = "Classification == 12", attribute = "Overlap", value = TRUE) + # Overlap points -> Overlap flag
-        lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 1) + # Overlap points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 8", attribute = "Synthetic", value = TRUE) + # Synthetic water points -> Synthetic_flag
-        lasR::edit_attribute(filter = "Classification == 8", attribute = "Classification", value = 9) + # Synthetic water points -> Water
-        lasR::edit_attribute(filter = "Classification == 19", attribute = "Classification", value = 5) + # General vegetation -> High Vegetation (could be correctly assigned with HAG)
-        lasR::edit_attribute(filter = "Classification == 20", attribute = "Classification", value = 1) + # Non-ground points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 21", attribute = "Classification", value = 2) + # Ground excluding basements -> Ground
-        lasR::edit_attribute(filter = "Classification == 22", attribute = "Classification", value = 2) + # Verified ground points -> Ground
-        lasR::edit_attribute(filter = "Classification == 23", attribute = "Classification", value = 1) + # Power infrastructure points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 24", attribute = "Classification", value = 20) + # Basement/light well points -> Ignored Ground
-        lasR::edit_attribute(filter = "Classification == 25", attribute = "Classification", value = 1) + # Hydraulic structure points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 26", attribute = "Classification", value = 1) + # Bridge foundation points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 27", attribute = "Classification", value = 6) + # General structure points -> Building
-        lasR::edit_attribute(filter = "Classification == 28", attribute = "Classification", value = 6) + # Building installations -> Building
-        lasR::edit_attribute(filter = "Classification == 29", attribute = "Synthetic", value = TRUE) + # Synthetic points -> Synthetic_flag
-        lasR::edit_attribute(filter = "Classification == 29", attribute = "Classification", value = 1) + # Synthetic points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 30", attribute = "Synthetic", value = TRUE) + # Synthetic surface points -> Synthetic_flag
-        lasR::edit_attribute(filter = "Classification == 30", attribute = "Classification", value = 1) + # Synthetic surface points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 31", attribute = "Classification", value = 1) + # Filled points from ALS -> Unclassified
-        lasR::edit_attribute(filter = "Classification > 31", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
-    }
-    # if classification scheme seems not AdV or legacy LGLN it is likely unclassified or ASPRS already
-    else {
-      pipeline <- pipeline +
-        lasR::edit_attribute(filter = "Classification == 12", attribute = "Overlap", value = TRUE) + # Overlap points -> Overlap flag
-        lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 1) + # Overlap points -> Unclassified
-        lasR::edit_attribute(filter = "Classification == 64", attribute = "Classification", value = 18) + # high noise: 64 -> 18  one campaign (Solling) high noise was classified as 64
-        lasR::edit_attribute(filter = "Classification > 22", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+    if (reclassify) {
+      if (classification_likely_legacy) {
+        pipeline <- pipeline +
+          lasR::edit_attribute(filter = "Classification %in% 20 22 23 25 26 27", attribute = "Overlap", value = TRUE) + # Overlap points -> Overlap flag
+          lasR::edit_attribute(filter = "Classification %in% 20 22 23 25 26 27", attribute = "Classification", value = 1) + # Overlap points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 11", attribute = "Synthetic", value = TRUE) + # Synthetic water points -> Synthetic_flag
+          lasR::edit_attribute(filter = "Classification == 8", attribute = "Classification", value = 9) + # 	Measured water points -> Water
+          lasR::edit_attribute(filter = "Classification == 11", attribute = "Classification", value = 9) + # Synthetic water points -> Water
+          lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 20) + # Subsurface/basement points -> Ignored Ground
+          lasR::edit_attribute(filter = "Classification == 13", attribute = "Classification", value = 1) + # Non-ground points, DSM-relevant -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 15", attribute = "Classification", value = 22) + # Other/unclassified points -> Temporal Exclusion
+          lasR::edit_attribute(filter = "Classification > 27", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+      } else if (classification_likely_adv) {
+        pipeline <- pipeline +
+          lasR::edit_attribute(filter = "Classification == 12", attribute = "Overlap", value = TRUE) + # Overlap points -> Overlap flag
+          lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 1) + # Overlap points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 8", attribute = "Synthetic", value = TRUE) + # Synthetic water points -> Synthetic_flag
+          lasR::edit_attribute(filter = "Classification == 8", attribute = "Classification", value = 9) + # Synthetic water points -> Water
+          lasR::edit_attribute(filter = "Classification == 19", attribute = "Classification", value = 5) + # General vegetation -> High Vegetation (could be correctly assigned with HAG)
+          lasR::edit_attribute(filter = "Classification == 20", attribute = "Classification", value = 1) + # Non-ground points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 21", attribute = "Classification", value = 2) + # Ground excluding basements -> Ground
+          lasR::edit_attribute(filter = "Classification == 22", attribute = "Classification", value = 2) + # Verified ground points -> Ground
+          lasR::edit_attribute(filter = "Classification == 23", attribute = "Classification", value = 1) + # Power infrastructure points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 24", attribute = "Classification", value = 20) + # Basement/light well points -> Ignored Ground
+          lasR::edit_attribute(filter = "Classification == 25", attribute = "Classification", value = 1) + # Hydraulic structure points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 26", attribute = "Classification", value = 1) + # Bridge foundation points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 27", attribute = "Classification", value = 6) + # General structure points -> Building
+          lasR::edit_attribute(filter = "Classification == 28", attribute = "Classification", value = 6) + # Building installations -> Building
+          lasR::edit_attribute(filter = "Classification == 29", attribute = "Synthetic", value = TRUE) + # Synthetic points -> Synthetic_flag
+          lasR::edit_attribute(filter = "Classification == 29", attribute = "Classification", value = 1) + # Synthetic points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 30", attribute = "Synthetic", value = TRUE) + # Synthetic surface points -> Synthetic_flag
+          lasR::edit_attribute(filter = "Classification == 30", attribute = "Classification", value = 1) + # Synthetic surface points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 31", attribute = "Classification", value = 1) + # Filled points from ALS -> Unclassified
+          lasR::edit_attribute(filter = "Classification > 31", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+      }
+      # if classification scheme seems not AdV or legacy LGLN it is likely unclassified or ASPRS already
+      else {
+        pipeline <- pipeline +
+          lasR::edit_attribute(filter = "Classification == 12", attribute = "Overlap", value = TRUE) + # Overlap points -> Overlap flag
+          lasR::edit_attribute(filter = "Classification == 12", attribute = "Classification", value = 1) + # Overlap points -> Unclassified
+          lasR::edit_attribute(filter = "Classification == 64", attribute = "Classification", value = 18) + # high noise: 64 -> 18  one campaign (Solling) high noise was classified as 64
+          lasR::edit_attribute(filter = "Classification > 22", attribute = "Classification", value = 1) # all other undefined classes -> Unclassified
+      }
     }
 
 
@@ -439,12 +458,14 @@ raw_to_processed <- function(path,
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
     # cascading classification with ivf and multiple voxel sizes performed best in a small benchmark
     # https://gist.github.com/wiesehahn/59fd9c7037213cb058187b805912c5d5
-    classify_noise <-
-      lasR::classify_with_ivf(res = 2, n = 2, class = 7, filter = lasR::drop_noise()) + # catch individual outliers with small voxels
-      lasR::classify_with_ivf(res = 5, n = 10, class = 7, filter = lasR::drop_noise()) + # catch small groups of outliers
-      lasR::classify_with_ivf(res = 10, n = 40, class = 7, filter = lasR::drop_noise()) # catch larger groups of outliers
+    if (classify_noise) {
+      noise_classification <-
+        lasR::classify_with_ivf(res = 2, n = 2, class = 7, filter = lasR::drop_noise()) + # catch individual outliers with small voxels
+        lasR::classify_with_ivf(res = 5, n = 10, class = 7, filter = lasR::drop_noise()) + # catch small groups of outliers
+        lasR::classify_with_ivf(res = 10, n = 40, class = 7, filter = lasR::drop_noise()) # catch larger groups of outliers
 
-    pipeline <- pipeline + classify_noise
+      pipeline <- pipeline + noise_classification
+    }
 
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -452,26 +473,28 @@ raw_to_processed <- function(path,
     # if point cloud does not contain any ground points (class 2) classify ground for all points
     # otherwise classify ground among overlap points
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    no_groundpoints <- !any(names(summary_original$npoints_per_class) == "2")
+    if (classify_ground) {
+      no_groundpoints <- !any(names(summary_original$npoints_per_class) == "2")
 
-    if (no_groundpoints) {
-      classify_ground <- lasR::classify_with_ptd(filter = "Classification %out% 7 18")
+      if (no_groundpoints) {
+        ground_classification <- lasR::classify_with_ptd(filter = "Classification %out% 7 18")
 
-      pipeline <- pipeline + classify_ground
-    } else if (
-      # legacy classification and overlap points (20, 22, 23, 25, 26, 27) OR not legacy and overlap points (12)
-      (classification_likely_legacy && (any(c(20, 22, 23, 25, 26, 27) %in% names(class_counts_original)))) ||
-        (!classification_likely_legacy && (12 %in% names(class_counts_original)))
-    ) {
-      # we want to apply ground classification on all existing ground points and all overlap points (which are not noise)
-      # since there is no option for OR filter (we can only filter for points which are Class 2 AND Overlap) we make use of temporary UserData
-      classify_ground <- lasR::classify_with_ptd(filter = c("UserData == 99", "Classification %out% 7 18"))
+        pipeline <- pipeline + ground_classification
+      } else if (
+        # legacy classification and overlap points (20, 22, 23, 25, 26, 27) OR not legacy and overlap points (12)
+        (classification_likely_legacy && (any(c(20, 22, 23, 25, 26, 27) %in% names(class_counts_original)))) ||
+          (!classification_likely_legacy && (12 %in% names(class_counts_original)))
+      ) {
+        # we want to apply ground classification on all existing ground points and all overlap points (which are not noise)
+        # since there is no option for OR filter (we can only filter for points which are Class 2 AND Overlap) we make use of temporary UserData
+        ground_classification <- lasR::classify_with_ptd(filter = c("UserData == 99", "Classification %out% 7 18"))
 
-      pipeline <- pipeline +
-        lasR::edit_attribute(filter = c("Overlap == 1"), attribute = "UserData", value = 99) +
-        lasR::edit_attribute(filter = c("Classification == 2"), attribute = "UserData", value = 99) +
-        classify_ground +
-        lasR::edit_attribute(filter = c("UserData == 99"), attribute = "UserData", value = 0)
+        pipeline <- pipeline +
+          lasR::edit_attribute(filter = c("Overlap == 1"), attribute = "UserData", value = 99) +
+          lasR::edit_attribute(filter = c("Classification == 2"), attribute = "UserData", value = 99) +
+          ground_classification +
+          lasR::edit_attribute(filter = c("UserData == 99"), attribute = "UserData", value = 0)
+      }
     }
 
 
@@ -479,24 +502,26 @@ raw_to_processed <- function(path,
     # normalize Intensity range
     # intensities are clipped to 0.025-0.975 percentile range and stretched to values of 0-65535
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
-    normalize_intensity_range <- function(data) {
-      lower_pct <- 0.025
-      upper_pct <- 0.975
-      min_val <- 0
-      max_val <- 2^16 - 1
+    if (normalize_intensity) {
+      normalize_intensity_range <- function(data) {
+        lower_pct <- 0.025
+        upper_pct <- 0.975
+        min_val <- 0
+        max_val <- 2^16 - 1
 
-      i <- data$Intensity
-      lower <- stats::quantile(i, probs = lower_pct, na.rm = TRUE)
-      upper <- stats::quantile(i, probs = upper_pct, na.rm = TRUE)
-      i <- (i - lower) / (upper - lower) * (max_val - min_val) + min_val
-      i[i < min_val] <- min_val
-      i[i > max_val] <- max_val
-      data$Intensity <- as.integer(round(i))
-      return(data)
+        i <- data$Intensity
+        lower <- stats::quantile(i, probs = lower_pct, na.rm = TRUE)
+        upper <- stats::quantile(i, probs = upper_pct, na.rm = TRUE)
+        i <- (i - lower) / (upper - lower) * (max_val - min_val) + min_val
+        i[i < min_val] <- min_val
+        i[i > max_val] <- max_val
+        data$Intensity <- as.integer(round(i))
+        return(data)
+      }
+
+      intensity_range_normalization <- lasR::callback(normalize_intensity_range, expose = "i")
+      pipeline <- pipeline + intensity_range_normalization
     }
-
-    intensity_range_normalization <- lasR::callback(normalize_intensity_range, expose = "i")
-    pipeline <- pipeline + intensity_range_normalization
 
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -895,7 +920,11 @@ raw_to_processed <- function(path,
       out_dir = normalizePath(out_dir, winslash = "/", mustWork = FALSE),
       epsg = epsg,
       region = region,
-      from_csv = if (!is.null(from_csv)) normalizePath(from_csv, winslash = "/", mustWork = FALSE) else NULL
+      from_csv = if (!is.null(from_csv)) normalizePath(from_csv, winslash = "/", mustWork = FALSE) else NULL,
+      reclassify = reclassify,
+      classify_noise = classify_noise,
+      classify_ground = classify_ground,
+      normalize_intensity = normalize_intensity
     ),
     files = file_logs
   )

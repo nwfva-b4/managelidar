@@ -12,6 +12,10 @@ raw_to_processed(
   region = NULL,
   from_csv = NULL,
   workers = NULL,
+  reclassify = TRUE,
+  classify_noise = TRUE,
+  classify_ground = TRUE,
+  normalize_intensity = TRUE,
   verbose = TRUE
 )
 }
@@ -39,6 +43,20 @@ when 20 or more files are detected, and sequential processing is used
 otherwise. Set to \code{1} to force sequential processing regardless of file
 count. Set to a positive integer to force that number of workers.}
 
+\item{reclassify}{Logical. Remap AdV/LGLN classification schemes to ASPRS
+(default \code{TRUE}). If \code{FALSE}, output classes may stay non-ASPRS, and
+ground classification (below) becomes slightly less precise. See
+\strong{Processing steps}.}
+
+\item{classify_noise}{Logical. Classify noise points (default \code{TRUE}).
+See \strong{Processing steps}.}
+
+\item{classify_ground}{Logical. Classify ground points (default \code{TRUE}).
+Density-dependent like \code{classify_noise}. See \strong{Processing steps}.}
+
+\item{normalize_intensity}{Logical. Normalize intensity range (default
+\code{TRUE}). See \strong{Processing steps}.}
+
 \item{verbose}{Logical. Print progress messages. Default is TRUE.}
 }
 \value{
@@ -55,14 +73,14 @@ This function performs a comprehensive quality assurance pipeline:
 \itemize{
 \item Generate AdV-compliant filenames
 \item Set CRS (if not present)
-\item Reclassify (AdV/LGLN to ASPRS scheme)
+\item Reclassify (AdV/LGLN to ASPRS scheme) - \code{reclassify}
 \item Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
 \item Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)
 \item Drop unused attributes
 \item Correct overlap points
-\item Classify noise points
-\item Classify ground points
-\item Normalize intensity range
+\item Classify noise points - \code{classify_noise}
+\item Classify ground points - \code{classify_ground}
+\item Normalize intensity range - \code{normalize_intensity}
 \item Sort (optimize) point cloud
 \item Append spatial index
 \item Create overview image
@@ -70,6 +88,9 @@ This function performs a comprehensive quality assurance pipeline:
 \item Create point cloud summaries
 \item Create log file
 }
+
+The four steps marked above are density-dependent and can be turned off
+individually (all default \code{TRUE}, i.e. current behavior).
 
 \strong{Output structure:}
 The function creates the following directory structure in \code{out_dir} if not otherwise defined:
