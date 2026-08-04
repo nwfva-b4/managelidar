@@ -18,6 +18,10 @@ raw_to_processed(
   platform = "als",
   product = NULL,
   workers = NULL,
+  reclassify = TRUE,
+  classify_noise = TRUE,
+  classify_ground = TRUE,
+  normalize_intensity = TRUE,
   verbose = TRUE
 )
 ```
@@ -92,6 +96,28 @@ raw_to_processed(
   to `1` to force sequential processing regardless of file count. Set to
   a positive integer to force that number of workers.
 
+- reclassify:
+
+  Logical. Remap AdV/LGLN classification schemes to ASPRS (default
+  `TRUE`). If `FALSE`, output classes may stay non-ASPRS, and ground
+  classification (below) becomes slightly less precise. See **Processing
+  steps**.
+
+- classify_noise:
+
+  Logical. Classify noise points (default `TRUE`). See **Processing
+  steps**.
+
+- classify_ground:
+
+  Logical. Classify ground points (default `TRUE`). Density-dependent
+  like `classify_noise`. See **Processing steps**.
+
+- normalize_intensity:
+
+  Logical. Normalize intensity range (default `TRUE`). See **Processing
+  steps**.
+
 - verbose:
 
   Logical. Print progress messages. Default is TRUE.
@@ -110,7 +136,7 @@ This function performs a comprehensive quality assurance pipeline:
 
 - Set CRS (if not present)
 
-- Reclassify (AdV/LGLN to ASPRS scheme)
+- Reclassify (AdV/LGLN to ASPRS scheme) - `reclassify`
 
 - Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)
 
@@ -120,11 +146,11 @@ This function performs a comprehensive quality assurance pipeline:
 
 - Correct overlap points
 
-- Classify noise points
+- Classify noise points - `classify_noise`
 
-- Classify ground points
+- Classify ground points - `classify_ground`
 
-- Normalize intensity range
+- Normalize intensity range - `normalize_intensity`
 
 - Sort (optimize) point cloud
 
@@ -137,6 +163,9 @@ This function performs a comprehensive quality assurance pipeline:
 - Create point cloud summaries
 
 - Create log file
+
+The four steps marked above are density-dependent and can be turned off
+individually (all default `TRUE`, i.e. current behavior).
 
 **Output structure:** For `standard = "adv"` (default), the function
 creates the following flat directory structure in `out_dir`:
@@ -205,18 +234,18 @@ folder <- system.file("extdata", package = "managelidar")
 out_dir <- tempfile("processed_")
 raw_to_processed(path = folder, out_dir = out_dir)
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/Rtmpatnzrr/logfiles/processing_log_2026-08-04_06-46-44.json
+#> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-42.json
 
 # NWFVA naming convention
 out_dir_nwfva <- tempfile("processed_nwfva_")
@@ -225,17 +254,17 @@ raw_to_processed(
   standard = "nwfva", region = "ni", campaign = "solling_sgb4"
 )
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/Rtmpatnzrr/logfiles/processing_log_2026-08-04_06-46-46.json
+#> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-44.json
 # }
 ```

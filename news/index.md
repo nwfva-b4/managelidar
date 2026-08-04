@@ -28,6 +28,17 @@
   re-call of the same filename builder used for initial name generation,
   which works for either naming standard.
 
+### raw_to_processed()
+
+- Added
+  `reclassify`/`classify_noise`/`classify_ground`/`normalize_intensity`
+  parameters (all default `TRUE`, i.e. unchanged behavior) so each of
+  these density-dependent pipeline stages can be individually disabled.
+  Mainly useful for testing against sparse or very small point clouds,
+  where noise and ground classification can otherwise classify most or
+  all points as noise, breaking overview generation (which excludes
+  noise points).
+
 ## managelidar 0.1.7
 
 ### STAC subsystem

@@ -176,12 +176,51 @@ supported.</p>
 </td>
 </tr>
 <tr class="even">
+<td><code>reclassify</code></td>
+<td><code>TRUE</code></td>
+<td>Remap AdV/LGLN classification schemes to ASPRS</td>
+</tr>
+<tr class="odd">
+<td><code>classify_noise</code></td>
+<td><code>TRUE</code></td>
+<td>Classify noise points</td>
+</tr>
+<tr class="even">
+<td><code>classify_ground</code></td>
+<td><code>TRUE</code></td>
+<td>Classify ground points</td>
+</tr>
+<tr class="odd">
+<td><code>normalize_intensity</code></td>
+<td><code>TRUE</code></td>
+<td>Normalize intensity range</td>
+</tr>
+<tr class="even">
 <td><code>verbose</code></td>
 <td><code>TRUE</code></td>
 <td>Print progress messages</td>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section level2">
+<h2 id="density-dependent-stages">Density-dependent stages<a class="anchor" aria-label="anchor" href="#density-dependent-stages"></a>
+</h2>
+<p><code>reclassify</code>, <code>classify_noise</code>,
+<code>classify_ground</code>, and <code>normalize_intensity</code> can
+each be turned off individually. <code>classify_noise</code> and
+<code>classify_ground</code> in particular are density-dependent: on
+sparse or very small point clouds they can classify most or all points
+as noise, which then breaks overview generation (it excludes noise
+points from the rasterized CHM). This is mainly useful when testing
+against such data:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
+<span>  path <span class="op">=</span> <span class="st">"path/to/sparse/test/data/"</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span>,</span>
+<span>  classify_noise <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  classify_ground <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="output-structure">Output structure<a class="anchor" aria-label="anchor" href="#output-structure"></a>
@@ -315,7 +354,7 @@ is considered invalid if it is missing (<code>0</code>), unrecognised
 <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">sf::st_crs()</a></code>. When an invalid CRS is detected,
 <code><a href="https://rdrr.io/pkg/lasR/man/set_crs.html" class="external-link">lasR::set_crs()</a></code> is prepended to the pipeline using the
 <code>epsg</code> fallback.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Files from a campaign stored without CRS — set explicitly (default)</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
 <span>  path <span class="op">=</span> <span class="st">"path/to/raw/"</span>,</span>
@@ -350,7 +389,7 @@ only undefined classes above 22 are collapsed to unclassified (1)</li>
 for 20 or more, using half of available logical CPU cores by default.
 The number of workers is always capped at half the available cores to
 leave headroom for memory and system processes.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Force sequential processing regardless of file count</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"path/to/raw/"</span>, out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span>, workers <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span></span>
@@ -372,7 +411,7 @@ recorded in the log without affecting other files.</p>
 were already processed successfully. This means interrupted runs can be
 resumed simply by calling the function again with the same arguments —
 only failed or unprocessed files will be re-attempted.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First run — processes all 50 files; 3 fail</span></span>
 <span><span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">files</span>, out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span><span class="op">)</span></span>
 <span></span>
@@ -414,23 +453,23 @@ directories for whichever <code>standard</code> was used - see
 log records the function call, package and dependency versions, all
 parameters, and a per-file entry with status, duration, and any error
 messages.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="dt">"processing"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"timestamp_start"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">123.4</span> <span class="fu">},</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="dt">"parameters"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"out_dir"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"epsg"</span><span class="fu">:</span> <span class="dv">25832</span> <span class="fu">},</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="dt">"files"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="fu">{</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>      <span class="dt">"input"</span><span class="fu">:</span> <span class="st">"path/to/raw/tile.laz"</span><span class="fu">,</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>      <span class="dt">"output"</span><span class="fu">:</span> <span class="st">"path/to/output/pointcloud/3dm_32_547_5724_1_ni_2023.laz"</span><span class="fu">,</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>      <span class="dt">"status"</span><span class="fu">:</span> <span class="st">"success"</span><span class="fu">,</span></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>      <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">45.2</span></span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="dt">"summary"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    <span class="dt">"files_total"</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">,</span></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    <span class="dt">"files_processed"</span><span class="fu">:</span> <span class="dv">19</span><span class="fu">,</span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    <span class="dt">"files_failed"</span><span class="fu">:</span> <span class="dv">1</span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="dt">"processing"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"timestamp_start"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">123.4</span> <span class="fu">},</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="dt">"parameters"</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">"out_dir"</span><span class="fu">:</span> <span class="st">"..."</span><span class="fu">,</span> <span class="dt">"epsg"</span><span class="fu">:</span> <span class="dv">25832</span> <span class="fu">},</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="dt">"files"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>      <span class="dt">"input"</span><span class="fu">:</span> <span class="st">"path/to/raw/tile.laz"</span><span class="fu">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>      <span class="dt">"output"</span><span class="fu">:</span> <span class="st">"path/to/output/pointcloud/3dm_32_547_5724_1_ni_2023.laz"</span><span class="fu">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>      <span class="dt">"status"</span><span class="fu">:</span> <span class="st">"success"</span><span class="fu">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>      <span class="dt">"duration_seconds"</span><span class="fu">:</span> <span class="fl">45.2</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>  <span class="dt">"summary"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a>    <span class="dt">"files_total"</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">,</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>    <span class="dt">"files_processed"</span><span class="fu">:</span> <span class="dv">19</span><span class="fu">,</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a>    <span class="dt">"files_failed"</span><span class="fu">:</span> <span class="dv">1</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>Possible status values:</p>
 <table class="table">
 <colgroup>
@@ -471,7 +510,7 @@ messages.</p>
 <p><code><a href="../reference/raw_to_processed.html">raw_to_processed()</a></code> returns a list of output file paths
 (one per input file) invisibly. Failed files return <code>NULL</code> in
 the corresponding position.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/raw_to_processed.html">raw_to_processed</a></span><span class="op">(</span></span>
 <span>  path    <span class="op">=</span> <span class="st">"path/to/raw/"</span>,</span>
 <span>  out_dir <span class="op">=</span> <span class="st">"path/to/output/"</span></span>

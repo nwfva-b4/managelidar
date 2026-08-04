@@ -49,6 +49,10 @@
 <li>Fixed a bug where <code><a href="../reference/raw_to_processed.html">raw_to_processed()</a></code>’s own <code>region</code> parameter was never forwarded to filename generation (hardcoded to <code>NULL</code>), so a user-supplied <code>region</code> silently had no effect on output filenames.</li>
 <li>The AdV-specific year-correction step (rewriting the filename’s year token after computing it from median GPS time) previously used a regex assuming the year was the filename’s trailing token; it’s now a re-call of the same filename builder used for initial name generation, which works for either naming standard.</li>
 </ul></div>
+<div class="section level3">
+<h3 id="raw_to_processed-0-1-8">raw_to_processed()<a class="anchor" aria-label="anchor" href="#raw_to_processed-0-1-8"></a></h3>
+<ul><li>Added <code>reclassify</code>/<code>classify_noise</code>/<code>classify_ground</code>/<code>normalize_intensity</code> parameters (all default <code>TRUE</code>, i.e. unchanged behavior) so each of these density-dependent pipeline stages can be individually disabled. Mainly useful for testing against sparse or very small point clouds, where noise and ground classification can otherwise classify most or all points as noise, breaking overview generation (which excludes noise points).</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.7" id="managelidar-017">managelidar 0.1.7<a class="anchor" aria-label="anchor" href="#managelidar-017"></a></h2>

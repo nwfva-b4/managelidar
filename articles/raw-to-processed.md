@@ -48,7 +48,31 @@ paths, or a VPC file. All LAS, LAZ, and COPC formats are supported.
 | `platform` | `"als"` | Platform token, only used for `standard = "nwfva"` |
 | `product` | `NULL` | Data-product/prefix token; defaults to `"3dm"` (AdV) or `"punktwolke"` (NWFVA) |
 | `workers` | `NULL` | Number of parallel workers; see [Parallelisation](#parallelisation) |
+| `reclassify` | `TRUE` | Remap AdV/LGLN classification schemes to ASPRS |
+| `classify_noise` | `TRUE` | Classify noise points |
+| `classify_ground` | `TRUE` | Classify ground points |
+| `normalize_intensity` | `TRUE` | Normalize intensity range |
 | `verbose` | `TRUE` | Print progress messages |
+
+## Density-dependent stages
+
+`reclassify`, `classify_noise`, `classify_ground`, and
+`normalize_intensity` can each be turned off individually.
+`classify_noise` and `classify_ground` in particular are
+density-dependent: on sparse or very small point clouds they can
+classify most or all points as noise, which then breaks overview
+generation (it excludes noise points from the rasterized CHM). This is
+mainly useful when testing against such data:
+
+``` r
+
+raw_to_processed(
+  path = "path/to/sparse/test/data/",
+  out_dir = "path/to/output/",
+  classify_noise = FALSE,
+  classify_ground = FALSE
+)
+```
 
 ## Output structure
 

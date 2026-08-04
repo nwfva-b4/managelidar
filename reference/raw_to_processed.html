@@ -58,6 +58,10 @@ comprehensive metadata and overview images.</p>
 <span>  platform <span class="op">=</span> <span class="st">"als"</span>,</span>
 <span>  product <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  workers <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reclassify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  classify_noise <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  classify_ground <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  normalize_intensity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -129,6 +133,28 @@ otherwise. Set to <code>1</code> to force sequential processing regardless of fi
 count. Set to a positive integer to force that number of workers.</p></dd>
 
 
+<dt id="arg-reclassify">reclassify<a class="anchor" aria-label="anchor" href="#arg-reclassify"></a></dt>
+<dd><p>Logical. Remap AdV/LGLN classification schemes to ASPRS
+(default <code>TRUE</code>). If <code>FALSE</code>, output classes may stay non-ASPRS, and
+ground classification (below) becomes slightly less precise. See
+<strong>Processing steps</strong>.</p></dd>
+
+
+<dt id="arg-classify-noise">classify_noise<a class="anchor" aria-label="anchor" href="#arg-classify-noise"></a></dt>
+<dd><p>Logical. Classify noise points (default <code>TRUE</code>).
+See <strong>Processing steps</strong>.</p></dd>
+
+
+<dt id="arg-classify-ground">classify_ground<a class="anchor" aria-label="anchor" href="#arg-classify-ground"></a></dt>
+<dd><p>Logical. Classify ground points (default <code>TRUE</code>).
+Density-dependent like <code>classify_noise</code>. See <strong>Processing steps</strong>.</p></dd>
+
+
+<dt id="arg-normalize-intensity">normalize_intensity<a class="anchor" aria-label="anchor" href="#arg-normalize-intensity"></a></dt>
+<dd><p>Logical. Normalize intensity range (default
+<code>TRUE</code>). See <strong>Processing steps</strong>.</p></dd>
+
+
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Logical. Print progress messages. Default is TRUE.</p></dd>
 
@@ -142,21 +168,23 @@ count. Set to a positive integer to force that number of workers.</p></dd>
     <p>This function performs a comprehensive quality assurance pipeline:</p>
 <p><strong>Processing steps:</strong></p><ul><li><p>Generate standard-compliant filenames</p></li>
 <li><p>Set CRS (if not present)</p></li>
-<li><p>Reclassify (AdV/LGLN to ASPRS scheme)</p></li>
+<li><p>Reclassify (AdV/LGLN to ASPRS scheme) - <code>reclassify</code></p></li>
 <li><p>Fix synthetic data (ReturnNumber, NumberOfReturns, GPStime)</p></li>
 <li><p>Filter erroneous data (ReturnNumber, NumberOfReturns, GPStime)</p></li>
 <li><p>Drop unused attributes</p></li>
 <li><p>Correct overlap points</p></li>
-<li><p>Classify noise points</p></li>
-<li><p>Classify ground points</p></li>
-<li><p>Normalize intensity range</p></li>
+<li><p>Classify noise points - <code>classify_noise</code></p></li>
+<li><p>Classify ground points - <code>classify_ground</code></p></li>
+<li><p>Normalize intensity range - <code>normalize_intensity</code></p></li>
 <li><p>Sort (optimize) point cloud</p></li>
 <li><p>Append spatial index</p></li>
 <li><p>Create overview image</p></li>
 <li><p>Create VPC file with additional metadata</p></li>
 <li><p>Create point cloud summaries</p></li>
 <li><p>Create log file</p></li>
-</ul><p><strong>Output structure:</strong>
+</ul><p>The four steps marked above are density-dependent and can be turned off
+individually (all default <code>TRUE</code>, i.e. current behavior).</p>
+<p><strong>Output structure:</strong>
 For <code>standard = "adv"</code> (default), the function creates the following flat
 directory structure in <code>out_dir</code>:</p><dl><dt><code>pointcloud/</code></dt>
 <dd><p>Processed LAZ files with embedded spatial index</p></dd>
@@ -208,18 +236,18 @@ steps, timing, and any warnings or errors.</p>
 <span class="r-in"><span><span class="va">out_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"processed_"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">raw_to_processed</span><span class="op">(</span>path <span class="op">=</span> <span class="va">folder</span>, out_dir <span class="op">=</span> <span class="va">out_dir</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Process 5 LASfiles</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_22961ffd606e/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing log written to: /tmp/Rtmpatnzrr/logfiles/processing_log_2026-08-04_06-46-44.json</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-42.json</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># NWFVA naming convention</span></span></span>
 <span class="r-in"><span><span class="va">out_dir_nwfva</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"processed_nwfva_"</span><span class="op">)</span></span></span>
@@ -228,18 +256,18 @@ steps, timing, and any warnings or errors.</p>
 <span class="r-in"><span>  standard <span class="op">=</span> <span class="st">"nwfva"</span>, region <span class="op">=</span> <span class="st">"ni"</span>, campaign <span class="op">=</span> <span class="st">"solling_sgb4"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Process 5 LASfiles</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/Rtmpatnzrr/processed_nwfva_22966163151a/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>GDAL Error 6: Too many command options '0'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing log written to: /tmp/Rtmpatnzrr/logfiles/processing_log_2026-08-04_06-46-46.json</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-44.json</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
