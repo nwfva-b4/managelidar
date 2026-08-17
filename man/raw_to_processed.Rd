@@ -63,7 +63,10 @@ from the data.}
 If \code{NULL} (default), workers are set to half of available logical cores
 when 20 or more files are detected, and sequential processing is used
 otherwise. Set to \code{1} to force sequential processing regardless of file
-count. Set to a positive integer to force that number of workers.}
+count. Set to a positive integer to force that number of workers, up to
+the number of logical cores (100\%). Requesting more than half of
+available cores triggers a warning, since each worker loads its own copy
+of the point cloud data and may exhaust available RAM.}
 
 \item{reclassify}{Logical. Remap AdV/LGLN classification schemes to ASPRS
 (default \code{TRUE}). If \code{FALSE}, output classes may stay non-ASPRS, and

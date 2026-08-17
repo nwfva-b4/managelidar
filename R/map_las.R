@@ -10,7 +10,10 @@
 #'   If `NULL` (default), workers are set to half of available logical cores
 #'   when 20 or more files are detected, and sequential processing is used
 #'   otherwise. Set to `1` to force sequential processing regardless of file
-#'   count. Set to a positive integer to force that number of workers.
+#'   count. Set to a positive integer to force that number of workers, up to
+#'   the number of logical cores (100%). Requesting more than half of
+#'   available cores triggers a warning, since each worker loads its own copy
+#'   of the point cloud data and may exhaust available RAM.
 #'
 #' @return A list with one element per file. Failed files return a list with
 #'   `output = NULL` and a `log` entry with `status = "failed"`.
@@ -37,19 +40,20 @@ map_las <- function(files, FUN, workers = NULL) {
 
   # Resolve number of workers
 
-  # cap at half available cores
-  max_workers <- max(1L, floor(parallel::detectCores(logical = TRUE) / 2L))
+  n_cores <- parallel::detectCores(logical = TRUE)
+  max_workers <- max(1L, n_cores) # hard cap: cannot exceed logical cores
+  safe_workers <- max(1L, floor(n_cores / 2L)) # recommended default
 
   n_workers <- if (!is.null(workers)) {
     w <- as.integer(workers)
-    if (w > max_workers) {
+    if (w > safe_workers) {
       cli::cli_warn(
-        "Requested {w} workers exceeds safe maximum ({max_workers} = half of {parallel::detectCores(logical = TRUE)} logical cores). Clamping."
+        "Requested {w} workers exceeds the recommended maximum ({safe_workers} = half of {n_cores} logical cores). Using more workers than this may exhaust available RAM, since each worker loads its own copy of the point cloud data."
       )
     }
     w
   } else if (n >= 20L) {
-    max_workers
+    safe_workers
   } else {
     1L
   }

@@ -33,7 +33,10 @@
 #'   If `NULL` (default), workers are set to half of available logical cores
 #'   when 20 or more files are detected, and sequential processing is used
 #'   otherwise. Set to `1` to force sequential processing regardless of file
-#'   count. Set to a positive integer to force that number of workers.
+#'   count. Set to a positive integer to force that number of workers, up to
+#'   the number of logical cores (100%). Requesting more than half of
+#'   available cores triggers a warning, since each worker loads its own copy
+#'   of the point cloud data and may exhaust available RAM.
 #' @param reclassify Logical. Remap AdV/LGLN classification schemes to ASPRS
 #'   (default `TRUE`). If `FALSE`, output classes may stay non-ASPRS, and
 #'   ground classification (below) becomes slightly less precise. See
