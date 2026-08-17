@@ -94,7 +94,10 @@ raw_to_processed(
   workers are set to half of available logical cores when 20 or more
   files are detected, and sequential processing is used otherwise. Set
   to `1` to force sequential processing regardless of file count. Set to
-  a positive integer to force that number of workers.
+  a positive integer to force that number of workers, up to the number
+  of logical cores (100%). Requesting more than half of available cores
+  triggers a warning, since each worker loads its own copy of the point
+  cloud data and may exhaust available RAM.
 
 - reclassify:
 
@@ -234,18 +237,18 @@ folder <- system.file("extdata", package = "managelidar")
 out_dir <- tempfile("processed_")
 raw_to_processed(path = folder, out_dir = out_dir)
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_2bdb669ef68c/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_2bdb669ef68c/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_2bdb669ef68c/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_2bdb669ef68c/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_23026cd1a975/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_2bdb669ef68c/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-42.json
+#> Processing log written to: /tmp/Rtmp3ntGw4/logfiles/processing_log_2026-08-17_09-51-48.json
 
 # NWFVA naming convention
 out_dir_nwfva <- tempfile("processed_nwfva_")
@@ -254,17 +257,17 @@ raw_to_processed(
   standard = "nwfva", region = "ni", campaign = "solling_sgb4"
 )
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb6a5e4a8f/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb6a5e4a8f/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb6a5e4a8f/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb6a5e4a8f/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/processed_nwfva_230254a62ba0/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb6a5e4a8f/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-44.json
+#> Processing log written to: /tmp/Rtmp3ntGw4/logfiles/processing_log_2026-08-17_09-51-49.json
 # }
 ```

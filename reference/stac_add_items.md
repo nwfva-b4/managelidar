@@ -54,21 +54,21 @@ existing one instead.
 ``` r
 cat <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni") 
-#> ✔ Created catalog lidar_ni at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/catalog.json
+#> ✔ Created catalog lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/catalog.json
 col <- cat |>
   stac_add_collection(id = "lidar_ni_2023", title = "Lidar Solling 2023") |>
   stac_add_collection(id = "2023_q3", title = "Q3 2023 Data")
-#> ✔ Created collection lidar_ni_2023 at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/collection.json
-#> ✔ Updated parent lidar_ni at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/catalog.json
-#> ✔ Created collection 2023_q3 at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/2023_q3/collection.json
-#> ✔ Updated parent lidar_ni_2023 at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/collection.json
+#> ✔ Created collection lidar_ni_2023 at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/collection.json
+#> ✔ Updated parent lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/catalog.json
+#> ✔ Created collection 2023_q3 at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/2023_q3/collection.json
+#> ✔ Updated parent lidar_ni_2023 at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/collection.json
 
 folder <- fs::path_package("extdata", package = "managelidar")
 las_files <- list.files(folder, full.names = TRUE, pattern = "*.laz")
 items <- col |>
   stac_add_items(path = las_files)
-#> Wrote Geopackage: /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/2023_q3/assets/footprints.gpkg
-#> ✔ Created or updated 5 items in /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/2023_q3/items
-#> ✔ Updated collection 2023_q3 at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/2023_q3/collection.json
-#> ✔ Updated extent of ancestor collection lidar_ni_2023 at /tmp/RtmpyGg8bK/stac-managelidar-23026e0b7257/collections/lidar_ni_2023/collection.json
+#> Wrote Geopackage: /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/2023_q3/assets/footprints.gpkg
+#> ✔ Created or updated 5 items in /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/2023_q3/items
+#> ✔ Updated collection 2023_q3 at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/2023_q3/collection.json
+#> ✔ Updated extent of ancestor collection lidar_ni_2023 at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb3cd57c88/collections/lidar_ni_2023/collection.json
 ```

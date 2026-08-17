@@ -63,14 +63,14 @@ Path to `collection.json` (invisibly), for piping into further calls.
 ``` r
 cat <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni") 
-#> ✔ Created catalog lidar_ni at /tmp/RtmpyGg8bK/stac-managelidar-230219a1a907/catalog.json
+#> ✔ Created catalog lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb776ccc81/catalog.json
 col <- cat |>
   stac_add_collection(id = "lidar_ni", title = "Lidar Solling", keywords = c("lidar", "ALS", "Solling", "test")) |> 
   stac_add_collection_asset(
     "https://raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/man/figures/logo.png",
     roles = "thumbnail"
   )
-#> ✔ Created collection lidar_ni at /tmp/RtmpyGg8bK/stac-managelidar-230219a1a907/collections/lidar_ni/collection.json
-#> ✔ Updated parent lidar_ni at /tmp/RtmpyGg8bK/stac-managelidar-230219a1a907/catalog.json
-#> ✔ Added thumbnail asset (thumbnail) to /tmp/RtmpyGg8bK/stac-managelidar-230219a1a907/collections/lidar_ni/collection.json
+#> ✔ Created collection lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb776ccc81/collections/lidar_ni/collection.json
+#> ✔ Updated parent lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb776ccc81/catalog.json
+#> ✔ Added thumbnail asset (thumbnail) to /tmp/Rtmp3ntGw4/stac-managelidar-2bdb776ccc81/collections/lidar_ni/collection.json
 ```

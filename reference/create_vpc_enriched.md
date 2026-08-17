@@ -94,18 +94,18 @@ vpc_enriched <- folder |>
   raw_to_processed() |>
   create_vpc_enriched()
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/overviews/3dm_32_547_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/overviews/3dm_32_547_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/overviews/3dm_32_548_5724_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/overviews/3dm_32_548_5725_1_ni_2023.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/RtmpyGg8bK/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/overviews/3dm_32_548_5725_1_ni_2024.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
 #> Warning: GDAL Error 6: Too many command options '0'
 #> 
-#> Processing log written to: /tmp/RtmpyGg8bK/logfiles/processing_log_2026-08-04_09-54-25.json
+#> Processing log written to: /tmp/Rtmp3ntGw4/logfiles/processing_log_2026-08-17_09-51-31.json
 #> Warning: No valid VPC objects or LAS/LAZ/COPC files found
 #> Warning: No valid VPC features found
 ```
