@@ -33,6 +33,9 @@ Standard](https://www.adv-online.de/AdV-Produkte/Standards-und-Produktblaetter/S
   quality-controlled outputs
 - **STAC-compliant VPCs**: Create enriched Virtual Point Clouds
   following STAC specifications
+- **Browsable STAC catalogs**: Organize collections into a full catalog
+  → collection → item tree, with thumbnails, icons and footprint assets,
+  explorable locally via `stac_browse()`
 
 ## Main Workflows
 
@@ -98,6 +101,33 @@ path |>
   filter_spatial(bbox) |>
   filter_temporal("2024-03") |>
   run_pipeline(dtm(10))
+```
+
+### 5. STAC Catalog Publishing
+
+Organize processed collections into a browsable, spec-compliant
+[STAC](https://stacspec.org/) catalog. See the example catalog rendered
+in
+[STAC-Browser](https://radiantearth.github.io/stac-browser/#/external/raw.githubusercontent.com/nwfva-b4/managelidar/refs/heads/main/inst/extdata/stac/catalog.json).
+
+``` r
+# Build a catalog -> collection -> items tree
+catalog <- "path/to/root" |>
+  stac_create_catalog(id = "lidar_ni", title = "Lidar Niedersachsen")
+
+collection <- catalog |>
+  stac_add_collection(
+    id = "lidar_ni_2023",
+    title = "Lidar Solling 2023",
+    thumbnail = "path/to/preview.png",
+    providers = list(list(name = "NW-FVA", roles = c("host", "processor")))
+  )
+
+collection |>
+  stac_add_items(path = "processed/collection.vpc")
+
+# Explore the catalog in a browser, no server setup needed
+stac_browse(catalog)
 ```
 
 ## Installation
