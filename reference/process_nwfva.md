@@ -86,17 +86,17 @@ folder <- system.file("extdata", package = "managelidar")
 out_dir <- tempfile("processed_nwfva_")
 process_nwfva(path = folder, campaign = "solling_sgb4", out_dir = out_dir, region = "ni")
 #> Process 5 LASfiles
-#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb1537d960/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
-#> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb1537d960/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
-#> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb1537d960/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
-#> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb1537d960/ni/als/2023/solling_sgb4/punktwolke/doku/overview/ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
-#> Warning: GDAL Error 6: Too many command options '0'
-#> Warning: GDAL Error 1: /tmp/Rtmp3ntGw4/processed_nwfva_2bdb1537d960/ni/als/2024/solling_sgb4/punktwolke/doku/overview/ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
-#> Warning: GDAL Error 6: Too many command options '0'
+#> Warning: GDAL Error 1: ni_als_2024_solling_sgb4_punktwolke_547000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: Zero positional arguments expected
+#> Warning: GDAL Error 1: ni_als_2024_solling_sgb4_punktwolke_547000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: Zero positional arguments expected
+#> Warning: GDAL Error 1: ni_als_2024_solling_sgb4_punktwolke_548000_5724000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: Zero positional arguments expected
+#> Warning: GDAL Error 1: ni_als_2023_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: Zero positional arguments expected
+#> Warning: GDAL Error 1: ni_als_2024_solling_sgb4_punktwolke_548000_5725000.tif, band 1: Failed to compute statistics, no valid pixels found in sampling.
+#> Warning: GDAL Error 1: Zero positional arguments expected
 #> 
-#> Processing log written to: /tmp/Rtmp3ntGw4/logfiles/processing_log_2026-08-17_09-51-46.json
+#> Processing log written to: /tmp/RtmpTzM2Iw/logfiles/processing_log_2026-11-26_10-33-09.json
 # }
 ```

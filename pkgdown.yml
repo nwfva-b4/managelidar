@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   how-to-use-the-functions: how-to-use-the-functions.html
   raw-to-processed: raw-to-processed.html
-last_built: 2026-08-17T09:51Z
+last_built: 2026-11-26T10:32Z
 urls:
   reference: https://wiesehahn.github.io/managelidar/reference
   article: https://wiesehahn.github.io/managelidar/articles

@@ -31,11 +31,11 @@ Nothing (called for its side effect of opening a browser).
 ``` r
 cat <- tempfile("stac-managelidar-") |>
   stac_create_catalog(id = "lidar_ni") 
-#> ✔ Created catalog lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb1845e5eb/catalog.json
+#> ✔ Created catalog lidar_ni at /tmp/RtmpTzM2Iw/stac-managelidar-28ad783cf682/catalog.json
 col <- cat |>
   stac_add_collection(id = "lidar_ni", title = "Lidar Solling")
-#> ✔ Created collection lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb1845e5eb/collections/lidar_ni/collection.json
-#> ✔ Updated parent lidar_ni at /tmp/Rtmp3ntGw4/stac-managelidar-2bdb1845e5eb/catalog.json
+#> ✔ Created collection lidar_ni at /tmp/RtmpTzM2Iw/stac-managelidar-28ad783cf682/collections/lidar_ni/collection.json
+#> ✔ Updated parent lidar_ni at /tmp/RtmpTzM2Iw/stac-managelidar-28ad783cf682/catalog.json
 cat |> stac_browse()
 #> ✔ Opening catalog in your browser...
 ```
